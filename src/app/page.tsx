@@ -34,16 +34,16 @@ export default function WelcomePage() {
 
         <div className="flex flex-col gap-3 w-full">
           <Link
-            href="/crear"
+            href="/unirme"
             className="w-full py-4 bg-green-500 hover:bg-green-400 active:scale-95 text-black font-bold text-lg uppercase tracking-wider rounded-2xl transition-all"
           >
-            Crear liga
+            Ingresar a mi liga
           </Link>
           <Link
-            href="/unirme"
+            href="/crear"
             className="w-full py-4 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-lg uppercase tracking-wider rounded-2xl border border-slate-700 transition-all"
           >
-            Unirme a una liga
+            Crear una liga nueva
           </Link>
         </div>
       </div>

@@ -54,10 +54,10 @@ export default function UnirmePage() {
 
       <div className="flex flex-col gap-8 max-w-sm w-full mx-auto">
         <div>
-          <p className="text-green-400 text-sm font-semibold uppercase tracking-wider mb-1">Unirme a una liga</p>
-          <h1 className="text-3xl font-black uppercase text-white">Ingresar código</h1>
+          <p className="text-green-400 text-sm font-semibold uppercase tracking-wider mb-1">Ingresar a mi liga</p>
+          <h1 className="text-3xl font-black uppercase text-white">¿Cuál es tu liga?</h1>
           <p className="text-slate-400 text-sm mt-2">
-            Pídele el código de 6 letras al que creó la liga
+            Ingresa tu nombre y el código de tu liga. Si ya participas, tu sesión se recupera automáticamente.
           </p>
         </div>
 
