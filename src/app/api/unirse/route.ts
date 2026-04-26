@@ -20,6 +20,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Código de invitación inválido' }, { status: 404 })
   }
 
+  // Si ya existe un usuario con ese nombre en esa liga, lo devolvemos
+  const { data: existente } = await supabase
+    .from('usuarios')
+    .select()
+    .eq('liga_id', liga.id)
+    .ilike('nombre', nombreUsuario.trim())
+    .maybeSingle()
+
+  if (existente) {
+    return NextResponse.json({ usuario: existente, liga })
+  }
+
   const { data: usuario, error: usuarioError } = await supabase
     .from('usuarios')
     .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id })
