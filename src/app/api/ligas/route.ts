@@ -6,9 +6,9 @@ function generarCodigo(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { nombreUsuario, nombreLiga } = await req.json()
+  const { nombreUsuario, nombreLiga, pin } = await req.json()
 
-  if (!nombreUsuario?.trim() || !nombreLiga?.trim()) {
+  if (!nombreUsuario?.trim() || !nombreLiga?.trim() || !pin || String(pin).length !== 4) {
     return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
   }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   const { data: usuario, error: usuarioError } = await supabase
     .from('usuarios')
-    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id })
+    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin) })
     .select()
     .single()
 

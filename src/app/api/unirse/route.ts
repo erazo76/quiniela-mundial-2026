@@ -2,45 +2,78 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
-  const { nombreUsuario, codigoInvitacion } = await req.json()
+  const { codigoInvitacion, usuarioId, nombreUsuario, pin } = await req.json()
 
-  if (!nombreUsuario?.trim() || !codigoInvitacion?.trim()) {
+  if (!codigoInvitacion?.trim() || !pin || String(pin).length !== 4) {
     return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
   }
 
   const supabase = createAdminClient()
 
-  const { data: liga, error: ligaError } = await supabase
+  const { data: liga } = await supabase
     .from('ligas')
     .select()
     .eq('codigo_invitacion', codigoInvitacion.toUpperCase().trim())
     .maybeSingle()
 
-  if (ligaError || !liga) {
-    return NextResponse.json({ error: 'Código de invitación inválido' }, { status: 404 })
+  if (!liga) {
+    return NextResponse.json({ error: 'Código de invitación no válido' }, { status: 404 })
   }
 
-  // Si ya existe un usuario con ese nombre en esa liga, lo devolvemos
-  const { data: existente } = await supabase
-    .from('usuarios')
-    .select()
-    .eq('liga_id', liga.id)
-    .ilike('nombre', nombreUsuario.trim())
-    .maybeSingle()
+  // Caso: usuario existente
+  if (usuarioId) {
+    const { data: usuario } = await supabase
+      .from('usuarios')
+      .select()
+      .eq('id', usuarioId)
+      .eq('liga_id', liga.id)
+      .maybeSingle()
 
-  if (existente) {
-    return NextResponse.json({ usuario: existente, liga })
+    if (!usuario) {
+      return NextResponse.json({ error: 'Usuario no encontrado en esta liga' }, { status: 404 })
+    }
+
+    // Sin PIN aún (migración o primera vez con flujo nuevo): asignar PIN
+    if (usuario.pin === null) {
+      await supabase.from('usuarios').update({ pin: String(pin) }).eq('id', usuarioId)
+      return NextResponse.json({ usuario: { ...usuario, pin }, liga })
+    }
+
+    if (usuario.pin !== String(pin)) {
+      return NextResponse.json({ error: 'PIN incorrecto. Intenta de nuevo.' }, { status: 401 })
+    }
+
+    return NextResponse.json({ usuario, liga })
   }
 
-  const { data: usuario, error: usuarioError } = await supabase
-    .from('usuarios')
-    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id })
-    .select()
-    .single()
+  // Caso: usuario nuevo
+  if (nombreUsuario?.trim()) {
+    const { data: existente } = await supabase
+      .from('usuarios')
+      .select('id')
+      .eq('liga_id', liga.id)
+      .ilike('nombre', nombreUsuario.trim())
+      .maybeSingle()
 
-  if (usuarioError || !usuario) {
-    return NextResponse.json({ error: 'Error al unirse a la liga' }, { status: 500 })
+    if (existente) {
+      return NextResponse.json(
+        { error: `Ya hay un "${nombreUsuario.trim()}" en esta liga. Elige un nombre diferente.` },
+        { status: 409 }
+      )
+    }
+
+    const { data: usuario, error } = await supabase
+      .from('usuarios')
+      .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin) })
+      .select()
+      .single()
+
+    if (error || !usuario) {
+      return NextResponse.json({ error: 'Error al unirse a la liga' }, { status: 500 })
+    }
+
+    return NextResponse.json({ usuario, liga })
   }
 
-  return NextResponse.json({ usuario, liga })
+  return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
 }
