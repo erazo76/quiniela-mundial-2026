@@ -53,11 +53,117 @@ const TEAM_MAP: Record<string, string> = {
   'Congo DR': 'República Democrática del Congo',
 }
 
+// Mapeo de etapas de la API → fases en nuestra DB
+const FASE_MAP: Record<string, string> = {
+  LAST_32: 'dieciseisavos',
+  LAST_16: 'octavos',
+  QUARTER_FINALS: 'cuartos',
+  SEMI_FINALS: 'semis',
+  THIRD_PLACE: 'tercer_puesto',
+  FINAL: 'final',
+}
+
+// Palabras que indican equipo TBD en la API
+const TBD_WORDS = ['yet', 'winner', 'loser', 'tbd', 'tba']
+function esTBD(nombre: string): boolean {
+  const lower = nombre.toLowerCase()
+  return TBD_WORDS.some((w) => lower.includes(w))
+}
+
+async function syncEquiposEliminatorias(
+  supabase: SupabaseClient,
+  apiKey: string
+): Promise<number> {
+  // Obtener banderas desde la DB para mapear nombre → URL
+  const { data: infoEquipos } = await supabase
+    .from('info_equipos')
+    .select('nombre_pais, bandera_url')
+
+  const banderaMap = new Map(
+    (infoEquipos ?? []).map((e: { nombre_pais: string; bandera_url: string }) => [
+      e.nombre_pais,
+      e.bandera_url,
+    ])
+  )
+
+  // Obtener partidos SCHEDULED/TIMED de eliminatorias desde la API
+  const res = await fetch(
+    'https://api.football-data.org/v4/competitions/WC/matches?status=SCHEDULED,TIMED',
+    { headers: { 'X-Auth-Token': apiKey }, cache: 'no-store' }
+  )
+  if (!res.ok) return 0
+
+  const data = await res.json()
+  const partidosApi: Array<{
+    homeTeam: { name: string }
+    awayTeam: { name: string }
+    utcDate: string
+    stage: string
+  }> = (data.matches ?? []).filter(
+    (m: { stage: string }) => m.stage !== 'GROUP_STAGE' && FASE_MAP[m.stage]
+  )
+
+  if (!partidosApi.length) return 0
+
+  // Obtener nuestros partidos pendientes de fases eliminatorias
+  const fasesElim = Object.values(FASE_MAP)
+  const { data: nuestrosPartidos } = await supabase
+    .from('partidos')
+    .select('id, equipo_local, equipo_visitante, fase, fecha_hora')
+    .in('fase', fasesElim)
+    .in('estado', ['pendiente', 'en_vivo'])
+
+  if (!nuestrosPartidos?.length) return 0
+
+  let actualizados = 0
+
+  for (const partido of partidosApi) {
+    const localApi = partido.homeTeam.name
+    const visitanteApi = partido.awayTeam.name
+
+    // Saltar si alguno es TBD
+    if (esTBD(localApi) || esTBD(visitanteApi)) continue
+
+    const localEs = TEAM_MAP[localApi] ?? localApi
+    const visitanteEs = TEAM_MAP[visitanteApi] ?? visitanteApi
+    const fase = FASE_MAP[partido.stage]
+    const fechaApi = partido.utcDate.split('T')[0]
+
+    // Buscar nuestro partido por fecha y fase
+    const nuestro = nuestrosPartidos.find((p) => {
+      const fechaDB = p.fecha_hora.split('T')[0]
+      return fechaDB === fechaApi && p.fase === fase
+    })
+
+    if (!nuestro) continue
+
+    // Solo actualizar si los equipos cambiaron
+    if (nuestro.equipo_local === localEs && nuestro.equipo_visitante === visitanteEs) continue
+
+    const { error } = await supabase
+      .from('partidos')
+      .update({
+        equipo_local: localEs,
+        equipo_visitante: visitanteEs,
+        bandera_local: banderaMap.get(localEs) ?? null,
+        bandera_visitante: banderaMap.get(visitanteEs) ?? null,
+      })
+      .eq('id', nuestro.id)
+
+    if (!error) actualizados++
+  }
+
+  return actualizados
+}
+
 export async function syncResultadosFootballData(
   supabase: SupabaseClient
-): Promise<{ sincronizados: number; mensaje?: string; errores?: string[] }> {
+): Promise<{ sincronizados: number; equiposActualizados?: number; mensaje?: string; errores?: string[] }> {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY
   if (!apiKey) return { sincronizados: 0, mensaje: 'FOOTBALL_DATA_API_KEY no configurado' }
+
+  // Actualizar equipos en rondas eliminatorias (en paralelo con la sync de resultados)
+  const equiposActualizados = await syncEquiposEliminatorias(supabase, apiKey)
 
   const fdRes = await fetch(
     'https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',
@@ -76,7 +182,13 @@ export async function syncResultadosFootballData(
     score: { fullTime: { home: number | null; away: number | null } }
   }> = fdData.matches ?? []
 
-  if (!partidosApi.length) return { sincronizados: 0, mensaje: 'Sin partidos finalizados en la API' }
+  if (!partidosApi.length) {
+    return {
+      sincronizados: 0,
+      equiposActualizados: equiposActualizados || undefined,
+      mensaje: 'Sin partidos finalizados en la API',
+    }
+  }
 
   const { data: nuestrosPartidos, error: errDB } = await supabase
     .from('partidos')
@@ -84,7 +196,13 @@ export async function syncResultadosFootballData(
     .in('estado', ['pendiente', 'en_vivo'])
 
   if (errDB) throw new Error(errDB.message)
-  if (!nuestrosPartidos?.length) return { sincronizados: 0, mensaje: 'No hay partidos pendientes' }
+  if (!nuestrosPartidos?.length) {
+    return {
+      sincronizados: 0,
+      equiposActualizados: equiposActualizados || undefined,
+      mensaje: 'No hay partidos pendientes',
+    }
+  }
 
   let sincronizados = 0
   const errores: string[] = []
@@ -126,5 +244,9 @@ export async function syncResultadosFootballData(
     }
   }
 
-  return { sincronizados, errores: errores.length ? errores : undefined }
+  return {
+    sincronizados,
+    equiposActualizados: equiposActualizados || undefined,
+    errores: errores.length ? errores : undefined,
+  }
 }

@@ -23,6 +23,18 @@ function canPredict(partido: Partido) {
   return new Date() < limitePrediccion
 }
 
+function formatCountdown(fechaHora: string): string | null {
+  const limite = new Date(fechaHora).getTime() - 5 * 60 * 1000
+  const diff = limite - Date.now()
+  if (diff <= 0) return null
+  const d = Math.floor(diff / 86400000)
+  const h = Math.floor((diff % 86400000) / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  if (d > 0) return `${d}d ${h}h`
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
 function Bandera({ src, nombre }: { src: string | null; nombre: string }) {
   if (!src) {
     return (
@@ -55,13 +67,24 @@ export function TarjetaPartido({ partido, onClick }: Props) {
     >
       {/* Fecha y sede */}
       <div className="flex items-center justify-between text-xs text-slate-500">
-        <span>{formatFecha(partido.fecha_hora)} · {formatHora(partido.fecha_hora)}</span>
+        <span>{formatFecha(partido.fecha_hora)} · {formatHora(partido.fecha_hora)}{partido.sede ? ` · ${partido.sede}` : ''}</span>
         {partido.estado === 'en_vivo' && (
           <span className="text-green-400 font-bold animate-pulse">EN VIVO</span>
         )}
         {partido.estado === 'finalizado' && (
           <span className="text-slate-400">Finalizado</span>
         )}
+        {partido.estado === 'pendiente' && (() => {
+          const countdown = formatCountdown(partido.fecha_hora)
+          if (!countdown) return null
+          const diff = new Date(partido.fecha_hora).getTime() - 5 * 60 * 1000 - Date.now()
+          const urgent = diff < 3600000
+          return (
+            <span className={`font-semibold ${urgent ? 'text-amber-400' : 'text-slate-400'}`}>
+              Cierra en {countdown}
+            </span>
+          )
+        })()}
       </div>
 
       {/* Equipos */}
