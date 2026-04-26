@@ -48,9 +48,14 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      <p className="relative z-10 text-xs text-slate-600 text-center max-w-xs">
-        App recreativa entre amigos. Sin dinero real dentro de la plataforma.
-      </p>
+      <div className="relative z-10 flex flex-col items-center gap-3">
+        <p className="text-xs text-slate-600 text-center max-w-xs">
+          App recreativa entre amigos. Sin dinero real dentro de la plataforma.
+        </p>
+        <Link href="/admin" className="text-xs text-slate-700 hover:text-slate-500 transition-colors">
+          Acceso admin
+        </Link>
+      </div>
     </main>
   )
 }
