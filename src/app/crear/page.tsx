@@ -40,7 +40,7 @@ export default function CrearLigaPage() {
 
       router.push('/lobby?onboarding=1')
     } catch {
-      setError('Error de conexión. Intentá de nuevo.')
+      setError('Error de conexión. Inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -57,7 +57,7 @@ export default function CrearLigaPage() {
           <p className="text-green-400 text-sm font-semibold uppercase tracking-wider mb-1">Paso 1 de 1</p>
           <h1 className="text-3xl font-black uppercase text-white">Crear liga</h1>
           <p className="text-slate-400 text-sm mt-2">
-            Vas a recibir un código de 6 letras para invitar a tus amigos
+            Recibirás un código de 6 letras para invitar a tus amigos
           </p>
         </div>
 

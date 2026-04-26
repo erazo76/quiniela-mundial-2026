@@ -40,7 +40,7 @@ export default function UnirmePage() {
 
       router.push('/lobby?onboarding=1')
     } catch {
-      setError('Error de conexión. Intentá de nuevo.')
+      setError('Error de conexión. Inténtalo de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -57,7 +57,7 @@ export default function UnirmePage() {
           <p className="text-green-400 text-sm font-semibold uppercase tracking-wider mb-1">Unirme a una liga</p>
           <h1 className="text-3xl font-black uppercase text-white">Ingresar código</h1>
           <p className="text-slate-400 text-sm mt-2">
-            Pedile el código de 6 letras al que creó la liga
+            Pídele el código de 6 letras al que creó la liga
           </p>
         </div>
 

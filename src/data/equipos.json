@@ -1,0 +1,482 @@
+[
+  {
+    "nombre_pais": "Argentina",
+    "codigo_pais": "ar",
+    "mejor_puesto_mundial": "Campeón (1978, 1986, 2022)",
+    "participaciones": 19,
+    "figura_clave_nombre": "Lionel Messi",
+    "dato_freak_1": "Argentina es la única selección que ganó el mundial en tres décadas diferentes: 70s, 80s y 2020s.",
+    "dato_freak_2": "Messi es el único jugador en ganar la Copa del Mundo, la Copa América, la Champions League y el Balón de Oro.",
+    "dato_freak_3": "El 'Himno Nacional Argentino' es el himno nacional más largo entonado en los mundiales, con 11 estrofas."
+  },
+  {
+    "nombre_pais": "Brasil",
+    "codigo_pais": "br",
+    "mejor_puesto_mundial": "Campeón (1958, 1962, 1970, 1994, 2002)",
+    "participaciones": 22,
+    "figura_clave_nombre": "Vinicius Jr.",
+    "dato_freak_1": "Brasil es el único país que ha participado en todos los mundiales de la historia (22 de 22).",
+    "dato_freak_2": "El 7-1 contra Alemania en 2014 es la derrota más recordada en suelo propio. El estadio donde ocurrió cambió de nombre.",
+    "dato_freak_3": "La camiseta amarilla de Brasil fue adoptada en 1954 como reacción a la derrota del Maracanazo en 1950, cuando jugaban de blanco."
+  },
+  {
+    "nombre_pais": "Francia",
+    "codigo_pais": "fr",
+    "mejor_puesto_mundial": "Campeón (1998, 2018)",
+    "participaciones": 16,
+    "figura_clave_nombre": "Kylian Mbappé",
+    "dato_freak_1": "Francia ganó el mundial de 1998 con una selección donde el 60% de los jugadores tenía raíces inmigrantes de África y el Caribe.",
+    "dato_freak_2": "Mbappé es el segundo jugador más joven en marcar en una final de Copa del Mundo, después de Pelé en 1958.",
+    "dato_freak_3": "En 2022 Francia anotó 16 goles, el máximo de cualquier subcampeón en la historia del torneo."
+  },
+  {
+    "nombre_pais": "España",
+    "codigo_pais": "es",
+    "mejor_puesto_mundial": "Campeón (2010)",
+    "participaciones": 16,
+    "figura_clave_nombre": "Pedri",
+    "dato_freak_1": "España ganó el mundial de 2010 sin marcar un solo gol en los primeros 90 minutos de las fases eliminatorias (todos cayeron en prórroga).",
+    "dato_freak_2": "El 'tiki-taka' que dominó el fútbol mundial entre 2008 y 2012 surgió del Barcelona de Guardiola y fue exportado a la selección.",
+    "dato_freak_3": "España es la única selección en ganar tres torneos consecutivos (Euro 2008, Mundial 2010, Euro 2012)."
+  },
+  {
+    "nombre_pais": "Alemania",
+    "codigo_pais": "de",
+    "mejor_puesto_mundial": "Campeón (1954, 1974, 1990, 2014)",
+    "participaciones": 20,
+    "figura_clave_nombre": "Florian Wirtz",
+    "dato_freak_1": "Alemania es la única selección en ganar mundiales tanto como Alemania Occidental (3) como Alemania reunificada (1).",
+    "dato_freak_2": "El estadio Maracaná de Río fue escenario del 7-1 en semifinales 2014, considerada la mayor goleada en la historia de mundiales de semifinales.",
+    "dato_freak_3": "Miroslav Klose es el máximo goleador histórico de los mundiales con 16 goles, todos con Alemania."
+  },
+  {
+    "nombre_pais": "Inglaterra",
+    "codigo_pais": "gb-eng",
+    "mejor_puesto_mundial": "Campeón (1966)",
+    "participaciones": 16,
+    "figura_clave_nombre": "Jude Bellingham",
+    "dato_freak_1": "Inglaterra inventó el fútbol y tardó 100 años en ganar un mundial, y sólo lo logró jugando en casa.",
+    "dato_freak_2": "El gol de Geoff Hurst en la final de 1966 sigue siendo el único hat-trick en una final de Copa del Mundo.",
+    "dato_freak_3": "El récord de eliminaciones seguidas en penales (4) lo tiene Inglaterra, hasta que ganó su primera tanda en 2018 contra Colombia."
+  },
+  {
+    "nombre_pais": "Portugal",
+    "codigo_pais": "pt",
+    "mejor_puesto_mundial": "Tercero (1966, 2006)",
+    "participaciones": 9,
+    "figura_clave_nombre": "Cristiano Ronaldo",
+    "dato_freak_1": "Portugal nunca ganó un Mundial pero ganó la Eurocopa 2016 sin ganar un solo partido en 90 minutos durante la fase de grupos.",
+    "dato_freak_2": "Ronaldo es el máximo goleador en la historia de la selección portuguesa con más de 130 goles.",
+    "dato_freak_3": "Eusébio, la leyenda portuguesa del 66, nació en Mozambique cuando era colonia portuguesa."
+  },
+  {
+    "nombre_pais": "Países Bajos",
+    "codigo_pais": "nl",
+    "mejor_puesto_mundial": "Subcampeón (1974, 1978, 2010)",
+    "participaciones": 11,
+    "figura_clave_nombre": "Virgil van Dijk",
+    "dato_freak_1": "Países Bajos perdió tres finales de Copa del Mundo, siendo el único país en llegar a tres finales sin ganar ninguna.",
+    "dato_freak_2": "Johan Cruyff, el mejor futbolista holandés de la historia, nunca jugó un mundial. Protestó por razones políticas en 1978.",
+    "dato_freak_3": "El 'fútbol total' holandés de los 70s revolucionó el fútbol mundial y sigue siendo el estilo más influyente de la historia."
+  },
+  {
+    "nombre_pais": "Bélgica",
+    "codigo_pais": "be",
+    "mejor_puesto_mundial": "Tercero (2018)",
+    "participaciones": 14,
+    "figura_clave_nombre": "Kevin De Bruyne",
+    "dato_freak_1": "La generación dorada de Bélgica (De Bruyne, Hazard, Lukaku) fue la mejor del mundo en el ranking FIFA pero nunca ganó un título mayor.",
+    "dato_freak_2": "Bélgica remontó un 0-2 ante Japón en 2018 para ganar 3-2, en la mayor remontada de la historia de los mundiales.",
+    "dato_freak_3": "Bélgica tiene tres idiomas oficiales (francés, holandés y alemán) y el equipo nacional une a las comunidades divididas del país."
+  },
+  {
+    "nombre_pais": "Croacia",
+    "codigo_pais": "hr",
+    "mejor_puesto_mundial": "Subcampeón (2018), Tercero (2022)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Luka Modrić",
+    "dato_freak_1": "Croacia existe como país independiente desde 1991 y en apenas 30 años logró dos finales y dos terceros puestos mundiales.",
+    "dato_freak_2": "Luka Modrić ganó el Balón de Oro 2018, rompiendo el duopolio Messi-Ronaldo que duraba 10 años.",
+    "dato_freak_3": "Croacia gana regularmente en tandas de penales: tiene el mejor porcentaje de equipos europeos en penales en mundiales."
+  },
+  {
+    "nombre_pais": "Uruguay",
+    "codigo_pais": "uy",
+    "mejor_puesto_mundial": "Campeón (1930, 1950)",
+    "participaciones": 14,
+    "figura_clave_nombre": "Federico Valverde",
+    "dato_freak_1": "Uruguay organizó y ganó el primer Mundial de la historia en 1930, y repitió en 1950 con el famoso Maracanazo ante Brasil.",
+    "dato_freak_2": "Uruguay tiene más títulos mundiales per cápita que cualquier otro país: 2 títulos para un país de apenas 3.5 millones de personas.",
+    "dato_freak_3": "Luis Suárez paró un gol con la mano en cuartos de 2010 y fue expulsado. Ghana erró el penal y Uruguay pasó. Suárez lo celebró en el banco."
+  },
+  {
+    "nombre_pais": "Colombia",
+    "codigo_pais": "co",
+    "mejor_puesto_mundial": "Cuartos de final (2014)",
+    "participaciones": 7,
+    "figura_clave_nombre": "James Rodríguez",
+    "dato_freak_1": "James Rodríguez fue el máximo goleador del Mundial 2014 con 6 goles, incluyendo el mejor gol del torneo ante Uruguay.",
+    "dato_freak_2": "El gol de Carlos Valderrama en el 93 es considerado uno de los más hermosos de la historia de Clasificatorias Sudamericanas.",
+    "dato_freak_3": "Colombia fue eliminada en penales en 2018 por Inglaterra en el primer partido de eliminación directa en que los ingleses ganaban una tanda."
+  },
+  {
+    "nombre_pais": "México",
+    "codigo_pais": "mx",
+    "mejor_puesto_mundial": "Cuartos de final (1970, 1986)",
+    "participaciones": 17,
+    "figura_clave_nombre": "Santiago Giménez",
+    "dato_freak_1": "México llegó a octavos en 7 mundiales consecutivos (1994-2018), un récord conocido como 'el quinto partido que nunca llegó'.",
+    "dato_freak_2": "Como anfitrión del 2026, México organiza su tercer Mundial, siendo el primer país en hacerlo tres veces.",
+    "dato_freak_3": "Hugo Sánchez metió el gol olímpico en la final del Preolímpico de 1984 y fue el primer mexicano en ganar el Pichichi de la Liga española."
+  },
+  {
+    "nombre_pais": "Estados Unidos",
+    "codigo_pais": "us",
+    "mejor_puesto_mundial": "Tercero (1930)",
+    "participaciones": 11,
+    "figura_clave_nombre": "Christian Pulisic",
+    "dato_freak_1": "EE.UU. llegó a semifinales del primer Mundial de 1930, luego desapareció del mapa futbolístico por décadas.",
+    "dato_freak_2": "La victoria 1-0 de EE.UU. ante Inglaterra en 1950 es considerada la mayor sorpresa de la historia de los mundiales.",
+    "dato_freak_3": "Como sede del 2026, EE.UU. recibirá el mayor número de partidos: 78 de los 104 se jugarán en ciudades estadounidenses."
+  },
+  {
+    "nombre_pais": "Canadá",
+    "codigo_pais": "ca",
+    "mejor_puesto_mundial": "Primera fase (1986)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Alphonso Davies",
+    "dato_freak_1": "Canadá clasificó al Mundial 2022 por primera vez en 36 años. En 2026 juega en casa por primera vez.",
+    "dato_freak_2": "Alphonso Davies creció como refugiado en un campamento de Ghana antes de llegar a Canadá y convertirse en estrella del Bayern Munich.",
+    "dato_freak_3": "Canadá tiene el récord de la clasificación más rápida al Mundial 2026: matematicamente clasificados con meses de antelación."
+  },
+  {
+    "nombre_pais": "Marruecos",
+    "codigo_pais": "ma",
+    "mejor_puesto_mundial": "Semifinales (2022)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Achraf Hakimi",
+    "dato_freak_1": "Marruecos fue el primer equipo africano y árabe en llegar a semifinales de un Mundial, en Qatar 2022.",
+    "dato_freak_2": "Varios jugadores del plantel marroquí nacieron en Europa (España, Francia, Países Bajos) y eligieron representar a Marruecos.",
+    "dato_freak_3": "El portero Bono detuvo penales de España y Portugal en Qatar 2022, convirtiendo a Marruecos en el equipo revelación del torneo."
+  },
+  {
+    "nombre_pais": "Senegal",
+    "codigo_pais": "sn",
+    "mejor_puesto_mundial": "Cuartos de final (2002)",
+    "participaciones": 4,
+    "figura_clave_nombre": "Sadio Mané",
+    "dato_freak_1": "Senegal eliminó al campeón defensor Francia en el debut del Mundial 2002, en la mayor sorpresa de los grupos.",
+    "dato_freak_2": "Sadio Mané nació en una familia muy humilde en Bambali, un pueblo sin electricidad, y llegó a ser candidato al Balón de Oro.",
+    "dato_freak_3": "Senegal es el único país africano campeón de Copa Africana de Naciones que también llegó a cuartos de final de un Mundial."
+  },
+  {
+    "nombre_pais": "Japón",
+    "codigo_pais": "jp",
+    "mejor_puesto_mundial": "Octavos de final (2002, 2010, 2022)",
+    "participaciones": 8,
+    "figura_clave_nombre": "Takefusa Kubo",
+    "dato_freak_1": "Japón eliminó a Alemania y España en la fase de grupos del Mundial 2022, dos de los favoritos del torneo.",
+    "dato_freak_2": "Los hinchas japoneses son famosos por recoger la basura del estadio al terminar los partidos, un gesto aplaudido mundialmente.",
+    "dato_freak_3": "El fútbol llegó a Japón en 1873 traído por marineros ingleses, pero la J-League profesional no existió hasta 1993."
+  },
+  {
+    "nombre_pais": "Corea del Sur",
+    "codigo_pais": "kr",
+    "mejor_puesto_mundial": "Semifinales (2002)",
+    "participaciones": 11,
+    "figura_clave_nombre": "Son Heung-min",
+    "dato_freak_1": "Corea del Sur llegó a semifinales del Mundial 2002 como coanfitrión, el mejor resultado de un equipo asiático en la historia.",
+    "dato_freak_2": "Son Heung-min es el máximo goleador asiático en la Premier League y el primer coreano en ganar la Bota de Oro de la liga.",
+    "dato_freak_3": "En Corea, el fútbol es tan popular que varios jugadores de la selección hacen el servicio militar obligatorio acortado gracias a sus títulos deportivos."
+  },
+  {
+    "nombre_pais": "Australia",
+    "codigo_pais": "au",
+    "mejor_puesto_mundial": "Cuartos de final (2006, 2023)",
+    "participaciones": 6,
+    "figura_clave_nombre": "Mathew Ryan",
+    "dato_freak_1": "Australia eliminó a Dinamarca en Qatar 2022 en uno de los partidos más emocionantes del torneo, pasando a octavos.",
+    "dato_freak_2": "Los Socceroos juegan en la AFC (Asia) desde 2006, luego de haber estado en la OFC (Oceanía) donde clasificar era más fácil.",
+    "dato_freak_3": "Tim Cahill es el máximo goleador histórico de Australia con 50 goles, marcando en cuatro mundiales distintos."
+  },
+  {
+    "nombre_pais": "Arabia Saudita",
+    "codigo_pais": "sa",
+    "mejor_puesto_mundial": "Segunda ronda (1994)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Salem Al-Dawsari",
+    "dato_freak_1": "Arabia Saudita venció a Argentina 2-1 en Qatar 2022, la primera gran sorpresa del torneo y una de las mayores de la historia.",
+    "dato_freak_2": "Al-Dawsari marcó el gol de la victoria ante Argentina con un tiro en curva desde el ángulo que el propio Messi calificó como 'increíble'.",
+    "dato_freak_3": "Arabia Saudita será sede del Mundial 2034, lo que significa que estará en el torneo como local apenas 8 años después del 2026."
+  },
+  {
+    "nombre_pais": "Irán",
+    "codigo_pais": "ir",
+    "mejor_puesto_mundial": "Primera fase (2018, 2022)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Mehdi Taremi",
+    "dato_freak_1": "Irán es la selección asiática con más participaciones mundialistas junto a Japón y Corea del Sur.",
+    "dato_freak_2": "En 2022 los jugadores iranís no cantaron el himno nacional en señal de solidaridad con las protestas dentro del país.",
+    "dato_freak_3": "Ali Daei fue el máximo goleador internacional de la historia con 109 goles hasta que Ronaldo lo superó en 2021."
+  },
+  {
+    "nombre_pais": "Egipto",
+    "codigo_pais": "eg",
+    "mejor_puesto_mundial": "Primera fase (1934, 1990, 2018)",
+    "participaciones": 4,
+    "figura_clave_nombre": "Mohamed Salah",
+    "dato_freak_1": "Egipto participó en el primer mundial de la historia en 1930 siendo el primer equipo africano en jugar una Copa del Mundo.",
+    "dato_freak_2": "Mohamed Salah es el máximo goleador de la Premier League desde 2017 y el jugador africano más valioso de la historia.",
+    "dato_freak_3": "Egipto ganó 7 veces la Copa África de Naciones, más que cualquier otro país, pero nunca pasó de la primera fase en un Mundial."
+  },
+  {
+    "nombre_pais": "Ghana",
+    "codigo_pais": "gh",
+    "mejor_puesto_mundial": "Cuartos de final (2010)",
+    "participaciones": 5,
+    "figura_clave_nombre": "Mohammed Kudus",
+    "dato_freak_1": "Ghana estuvo a segundos de ser el primer equipo africano en semifinales en 2010, antes de que Suárez parara el gol con la mano.",
+    "dato_freak_2": "El error de Asamoah Gyan desde el punto penal en 2010 es el penalti fallado más recordado de la historia del torneo.",
+    "dato_freak_3": "Ghana eliminó a EE.UU. en dos mundiales consecutivos (2006 y 2010), ganándose el apodo de 'la pesadilla americana'."
+  },
+  {
+    "nombre_pais": "Costa de Marfil",
+    "codigo_pais": "ci",
+    "mejor_puesto_mundial": "Primera fase (2006, 2010, 2014)",
+    "participaciones": 4,
+    "figura_clave_nombre": "Sébastien Haller",
+    "dato_freak_1": "La generación de oro de Costa de Marfil con Drogba nunca pasó de la primera fase del mundial pese a ser considerada brillante.",
+    "dato_freak_2": "Didier Drogba convenció a las facciones en guerra civil de Côte d'Ivoire de hacer una tregua para ver un partido de la selección en 2006.",
+    "dato_freak_3": "En 2006 quedaron en el mismo grupo que Argentina, Holanda y Serbia: el llamado 'Grupo de la Muerte' más difícil de la historia."
+  },
+  {
+    "nombre_pais": "Argelia",
+    "codigo_pais": "dz",
+    "mejor_puesto_mundial": "Segunda ronda (2014)",
+    "participaciones": 5,
+    "figura_clave_nombre": "Riyad Mahrez",
+    "dato_freak_1": "Argelia venció a Alemania en 1982 en la mayor sorpresa de ese Mundial, pero ambos equipos quedaron fuera por el 'Pacto de Gijón'.",
+    "dato_freak_2": "Mahrez fue el primer argelino y africano en ganar la Premier League con Leicester en 2016, en el título más inesperado del fútbol inglés.",
+    "dato_freak_3": "En 2014 Argelia llegó a octavos y casi elimina a Alemania, que finalmente ganaría el torneo. El partido duró hasta la prórroga."
+  },
+  {
+    "nombre_pais": "Túnez",
+    "codigo_pais": "tn",
+    "mejor_puesto_mundial": "Primera fase (1978, 1998, 2002, 2006, 2018, 2022)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Hannibal Mejbri",
+    "dato_freak_1": "Túnez venció a Francia en Qatar 2022 pero ambos ya estaban clasificados y el resultado no sirvió para avanzar.",
+    "dato_freak_2": "Túnez fue el primer equipo africano en ganar un partido de Copa del Mundo, venciendo a México 3-1 en Argentina 1978.",
+    "dato_freak_3": "El país lleva el nombre de Cartago, la civilización que compitió con Roma por el dominio del Mediterráneo hace más de 2000 años."
+  },
+  {
+    "nombre_pais": "Ecuador",
+    "codigo_pais": "ec",
+    "mejor_puesto_mundial": "Segunda ronda (2006)",
+    "participaciones": 5,
+    "figura_clave_nombre": "Moisés Caicedo",
+    "dato_freak_1": "Ecuador abrió el Mundial de Qatar 2022 con una victoria en el partido inaugural, el único gol del partido marcado por Enner Valencia.",
+    "dato_freak_2": "Enner Valencia marcó en tres mundiales distintos (2014, 2018, 2022) siendo el máximo goleador histórico de Ecuador.",
+    "dato_freak_3": "Ecuador clasificó al Mundial 2002 por primera vez en su historia derrotando a Uruguay en el estadio de Quito, a 2850 metros de altura."
+  },
+  {
+    "nombre_pais": "Paraguay",
+    "codigo_pais": "py",
+    "mejor_puesto_mundial": "Cuartos de final (2010)",
+    "participaciones": 9,
+    "figura_clave_nombre": "Miguel Almirón",
+    "dato_freak_1": "Paraguay llegó a cuartos de final del Mundial 2010 sin ganar ningún partido en 90 minutos durante la fase eliminatoria.",
+    "dato_freak_2": "El portero José Luis Chilavert marcó tres goles de falta en mundiales, siendo el portero goleador más famoso de la historia.",
+    "dato_freak_3": "Paraguay tiene más participaciones mundialistas que Argentina en términos de clasificaciones consecutivas en algunos períodos."
+  },
+  {
+    "nombre_pais": "Suiza",
+    "codigo_pais": "ch",
+    "mejor_puesto_mundial": "Cuartos de final (1934, 1938, 1954)",
+    "participaciones": 13,
+    "figura_clave_nombre": "Granit Xhaka",
+    "dato_freak_1": "Suiza no se involucra en guerras pero es sede de la FIFA, la organización que gestiona el deporte más popular del mundo.",
+    "dato_freak_2": "En 2022, Suiza eliminó a Serbia con goles de jugadores de origen albanés (Xhaka, Shaqiri), quienes celebraron con el símbolo del águila albanesa.",
+    "dato_freak_3": "Suiza tiene cuatro idiomas oficiales y el equipo está integrado por jugadores de hasta 8 orígenes étnicos distintos."
+  },
+  {
+    "nombre_pais": "Turquía",
+    "codigo_pais": "tr",
+    "mejor_puesto_mundial": "Tercero (2002)",
+    "participaciones": 3,
+    "figura_clave_nombre": "Hakan Çalhanoğlu",
+    "dato_freak_1": "Turquía llegó a semifinales del Mundial 2002 derrotando a Senegal y Japón, sorprendiendo al mundo.",
+    "dato_freak_2": "Hakan Şükür marcó el gol más rápido de la historia de los mundiales: 11 segundos contra Corea del Sur en el partido por el tercer puesto.",
+    "dato_freak_3": "Turquía tiene más de 80 millones de habitantes y uno de los campeonatos más seguidos de Europa: la Süper Lig."
+  },
+  {
+    "nombre_pais": "Escocia",
+    "codigo_pais": "gb-sct",
+    "mejor_puesto_mundial": "Primera fase",
+    "participaciones": 8,
+    "figura_clave_nombre": "Scott McTominay",
+    "dato_freak_1": "Escocia participó en los primeros dos partidos de la historia del fútbol internacional (1872) contra Inglaterra.",
+    "dato_freak_2": "Escocia clasificó ocho veces al Mundial pero nunca pasó de la primera fase, siendo el equipo con más participaciones sin pasar de grupos.",
+    "dato_freak_3": "En 1978 Escocia fue a Argentina convencida de que podía ganar el mundial y fue eliminada en primera ronda pese a vencer a Holanda."
+  },
+  {
+    "nombre_pais": "Nueva Zelanda",
+    "codigo_pais": "nz",
+    "mejor_puesto_mundial": "Primera fase (1982, 2010)",
+    "participaciones": 3,
+    "figura_clave_nombre": "Chris Wood",
+    "dato_freak_1": "Nueva Zelanda no perdió ningún partido en el Mundial 2010, empatando los tres partidos de grupo (vs Italia, Paraguay y Eslovaquia).",
+    "dato_freak_2": "Los All Whites comparten instalaciones y popularidad con los famosos All Blacks del rugby, el deporte más seguido del país.",
+    "dato_freak_3": "Nueva Zelanda clasifica por la OFC (Oceanía), la confederación más pequeña, con apenas 11 plazas repartidas entre 14 países."
+  },
+  {
+    "nombre_pais": "Panamá",
+    "codigo_pais": "pa",
+    "mejor_puesto_mundial": "Primera fase (2018)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Rolando Blackburn",
+    "dato_freak_1": "Panamá marcó su primer gol en mundiales contra Inglaterra en 2018, con un gol en propia meta de John Stones al principio del partido.",
+    "dato_freak_2": "La clasificación de Panamá al Mundial 2018 fue obra de la generación de Roman Torres y Blas Pérez, que renovaron el fútbol panameño.",
+    "dato_freak_3": "El Canal de Panamá conecta el Atlántico con el Pacífico, y el país conecta Centroamérica con Sudamérica: clave para la CONCACAF."
+  },
+  {
+    "nombre_pais": "Qatar",
+    "codigo_pais": "qa",
+    "mejor_puesto_mundial": "Primera fase (2022)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Akram Afif",
+    "dato_freak_1": "Qatar fue el primer anfitrión de la historia en ser eliminado en primera fase del mundial que organizó.",
+    "dato_freak_2": "Qatar invirtió más de 200 mil millones de dólares en infraestructura para el Mundial 2022, la inversión más grande de la historia del deporte.",
+    "dato_freak_3": "Las temperaturas en Qatar obligaron a mover el torneo del verano al noviembre-diciembre, alterando los calendarios de todas las ligas del mundo."
+  },
+  {
+    "nombre_pais": "Sudáfrica",
+    "codigo_pais": "za",
+    "mejor_puesto_mundial": "Primera fase (1998, 2002, 2010)",
+    "participaciones": 4,
+    "figura_clave_nombre": "Percy Tau",
+    "dato_freak_1": "Sudáfrica fue el primer país africano en organizar un Mundial, en 2010.",
+    "dato_freak_2": "El vuvuzela, la trompeta característica de los hinchas sudafricanos, se hizo famosa mundialmente durante el Mundial 2010.",
+    "dato_freak_3": "Sudáfrica no logró pasar de la primera fase cuando fue anfitrión en 2010, siendo el primer país sede en caer en primera ronda."
+  },
+  {
+    "nombre_pais": "República Checa",
+    "codigo_pais": "cz",
+    "mejor_puesto_mundial": "Subcampeón (1934, 1962 como Checoslovaquia)",
+    "participaciones": 7,
+    "figura_clave_nombre": "Patrik Schick",
+    "dato_freak_1": "Como Checoslovaquia, llegaron a dos finales de mundial (1934 y 1962), perdiendo ambas contra Italia.",
+    "dato_freak_2": "Pavel Nedvěd ganó el Balón de Oro en 2003, siendo el primer checo en lograrlo desde la separación del país.",
+    "dato_freak_3": "La república independiente de Chequia se formó en 1993 y desde entonces su mejor resultado en mundiales ha sido la primera fase."
+  },
+  {
+    "nombre_pais": "Bosnia y Herzegovina",
+    "codigo_pais": "ba",
+    "mejor_puesto_mundial": "Primera fase (2014)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Edin Džeko",
+    "dato_freak_1": "Bosnia clasificó por primera vez a un Mundial en 2014, un logro enorme para un país que sigue reconstruyéndose tras la guerra de los 90.",
+    "dato_freak_2": "Edin Džeko es el máximo goleador histórico de Bosnia y uno de los futbolistas más respetados de la Premier League.",
+    "dato_freak_3": "Bosnia tiene un himno nacional sin letra, debido a las divisiones étnicas entre serbios, croatas y bosnios, que no se pusieron de acuerdo."
+  },
+  {
+    "nombre_pais": "Haití",
+    "codigo_pais": "ht",
+    "mejor_puesto_mundial": "Primera fase (1974)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Frantzdy Pierrot",
+    "dato_freak_1": "Haití fue el primer país del Caribe en clasificar a un Mundial, en 1974.",
+    "dato_freak_2": "En 1974, Haití enfrentó a la poderosa Italia de Giorgio Chinaglia y perdió 3-1, pero le anotó un gol histórico.",
+    "dato_freak_3": "El fútbol haitiano ha sido un símbolo de resistencia y orgullo nacional, emergiendo de la pobreza y la inestabilidad política."
+  },
+  {
+    "nombre_pais": "Curazao",
+    "codigo_pais": "cw",
+    "mejor_puesto_mundial": "Debut 2026",
+    "participaciones": 1,
+    "figura_clave_nombre": "Cuco Martina",
+    "dato_freak_1": "Curazao es el país más pequeño (en población y en territorio) en clasificar a un Mundial, con menos de 200,000 habitantes.",
+    "dato_freak_2": "Curazao era parte de las Antillas Neerlandesas, cuyo equipo nunca clasificó. Ahora, como país independiente dentro del Reino de los Países Bajos, lo logró.",
+    "dato_freak_3": "Varios jugadores de Curazao juegan en la Eredivisie holandesa, y algunos han llegado a selecciones menores de los Países Bajos antes de optar por Curazao."
+  },
+  {
+    "nombre_pais": "Irak",
+    "codigo_pais": "iq",
+    "mejor_puesto_mundial": "Primera fase (1986)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Ali Adnan",
+    "dato_freak_1": "Irak clasificó a su primer mundial en 1986, en plena guerra con Irán, un logro deportivo en medio de un conflicto devastador.",
+    "dato_freak_2": "La selección iraquí ganó la Copa Asiática 2007, un título que reunió al país en un momento de violencia sectaria extrema.",
+    "dato_freak_3": "Irak no puede jugar partidos como local en Bagdad por razones de seguridad, y suele disputar sus partidos de clasificación en Jordania o Catar."
+  },
+  {
+    "nombre_pais": "Jordania",
+    "codigo_pais": "jo",
+    "mejor_puesto_mundial": "Debut 2026",
+    "participaciones": 1,
+    "figura_clave_nombre": "Musa Al-Taamari",
+    "dato_freak_1": "Jordania es uno de los debutantes del Mundial 2026, logrando la clasificación tras una campaña perfecta en la repesca asiática.",
+    "dato_freak_2": "Musa Al-Taamari es el primer jordano en jugar en la Ligue 1 francesa, fichando por el Montpellier.",
+    "dato_freak_3": "Jordania llegó a la final de la Copa Asiática 2024, un logro histórico que impulsó la popularidad del deporte en el país."
+  },
+  {
+    "nombre_pais": "Uzbekistán",
+    "codigo_pais": "uz",
+    "mejor_puesto_mundial": "Debut 2026",
+    "participaciones": 1,
+    "figura_clave_nombre": "Eldor Shomurodov",
+    "dato_freak_1": "Uzbekistán es otro de los debutantes. Había estado cerca en clasificatorias anteriores, pero nunca había logrado el boleto.",
+    "dato_freak_2": "Los uzbekos son conocidos por su pasión por el fútbol, con estadios llenos y una liga local muy competitiva.",
+    "dato_freak_3": "Eldor Shomurodov es el máximo goleador histórico de Uzbekistán y el primer uzbeko en marcar en la Serie A italiana."
+  },
+  {
+    "nombre_pais": "Cabo Verde",
+    "codigo_pais": "cv",
+    "mejor_puesto_mundial": "Debut 2026",
+    "participaciones": 1,
+    "figura_clave_nombre": "Ryan Mendes",
+    "dato_freak_1": "Cabo Verde, un archipiélago de 10 islas, es el debutante más pequeño en términos de población después de Curazao.",
+    "dato_freak_2": "Los Tiburones Azules han sorprendido al mundo del fútbol con su estilo ofensivo, eliminando a Nigeria en la clasificatoria africana.",
+    "dato_freak_3": "Muchos jugadores de Cabo Verde nacieron en Portugal (como Nani, que eligió Portugal), pero la actual generación ha optado por representar a su país de origen."
+  },
+  {
+    "nombre_pais": "Suecia",
+    "codigo_pais": "se",
+    "mejor_puesto_mundial": "Subcampeón (1958)",
+    "participaciones": 13,
+    "figura_clave_nombre": "Alexander Isak",
+    "dato_freak_1": "Suecia fue anfitriona y subcampeona en 1958, siendo la mejor actuación de un país nórdico en la historia del torneo.",
+    "dato_freak_2": "Suecia eliminó a Países Bajos y a Italia en la clasificatoria para el Mundial 2018, dos potencias europeas.",
+    "dato_freak_3": "El famoso 'puente de Øresund' que conecta Suecia con Dinamarca ha sido adjudicado por los hinchas suecos como un buen augurio para viajar a partidos internacionales."
+  },
+  {
+    "nombre_pais": "Austria",
+    "codigo_pais": "at",
+    "mejor_puesto_mundial": "Tercero (1954)",
+    "participaciones": 8,
+    "figura_clave_nombre": "Marcel Sabitzer",
+    "dato_freak_1": "Austria fue una potencia del fútbol en los años 30 con el 'Wunderteam', considerado el mejor equipo del mundo de esa época.",
+    "dato_freak_2": "El 'Wunderteam' de Hugo Meisl entre 1931-1934 ganó 14 partidos seguidos, un récord para la época.",
+    "dato_freak_3": "Austria y Alemania jugaron un partido amañado en 1982 (el 'Juego de la Vergüenza') para eliminar a Argelia. Llevó a cambiar el reglamento."
+  },
+  {
+    "nombre_pais": "Noruega",
+    "codigo_pais": "no",
+    "mejor_puesto_mundial": "Primera fase (1938, 1994, 1998)",
+    "participaciones": 4,
+    "figura_clave_nombre": "Erling Haaland",
+    "dato_freak_1": "Noruega ha estado ausente de los mundiales desde 1998, y el regreso en 2026 con Haaland y Ødegaard es uno de los más esperados.",
+    "dato_freak_2": "Erling Haaland rompió todos los récords de goleo en la Premier League, siendo el jugador más letal de la actualidad.",
+    "dato_freak_3": "Noruega eliminó a Brasil en la fase de grupos del Mundial 1998, uno de los resultados más sorprendentes de la historia."
+  },
+  {
+    "nombre_pais": "República Democrática del Congo",
+    "codigo_pais": "cd",
+    "mejor_puesto_mundial": "Primera fase (1974 como Zaire)",
+    "participaciones": 2,
+    "figura_clave_nombre": "Yannick Bolasie",
+    "dato_freak_1": "La RDC clasificó anteriormente como Zaire en 1974, siendo el primer equipo del África subsahariana en jugar un Mundial.",
+    "dato_freak_2": "En 1974, un jugador de Zaire salió corriendo a patear un tiro libre del rival antes de que se ejecutara, en uno de los momentos más insólitos de la historia.",
+    "dato_freak_3": "La RDC es el país más poblado de África francófona, con más de 100 millones de habitantes, y el fútbol es la pasión nacional."
+  }
+]

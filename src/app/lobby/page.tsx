@@ -1,16 +1,28 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from '@/context/SessionContext'
 import { getOnboardingVisto } from '@/lib/session'
 import { Onboarding } from '@/components/onboarding/Onboarding'
-import { Suspense } from 'react'
+import { PartidosTab } from '@/components/partidos/PartidosTab'
+import { RankingTab } from '@/components/ranking/RankingTab'
+import { PerfilTab } from '@/components/perfil/PerfilTab'
+
+type Tab = 'partidos' | 'ranking' | 'perfil'
+
+const NAV = [
+  { id: 'partidos' as Tab, label: 'Partidos', icon: '📅' },
+  { id: 'ranking' as Tab, label: 'Ranking', icon: '🏆' },
+  { id: 'perfil' as Tab, label: 'Perfil', icon: '👤' },
+]
 
 function LobbyContent() {
   const { session, loading, logout } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('partidos')
+  const [fichas, setFichas] = useState<number>(1000)
 
   useEffect(() => {
     if (!loading && !session) {
@@ -22,80 +34,83 @@ function LobbyContent() {
       if (forzar || !getOnboardingVisto()) {
         setShowOnboarding(true)
       }
+      // Cargar fichas reales desde DB
+      fetch(`/api/usuario?id=${session.usuarioId}`)
+        .then((r) => r.json())
+        .then((data) => { if (data?.fichas != null) setFichas(data.fichas) })
+        .catch(() => {})
     }
   }, [session, loading, router, searchParams])
 
   if (loading || !session) return null
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col overflow-hidden max-h-screen">
       {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
 
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-widest">Liga</p>
           <h2 className="text-base font-bold text-white">{session.ligaNombre}</h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <span className="text-xs text-slate-500 uppercase tracking-widest">Fichas</span>
+            <span className="text-yellow-400 font-black text-lg leading-none">{fichas.toLocaleString()}</span>
+          </div>
           <button
             onClick={() => setShowOnboarding(true)}
-            className="text-slate-500 hover:text-white text-lg transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white text-sm font-bold transition-colors"
             title="Ver tutorial"
           >
             ?
           </button>
-          <button
-            onClick={() => { logout(); router.push('/') }}
-            className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-          >
-            Salir
-          </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <div className="flex flex-col items-center justify-center flex-1 gap-6 px-6 py-12 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-3xl">
-            ⚽
-          </div>
-          <div>
-            <p className="text-slate-400 text-sm">Hola,</p>
-            <h1 className="text-3xl font-black uppercase text-white">{session.nombre}</h1>
-          </div>
-        </div>
-
-        {/* Código de liga */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 flex flex-col items-center gap-1">
-          <p className="text-xs text-slate-500 uppercase tracking-widest">Código de invitación</p>
-          <p className="text-3xl font-black tracking-widest text-green-400">{session.codigoInvitacion}</p>
-          <p className="text-xs text-slate-600">Compartilo con tus amigos</p>
-        </div>
-
-        {/* Fichas */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 flex flex-col items-center gap-1 w-full max-w-xs">
-          <p className="text-xs text-slate-500 uppercase tracking-widest">Tus fichas</p>
-          <p className="text-4xl font-black text-yellow-400">1000</p>
-        </div>
-
-        <p className="text-slate-600 text-sm">
-          Los partidos estarán disponibles próximamente
+      {/* Subheader */}
+      <div className="px-5 py-2 border-b border-slate-800/50 shrink-0">
+        <p className="text-sm text-slate-400">
+          Hola, <span className="text-white font-semibold">{session.nombre}</span>
         </p>
       </div>
 
-      {/* Bottom nav placeholder */}
-      <nav className="border-t border-slate-800 flex">
-        {[
-          { label: 'Partidos', emoji: '📅' },
-          { label: 'Ranking', emoji: '🏆' },
-          { label: 'Perfil', emoji: '👤' },
-        ].map(item => (
+      {/* Contenido del tab activo */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {activeTab === 'partidos' && (
+          <PartidosTab
+            usuarioId={session.usuarioId}
+            fichas={fichas}
+            onFichasChange={setFichas}
+          />
+        )}
+        {activeTab === 'ranking' && (
+          <RankingTab ligaId={session.ligaId} usuarioId={session.usuarioId} />
+        )}
+        {activeTab === 'perfil' && (
+          <PerfilTab
+            session={session}
+            fichas={fichas}
+            onLogout={() => { logout(); router.push('/') }}
+            onVerTutorial={() => setShowOnboarding(true)}
+          />
+        )}
+      </div>
+
+      {/* Bottom nav */}
+      <nav className="border-t border-slate-800 flex shrink-0">
+        {NAV.map((item) => (
           <button
-            key={item.label}
-            className="flex-1 flex flex-col items-center gap-1 py-3 text-slate-600"
+            key={item.id}
+            onClick={() => setActiveTab(item.id)}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              activeTab === item.id
+                ? 'text-green-400'
+                : 'text-slate-600 hover:text-slate-400'
+            }`}
           >
-            <span className="text-xl">{item.emoji}</span>
+            <span className="text-xl">{item.icon}</span>
             <span className="text-xs font-semibold uppercase tracking-wide">{item.label}</span>
           </button>
         ))}

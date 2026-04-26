@@ -8,25 +8,25 @@ const SLIDES = [
     emoji: '🏆',
     titulo: '¡Bienvenido a la Quiniela!',
     descripcion:
-      'Predecí los resultados de los 96 partidos del Mundial 2026. Ganás fichas al acertar y el que termina con más fichas se queda con el pote de la liga.',
+      'Predice los resultados de los partidos del Mundial 2026. Ganas fichas al acertar y quien termina con más fichas se queda con el pote de la liga.',
   },
   {
     emoji: '🎯',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresás el marcador que esperás. Las predicciones se cierran 5 minutos antes del inicio del partido. No podés cambiarlas después.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.',
   },
   {
     emoji: '🪙',
     titulo: 'Las fichas',
     descripcion:
-      'Arrancás con 1000 fichas. Antes de cada partido elegís cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
+      'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
   },
   {
     emoji: '✖️',
     titulo: 'Los multiplicadores',
     descripcion:
-      'Marcador exacto → ganás 3x lo apostado\nAcertás ganador o empate → ganás 1.5x\nFallás → perdés lo apostado',
+      'Marcador exacto → ganas 3x lo apostado\nAciertas ganador o empate → ganas 1.5x\nFallas → pierdes lo apostado',
   },
   {
     emoji: '💰',
@@ -38,7 +38,7 @@ const SLIDES = [
     emoji: '🔥',
     titulo: 'Extras y bonos',
     descripcion:
-      '3 aciertos seguidos = Racha de oro (fichas doradas ✨)\nSi quedás en 0 fichas recibís 300 de regalo una sola vez (bono de rescate).',
+      '3 aciertos seguidos = Racha de oro (fichas doradas ✨)\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
   },
   {
     emoji: '⚖️',

@@ -28,7 +28,7 @@ export default function WelcomePage() {
             <span className="block text-green-400">Mundial 2026</span>
           </h1>
           <p className="text-slate-400 text-base leading-relaxed">
-            Predecí los partidos, apostá fichas<br />y ganá el pote con tu grupo
+            Predice los partidos, apuesta fichas<br />y gana el pote con tu grupo
           </p>
         </div>
 
