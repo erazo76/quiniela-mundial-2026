@@ -51,7 +51,7 @@
   },
   {
     "nombre_pais": "Inglaterra",
-    "codigo_pais": "gb-eng",
+    "codigo_pais": "xe",
     "mejor_puesto_mundial": "Campeón (1966)",
     "participaciones": 16,
     "figura_clave_nombre": "Jude Bellingham",
@@ -311,7 +311,7 @@
   },
   {
     "nombre_pais": "Escocia",
-    "codigo_pais": "gb-sct",
+    "codigo_pais": "xs",
     "mejor_puesto_mundial": "Primera fase",
     "participaciones": 8,
     "figura_clave_nombre": "Scott McTominay",
@@ -340,7 +340,7 @@
     "dato_freak_3": "El Canal de Panamá conecta el Atlántico con el Pacífico, y el país conecta Centroamérica con Sudamérica: clave para la CONCACAF."
   },
   {
-    "nombre_pais": "Qatar",
+    "nombre_pais": "Catar",
     "codigo_pais": "qa",
     "mejor_puesto_mundial": "Primera fase (2022)",
     "participaciones": 2,
