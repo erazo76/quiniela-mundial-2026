@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Partido } from '@/types'
 
 const ADMIN_TOKEN_KEY = 'qm2026_admin_token'
@@ -251,6 +252,22 @@ export default function AdminPartidosPage() {
           </p>
         )}
       </header>
+
+      {/* Nav */}
+      <nav className="flex gap-1 px-4 py-3 border-b border-slate-800">
+        <Link
+          href="/admin/partidos"
+          className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide bg-green-500 text-black"
+        >
+          Partidos
+        </Link>
+        <Link
+          href="/admin/ligas"
+          className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide bg-slate-800 text-slate-400 hover:bg-slate-700 transition-colors"
+        >
+          Ligas
+        </Link>
+      </nav>
 
       {/* Tabs de fase */}
       <div className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-slate-800" style={{ scrollbarWidth: 'none' }}>
