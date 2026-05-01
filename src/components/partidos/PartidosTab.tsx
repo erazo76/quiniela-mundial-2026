@@ -90,13 +90,14 @@ export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
         {GRUPOS.map((g) => {
           const partidosDeGrupo = partidos.filter((p) => p.grupo === g)
           const conPrediccion = partidosDeGrupo.filter((p) => p.prediccion).length
+          const totalGrupo = partidosDeGrupo.length
           const isActive = g === grupoActivo
           return (
             <button
               key={g}
               data-grupo={g}
               onClick={() => handleGrupoClick(g)}
-              className={`flex flex-col items-center shrink-0 w-12 py-2 rounded-2xl border transition-colors ${
+              className={`flex flex-col items-center gap-1 shrink-0 w-12 py-2 rounded-2xl border transition-colors ${
                 isActive
                   ? 'bg-green-500 border-green-500 text-black'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
@@ -104,7 +105,7 @@ export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
             >
               <span className="text-sm font-black">{g}</span>
               <span className={`text-xs ${isActive ? 'text-black/60' : 'text-slate-600'}`}>
-                {conPrediccion}/3
+                {conPrediccion}/{totalGrupo}
               </span>
             </button>
           )
