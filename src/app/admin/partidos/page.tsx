@@ -321,6 +321,13 @@ export default function AdminPartidosPage() {
         >
           Ligas
         </Link>
+        <Link
+          href="/admin/manual"
+          target="_blank"
+          className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide bg-slate-800 text-slate-400 hover:bg-slate-700 transition-colors ml-auto"
+        >
+          Manual
+        </Link>
       </nav>
 
       {/* Tabs de fase */}

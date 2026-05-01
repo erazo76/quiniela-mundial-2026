@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     (data ?? []).map((p) => ({
       id: p.id,
-      nombre: (p.usuarios as { nombre: string } | null)?.nombre ?? 'Desconocido',
+      nombre: (p.usuarios as unknown as { nombre: string } | null)?.nombre ?? 'Desconocido',
       pred: `${p.goles_local}-${p.goles_visitante}`,
       fichas: p.fichas_apostadas,
       tipo_acierto: p.tipo_acierto,
