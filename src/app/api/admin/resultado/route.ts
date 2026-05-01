@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   const { data: partidoActual } = await supabase
     .from('partidos')
-    .select('estado')
+    .select('estado, equipo_local, equipo_visitante')
     .eq('id', partido_id)
     .single()
 
@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
     supabase,
     partido_id,
     resultado_local,
-    resultado_visitante
+    resultado_visitante,
+    partidoActual?.equipo_local ?? 'Local',
+    partidoActual?.equipo_visitante ?? 'Visitante'
   )
 
   if (error) return NextResponse.json({ error }, { status: 500 })

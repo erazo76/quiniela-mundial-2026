@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const PAGE_SIZE = 7
+const PAGE_SIZE = 5
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')

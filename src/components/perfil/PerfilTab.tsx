@@ -284,10 +284,15 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
       <div className="flex flex-col gap-2">
         <button
           onClick={toggleHistorial}
-          className="flex items-center justify-between w-full group"
+          className="flex items-center justify-between w-full px-4 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-2xl transition-colors"
         >
-          <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Movimientos</p>
-          <span className={`text-slate-600 group-hover:text-slate-400 transition-all text-sm ${historialAbierto ? 'rotate-180' : ''} inline-block`}>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-slate-300 uppercase tracking-widest font-bold">Movimientos</p>
+            {historial && historial.total > 0 && (
+              <span className="text-xs text-slate-500 font-semibold">{historial.total}</span>
+            )}
+          </div>
+          <span className={`text-slate-500 text-sm transition-transform inline-block ${historialAbierto ? 'rotate-180' : ''}`}>
             ▾
           </span>
         </button>
@@ -296,7 +301,7 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
           <div className="flex flex-col gap-1">
             {cargandoHistorial && (
               <div className="flex flex-col gap-1">
-                {Array.from({ length: 7 }).map((_, i) => (
+                {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="h-12 bg-slate-900 rounded-xl animate-pulse" />
                 ))}
               </div>
@@ -317,7 +322,7 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
                     <span className="text-xs font-semibold text-white">
                       {TIPO_LABEL[mov.tipo] ?? mov.tipo}
                     </span>
-                    <span className="text-[10px] text-slate-600 truncate">{mov.descripcion}</span>
+                    <span className="text-xs text-slate-500 truncate">{mov.descripcion}</span>
                   </div>
                   <span className={`text-sm font-black shrink-0 ml-3 ${esGanancia ? 'text-green-400' : 'text-red-400'}`}>
                     {esGanancia ? '+' : ''}{mov.cantidad.toLocaleString()}

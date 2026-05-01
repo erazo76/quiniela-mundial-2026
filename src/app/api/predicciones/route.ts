@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   // Verificar partido
   const { data: partido, error: errorPartido } = await supabase
     .from('partidos')
-    .select('id, estado, fecha_hora')
+    .select('id, estado, fecha_hora, equipo_local, equipo_visitante')
     .eq('id', partido_id)
     .single()
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       usuario_id,
       tipo,
       cantidad: diferencia > 0 ? -cantidad : cantidad,
-      descripcion: `Predicción ${accion}: partido ${partido_id}`,
+      descripcion: `${partido.equipo_local} vs ${partido.equipo_visitante} · pred. ${goles_local}-${goles_visitante}${accion === 'modificada' ? ' (modificada)' : ''}`,
     })
 
     // Acumular 5% de la apuesta neta al pote de la liga

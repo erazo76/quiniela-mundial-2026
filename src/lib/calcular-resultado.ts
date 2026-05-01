@@ -23,7 +23,9 @@ export async function procesarResultadoPartido(
   supabase: SupabaseClient,
   partidoId: string,
   resultadoLocal: number,
-  resultadoVisitante: number
+  resultadoVisitante: number,
+  equipoLocal = 'Local',
+  equipoVisitante = 'Visitante'
 ): Promise<{ procesadas: number; error?: string }> {
   // Query 1: fetch predictions for this match
   const { data: predicciones, error: errPred } = await supabase
@@ -95,7 +97,7 @@ export async function procesarResultadoPartido(
           usuario_id: pred.usuario_id,
           tipo,
           cantidad: ganancia,
-          descripcion: `Ganancia partido ${partidoId} (${tipo})`,
+          descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
         })
       }
     }
