@@ -197,7 +197,7 @@ export default function AdminPartidosPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setMsgSync(`Error: ${data.error}`)
+        setMsgSync(`Error al sincronizar: ${data.error?.replace(/^TypeError: /, '') ?? 'intenta de nuevo'}`)
       } else {
         setMsgSync(
           data.sincronizados > 0
@@ -228,23 +228,25 @@ export default function AdminPartidosPage() {
   return (
     <main className="min-h-screen text-white">
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-widest">Admin</p>
-          <h1 className="text-base font-black text-white">Quiniela Mundial 2026</h1>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>{conteoEnVivo} en vivo · {conteoFinalizado} finalizados</span>
-          <button
-            onClick={sincronizar}
-            disabled={sincronizando}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 font-semibold rounded-lg transition-colors"
-          >
-            {sincronizando ? 'Sincronizando...' : 'Sincronizar'}
-          </button>
-          <button onClick={salir} className="text-red-400 hover:text-red-300 transition-colors font-semibold">
-            Salir
-          </button>
+      <header className="border-b border-slate-800">
+        <div className="flex items-center justify-between px-5 py-4">
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-widest">Admin</p>
+            <h1 className="text-base font-black text-white">Quiniela Mundial 2026</h1>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-slate-500">
+            <span>{conteoEnVivo} en vivo · {conteoFinalizado} finalizados</span>
+            <button
+              onClick={sincronizar}
+              disabled={sincronizando}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 font-semibold rounded-lg transition-colors"
+            >
+              {sincronizando ? 'Sincronizando...' : 'Sincronizar'}
+            </button>
+            <button onClick={salir} className="text-red-400 hover:text-red-300 transition-colors font-semibold">
+              Salir
+            </button>
+          </div>
         </div>
         {msgSync && (
           <p className={`text-xs px-5 pb-2 ${msgSync.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>

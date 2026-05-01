@@ -65,7 +65,8 @@ const FASE_MAP: Record<string, string> = {
 
 // Palabras que indican equipo TBD en la API
 const TBD_WORDS = ['yet', 'winner', 'loser', 'tbd', 'tba']
-function esTBD(nombre: string): boolean {
+function esTBD(nombre: string | null | undefined): boolean {
+  if (!nombre) return true
   const lower = nombre.toLowerCase()
   return TBD_WORDS.some((w) => lower.includes(w))
 }

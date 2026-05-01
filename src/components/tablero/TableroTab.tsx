@@ -57,7 +57,7 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
       </div>
 
       {/* Encabezado */}
-      <div className={`grid ${COL} text-[10px] text-slate-500 border-b border-slate-800 px-2 py-1`}>
+      <div className={`grid ${COL} text-[10px] text-slate-400 border-b border-slate-800 px-2 py-1`}>
         <span>Equipo</span>
         <span className="text-center">PJ</span>
         <span className="text-center">G</span>
@@ -73,7 +73,7 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
         return (
           <div
             key={s.equipo}
-            className={`grid ${COL} text-[11px] px-2 py-1.5 border-b border-slate-800/40 last:border-0 items-center ${top ? 'text-white' : 'text-slate-400'}`}
+            className={`grid ${COL} text-[11px] px-2 py-1.5 border-b border-slate-800/40 last:border-0 items-center ${top ? 'text-white' : 'text-slate-300'}`}
           >
             <div className="flex items-center gap-1 min-w-0">
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${top ? 'bg-green-500' : 'bg-transparent'}`} />
@@ -94,7 +94,7 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
       })}
 
       {rows.length === 0 && (
-        <p className="text-[11px] text-slate-600 text-center py-3">Sin datos</p>
+        <p className="text-[11px] text-slate-400 text-center py-3">Sin datos</p>
       )}
     </div>
   )
@@ -106,7 +106,7 @@ function GruposView({ partidos }: { partidos: Partido[] }) {
   for (const g of GRUPOS) byGrupo[g] = []
   for (const p of partidos) { if (p.grupo) byGrupo[p.grupo]?.push(p) }
   return (
-    <div className="flex-1 overflow-y-auto p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
+    <div className="flex-1 min-h-0 overflow-y-auto p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
       {GRUPOS.map(g => <GrupoCard key={g} letra={g} partidos={byGrupo[g] ?? []} />)}
     </div>
   )
