@@ -2,12 +2,47 @@
 
 @theme inline {
   --font-sans: var(--font-exo2);
+
+  /* Paleta oficial World Cup 2026 */
+  --wc-stripe-gradient: linear-gradient(
+    90deg,
+    #8B0000  0%,
+    #7F00FF  6.67%,
+    #1F3A93  13.33%,
+    #0B5D3B  20%,
+    #FF0000  26.67%,
+    #C8A2C8  33.33%,
+    #2F5BFF  40%,
+    #00C853  46.67%,
+    #FF3B1F  53.33%,
+    #D65A9A  60%,
+    #00AEEF  66.67%,
+    #AEEA00  73.33%,
+    #F5A487  80%,
+    #FF006E  86.67%,
+    #00D1B2  93.33%,
+    #FFFF00  100%
+  );
 }
 
 body {
-  background: #020617;
+  background: #020617 url('/ui/background.png') center top / cover no-repeat fixed;
   color: #f8fafc;
   font-family: var(--font-exo2), system-ui, sans-serif;
+}
+
+@media (min-width: 768px) {
+  body { background-position: center 60%; }
+}
+
+/* Overlay oscuro global — capa fija encima del fondo, debajo de todo el contenido */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.68);
+  z-index: -1;
+  pointer-events: none;
 }
 
 * {
@@ -17,4 +52,71 @@ body {
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
+}
+
+/* Franja FIFA 2026 como borde inferior */
+.wc-stripe-bar {
+  height: 4px;
+  background: var(--wc-stripe-gradient);
+  border-radius: 0 0 2px 2px;
+}
+
+/* Franja como borde izquierdo en cards */
+.wc-stripe-left {
+  border-left: 4px solid transparent;
+  border-image: var(--wc-stripe-gradient) 1;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Copa pulse / latido ── */
+@keyframes copaPulse {
+  0%, 100% { transform: scale(1);    filter: drop-shadow(0 6px 24px rgba(255,215,0,0.25)); }
+  50%       { transform: scale(1.09); filter: drop-shadow(0 8px 36px rgba(255,215,0,0.55)); }
+}
+
+/* ── Player peek animations ── */
+
+/* El fondo respira lento creando profundidad */
+@keyframes bgPulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+
+/* Mobile: 35% visible */
+@keyframes peekLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(-65%); }
+}
+@keyframes peekRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(65%); }
+}
+
+/* Desktop (≥768px): 55% visible */
+@media (min-width: 768px) {
+  @keyframes peekLeft {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(-45%); }
+  }
+  @keyframes peekRight {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(45%); }
+  }
+}
+
+/* Latido suave — variante con flip horizontal */
+@keyframes breatheFlip {
+  0%, 100% { transform: scaleX(-1) scale(1)    translateY(0px); }
+  50%       { transform: scaleX(-1) scale(1.05) translateY(-10px); }
+}
+/* Latido suave — variante sin flip */
+@keyframes breatheNoFlip {
+  0%, 100% { transform: scale(1)    translateY(0px); }
+  50%       { transform: scale(1.05) translateY(-10px); }
 }
