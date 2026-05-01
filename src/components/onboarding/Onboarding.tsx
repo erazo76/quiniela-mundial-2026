@@ -12,13 +12,13 @@ interface Slide {
 
 const SLIDES: Slide[] = [
   {
-    image: '/ui/trophy.png',
+    image: '/ui/icon-trophy-nav.png',
     titulo: '¡Bienvenido a la Quiniela!',
     descripcion:
       'Predice los resultados de los partidos del Mundial 2026. Ganas fichas al acertar y quien termina con más fichas se queda con el pote de la liga.',
   },
   {
-    image: '/ui/star.png',
+    image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
       'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.',
@@ -30,25 +30,25 @@ const SLIDES: Slide[] = [
       'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
   },
   {
-    image: '/ui/copa.png',
+    image: '/ui/icon-multiplier.png',
     titulo: 'Los multiplicadores',
     descripcion:
       'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
   },
   {
-    image: '/ui/icon-coins.png',
+    image: '/ui/icon-coins5.png',
     titulo: 'El pote virtual',
     descripcion:
       'El pote es la suma de todas las fichas de tu liga. Al final del Mundial, quien tenga más fichas gana. El premio real (si lo hay) se coordina fuera de la app.',
   },
   {
-    image: '/ui/fire.png',
+    image: '/ui/icon-gift.png',
     titulo: 'Extras y bonos',
     descripcion:
       '3 aciertos seguidos activan la Racha de oro.\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
   },
   {
-    image: null,
+    image: '/ui/icon-exclamation.png',
     titulo: 'Aviso importante',
     descripcion:
       'Esta app es exclusivamente recreativa entre amigos. No se realizan transacciones con dinero real dentro de la plataforma. Cualquier premio en efectivo es responsabilidad exclusiva de los usuarios.',

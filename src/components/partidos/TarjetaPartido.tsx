@@ -163,7 +163,7 @@ export function TarjetaPartido({ partido, onClick }: Props) {
                 {badge.label}
               </span>
             ) : puedePredicir ? (
-              <Image src="/ui/icon-edit.png" alt="Editar" width={18} height={18} unoptimized style={{ filter: 'brightness(0) invert(1)', opacity: 0.5 }} />
+              <Image src="/ui/icon-edit.png" alt="Editar" width={18} height={18} unoptimized className="opacity-50" />
             ) : null}
             {badge?.label === 'EXACTO' && (
               <span className="text-yellow-300 text-xs font-bold">+{pred.ganancia_fichas}</span>
