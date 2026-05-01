@@ -1,3 +1,5 @@
+import { PrintButton } from '@/components/manual/PrintButton'
+
 export const metadata = { title: 'Manual de usuario — Quiniela Mundial 2026' }
 
 function H2({ children }: { children: React.ReactNode }) {
@@ -54,7 +56,9 @@ function Recuadro({ titulo, children, color = 'slate' }: { titulo: string; child
 
 export default function ManualUsuarioPage() {
   return (
-    <main className="max-w-3xl mx-auto px-6 py-10 print:py-4 print:px-4 font-sans">
+    <>
+    <PrintButton />
+    <main className="relative z-10 min-h-screen bg-white max-w-3xl mx-auto px-6 py-10 print:py-4 print:px-4 font-sans shadow-xl">
       <style>{`
         @media print {
           @page { margin: 1.5cm; size: A4; }
@@ -303,5 +307,6 @@ export default function ManualUsuarioPage() {
         <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.0</p>
       </div>
     </main>
+    </>
   )
 }

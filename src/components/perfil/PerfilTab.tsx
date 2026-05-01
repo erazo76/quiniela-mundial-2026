@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Session } from '@/lib/session'
 import { avatarSrc, getAvatarIndex, setAvatarIndex, TOTAL_AVATARES } from '@/lib/avatar'
 
@@ -358,6 +359,13 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
         >
           Ver tutorial
         </button>
+        <Link
+          href="/manual"
+          target="_blank"
+          className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold uppercase tracking-wide rounded-2xl transition-colors text-center block"
+        >
+          Manual de usuario
+        </Link>
         <button
           onClick={onLogout}
           className="w-full py-3 text-red-400 hover:text-red-300 text-sm font-bold uppercase tracking-wide rounded-2xl border border-red-900/40 hover:border-red-700/40 transition-colors"
