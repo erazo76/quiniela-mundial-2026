@@ -106,8 +106,10 @@ function GruposView({ partidos }: { partidos: Partido[] }) {
   for (const g of GRUPOS) byGrupo[g] = []
   for (const p of partidos) { if (p.grupo) byGrupo[p.grupo]?.push(p) }
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 content-start">
-      {GRUPOS.map(g => <GrupoCard key={g} letra={g} partidos={byGrupo[g] ?? []} />)}
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {GRUPOS.map(g => <GrupoCard key={g} letra={g} partidos={byGrupo[g] ?? []} />)}
+      </div>
     </div>
   )
 }
@@ -173,7 +175,7 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
   const cols = FASES.filter(f => byFase[f.key].length > 0)
 
   return (
-    <div className="flex-1 overflow-auto p-4">
+    <div className="flex-1 min-h-0 overflow-auto p-4">
       <div className="flex gap-5 items-start pb-4" style={{ minWidth: cols.length * 192 }}>
         {cols.map(f => (
           <RondaCol key={f.key} label={f.label} partidos={byFase[f.key]} />
@@ -198,7 +200,7 @@ export function TableroTab() {
   }, [])
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Toggle grupos / llave */}
       <div className="flex gap-2 p-3 border-b border-slate-800 shrink-0">
         {(['grupos', 'llave'] as const).map(v => (
