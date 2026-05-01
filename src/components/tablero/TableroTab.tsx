@@ -45,59 +45,57 @@ function shortName(name: string) {
 
 // ─── Grupos View ───────────────────────────────────────────────────────────
 
+const COL = 'grid-cols-[1fr_22px_18px_18px_18px_26px_28px]'
+
 function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) {
   const rows = calcularGrupo(partidos)
   const grupoHaJugado = rows.some(r => r.pj > 0)
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
-      <div className="px-3 py-2 bg-slate-800/60 border-b border-slate-700 flex items-center gap-2">
+      <div className="px-3 py-2 bg-slate-800/60 border-b border-slate-700">
         <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Grupo {letra}</span>
       </div>
-      <table className="w-full table-fixed text-[11px]">
-        <colgroup>
-          <col className="w-auto" />
-          <col className="w-7" />
-          <col className="w-7" />
-          <col className="w-7" />
-          <col className="w-7" />
-          <col className="w-8" />
-          <col className="w-9" />
-        </colgroup>
-        <thead>
-          <tr className="text-slate-500 border-b border-slate-800">
-            <th className="text-left px-2 py-1 font-medium">Equipo</th>
-            <th className="px-1 py-1 font-medium text-center">PJ</th>
-            <th className="px-1 py-1 font-medium text-center">G</th>
-            <th className="px-1 py-1 font-medium text-center">E</th>
-            <th className="px-1 py-1 font-medium text-center">P</th>
-            <th className="px-1 py-1 font-medium text-center">DG</th>
-            <th className="px-2 py-1 font-medium text-center text-yellow-400">Pts</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((s, i) => (
-            <tr key={s.equipo} className={`border-b border-slate-800/40 last:border-0 ${i < 2 && grupoHaJugado ? 'text-white' : 'text-slate-500'}`}>
-              <td className="px-2 py-1.5 max-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {i < 2 && grupoHaJugado && <span className="w-1 h-1 rounded-full bg-green-500 shrink-0" />}
-                  {!(i < 2 && grupoHaJugado) && <span className="w-1 h-1 shrink-0" />}
-                  {s.bandera
-                    ? <img src={s.bandera} alt="" className="w-4 h-3 object-cover rounded-sm shrink-0" />
-                    : <div className="w-4 h-3 bg-slate-700 rounded-sm shrink-0" />
-                  }
-                  <span className="truncate">{shortName(s.equipo)}</span>
-                </div>
-              </td>
-              <td className="px-1 py-1.5 text-center">{s.pj}</td>
-              <td className="px-1 py-1.5 text-center">{s.pg}</td>
-              <td className="px-1 py-1.5 text-center">{s.pe}</td>
-              <td className="px-1 py-1.5 text-center">{s.pp}</td>
-              <td className="px-1 py-1.5 text-center">{s.dif > 0 ? `+${s.dif}` : s.dif}</td>
-              <td className="px-2 py-1.5 text-center font-black text-yellow-400">{s.pts}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      {/* Encabezado */}
+      <div className={`grid ${COL} text-[10px] text-slate-500 border-b border-slate-800 px-2 py-1`}>
+        <span>Equipo</span>
+        <span className="text-center">PJ</span>
+        <span className="text-center">G</span>
+        <span className="text-center">E</span>
+        <span className="text-center">P</span>
+        <span className="text-center">DG</span>
+        <span className="text-center text-yellow-500">Pts</span>
+      </div>
+
+      {/* Filas */}
+      {rows.map((s, i) => {
+        const top = i < 2 && grupoHaJugado
+        return (
+          <div
+            key={s.equipo}
+            className={`grid ${COL} text-[11px] px-2 py-1.5 border-b border-slate-800/40 last:border-0 items-center ${top ? 'text-white' : 'text-slate-400'}`}
+          >
+            <div className="flex items-center gap-1 min-w-0">
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${top ? 'bg-green-500' : 'bg-transparent'}`} />
+              {s.bandera
+                ? <img src={s.bandera} alt="" className="w-4 h-3 object-cover rounded-sm shrink-0" />
+                : <div className="w-4 h-3 bg-slate-700 rounded-sm shrink-0" />
+              }
+              <span className="truncate">{shortName(s.equipo)}</span>
+            </div>
+            <span className="text-center">{s.pj}</span>
+            <span className="text-center">{s.pg}</span>
+            <span className="text-center">{s.pe}</span>
+            <span className="text-center">{s.pp}</span>
+            <span className="text-center">{s.dif > 0 ? `+${s.dif}` : s.dif}</span>
+            <span className="text-center font-black text-yellow-400">{s.pts}</span>
+          </div>
+        )
+      })}
+
+      {rows.length === 0 && (
+        <p className="text-[11px] text-slate-600 text-center py-3">Sin datos</p>
+      )}
     </div>
   )
 }
