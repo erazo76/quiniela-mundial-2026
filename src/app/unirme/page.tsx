@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useSession } from '@/context/SessionContext'
+import { avatarSrc, getAvatarIndex } from '@/lib/avatar'
 
 type Paso = 'codigo' | 'liga' | 'pin'
 
@@ -267,7 +268,7 @@ export default function UnirmePage() {
           <>
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-black text-xs font-black">✓</span>
+                <Image src="/ui/icon-check-green.png" alt="ok" width={22} height={22} unoptimized />
                 <p className="text-green-400 text-sm font-semibold">Liga encontrada</p>
               </div>
               <h1 className="text-3xl font-black uppercase text-white">{liga.nombre_liga}</h1>
@@ -291,14 +292,12 @@ export default function UnirmePage() {
                       className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] border border-slate-700 hover:border-green-500/50 rounded-xl transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-700 group-hover:bg-green-500/20 flex items-center justify-center text-sm font-black text-white transition-colors">
-                          {m.nombre[0].toUpperCase()}
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0">
+                          <Image src={avatarSrc(getAvatarIndex(m.id, m.nombre))} alt={m.nombre} width={40} height={40} className="w-full h-full object-cover" unoptimized />
                         </div>
                         <span className="text-white font-semibold">{m.nombre}</span>
                       </div>
-                      <span className="text-slate-500 group-hover:text-green-400 text-sm font-medium transition-colors">
-                        Soy yo →
-                      </span>
+                      <Image src="/ui/icon-auto.png" alt="Soy yo" width={28} height={28} unoptimized style={{ filter: 'brightness(0) invert(1)', opacity: 0.5 }} className="group-hover:opacity-100 transition-opacity" />
                     </button>
                   ))}
 
@@ -312,9 +311,10 @@ export default function UnirmePage() {
 
               <button
                 onClick={irANuevo}
-                className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 hover:border-slate-600 text-white font-semibold rounded-xl transition-all text-sm"
+                className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 hover:border-slate-600 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2"
               >
-                + Soy nuevo en esta liga
+                <Image src="/ui/icon-add.png" alt="+" width={20} height={20} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
+                Soy nuevo en esta liga
               </button>
             </div>
           </>
