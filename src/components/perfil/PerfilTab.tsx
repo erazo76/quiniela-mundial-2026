@@ -12,13 +12,19 @@ interface MovimientoFichas {
   created_at: string
 }
 
+interface HistorialPage {
+  items: MovimientoFichas[]
+  total: number
+  page: number
+  pages: number
+}
+
 interface Stats {
   fichas: number
   racha: number
   bono_usado: boolean
   predicciones_total: number
   predicciones_acertadas: number
-  historial: MovimientoFichas[]
 }
 
 interface Props {
@@ -80,11 +86,20 @@ function SelectorAvatar({
   )
 }
 
+const TIPO_LABEL: Record<string, string> = {
+  exacto: 'Exacto', ganador: 'Ganador', fallo: 'Fallo',
+  apuesta: 'Apuesta', devolucion: 'Devolucion', bono_rescate: 'Bono rescate',
+  premio_pote: 'Premio pote',
+}
+
 export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
   const [stats, setStats] = useState<Stats | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [avatarIdx, setAvatarIdx] = useState<number>(1)
   const [showSelector, setShowSelector] = useState(false)
+  const [historialAbierto, setHistorialAbierto] = useState(false)
+  const [historial, setHistorial] = useState<HistorialPage | null>(null)
+  const [cargandoHistorial, setCargandoHistorial] = useState(false)
 
   useEffect(() => {
     setAvatarIdx(getAvatarIndex(session.usuarioId, session.nombre))
@@ -96,6 +111,28 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
       .then((data) => setStats(data))
       .catch(() => {})
   }, [session.usuarioId])
+
+  async function cargarHistorial(page: number) {
+    setCargandoHistorial(true)
+    try {
+      const res = await fetch(`/api/historial?id=${session.usuarioId}&page=${page}`)
+      const data = await res.json()
+      setHistorial(data)
+    } catch {
+      // silencioso
+    } finally {
+      setCargandoHistorial(false)
+    }
+  }
+
+  function toggleHistorial() {
+    if (!historialAbierto && !historial) cargarHistorial(1)
+    setHistorialAbierto((prev) => !prev)
+  }
+
+  function irPagina(page: number) {
+    cargarHistorial(page)
+  }
 
   function elegirAvatar(idx: number) {
     setAvatarIndex(session.usuarioId, idx)
@@ -243,16 +280,33 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
       </div>
 
       {/* Historial de fichas */}
-      {stats?.historial && stats.historial.length > 0 && (
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={toggleHistorial}
+          className="flex items-center justify-between w-full group"
+        >
           <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Movimientos</p>
+          <span className={`text-slate-600 group-hover:text-slate-400 transition-all text-sm ${historialAbierto ? 'rotate-180' : ''} inline-block`}>
+            ▾
+          </span>
+        </button>
+
+        {historialAbierto && (
           <div className="flex flex-col gap-1">
-            {stats.historial.map((mov) => {
+            {cargandoHistorial && (
+              <div className="flex flex-col gap-1">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div key={i} className="h-12 bg-slate-900 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {!cargandoHistorial && historial && historial.items.length === 0 && (
+              <p className="text-xs text-slate-600 text-center py-4">Sin movimientos aún</p>
+            )}
+
+            {!cargandoHistorial && historial && historial.items.map((mov) => {
               const esGanancia = mov.cantidad > 0
-              const tipoLabel: Record<string, string> = {
-                exacto: 'Exacto', ganador: 'Ganador', fallo: 'Fallo',
-                apuesta: 'Apuesta', devolucion: 'Devolucion', bono_rescate: 'Bono rescate',
-              }
               return (
                 <div
                   key={mov.id}
@@ -260,7 +314,7 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
                 >
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-semibold text-white">
-                      {tipoLabel[mov.tipo] ?? mov.tipo}
+                      {TIPO_LABEL[mov.tipo] ?? mov.tipo}
                     </span>
                     <span className="text-[10px] text-slate-600 truncate">{mov.descripcion}</span>
                   </div>
@@ -270,9 +324,31 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
                 </div>
               )
             })}
+
+            {!cargandoHistorial && historial && historial.pages > 1 && (
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  onClick={() => irPagina(historial.page - 1)}
+                  disabled={historial.page <= 1}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  Anterior
+                </button>
+                <span className="text-xs text-slate-600">
+                  {historial.page} / {historial.pages}
+                </span>
+                <button
+                  onClick={() => irPagina(historial.page + 1)}
+                  disabled={historial.page >= historial.pages}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-colors"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Acciones */}
       <div className="flex flex-col gap-2 mt-auto">
