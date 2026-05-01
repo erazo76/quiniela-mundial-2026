@@ -4,12 +4,21 @@ import Image from 'next/image'
 import { Session } from '@/lib/session'
 import { avatarSrc, getAvatarIndex, setAvatarIndex, TOTAL_AVATARES } from '@/lib/avatar'
 
+interface MovimientoFichas {
+  id: string
+  tipo: string
+  cantidad: number
+  descripcion: string
+  created_at: string
+}
+
 interface Stats {
   fichas: number
   racha: number
   bono_usado: boolean
   predicciones_total: number
   predicciones_acertadas: number
+  historial: MovimientoFichas[]
 }
 
 interface Props {
@@ -232,6 +241,38 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Historial de fichas */}
+      {stats?.historial && stats.historial.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Movimientos</p>
+          <div className="flex flex-col gap-1">
+            {stats.historial.map((mov) => {
+              const esGanancia = mov.cantidad > 0
+              const tipoLabel: Record<string, string> = {
+                exacto: 'Exacto', ganador: 'Ganador', fallo: 'Fallo',
+                apuesta: 'Apuesta', devolucion: 'Devolucion', bono_rescate: 'Bono rescate',
+              }
+              return (
+                <div
+                  key={mov.id}
+                  className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl"
+                >
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-semibold text-white">
+                      {tipoLabel[mov.tipo] ?? mov.tipo}
+                    </span>
+                    <span className="text-[10px] text-slate-600 truncate">{mov.descripcion}</span>
+                  </div>
+                  <span className={`text-sm font-black shrink-0 ml-3 ${esGanancia ? 'text-green-400' : 'text-red-400'}`}>
+                    {esGanancia ? '+' : ''}{mov.cantidad.toLocaleString()}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Acciones */}
       <div className="flex flex-col gap-2 mt-auto">

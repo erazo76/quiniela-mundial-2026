@@ -14,13 +14,23 @@ export async function GET(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const { data: predicciones } = await supabase
-    .from('predicciones')
-    .select('acertado')
-    .eq('usuario_id', id)
+  const [{ data: predicciones }, { data: historial }] = await Promise.all([
+    supabase.from('predicciones').select('acertado').eq('usuario_id', id),
+    supabase
+      .from('historial_fichas')
+      .select('id, tipo, cantidad, descripcion, created_at')
+      .eq('usuario_id', id)
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ])
 
   const total = predicciones?.length ?? 0
   const acertadas = predicciones?.filter((p) => p.acertado).length ?? 0
 
-  return NextResponse.json({ ...data, predicciones_total: total, predicciones_acertadas: acertadas })
+  return NextResponse.json({
+    ...data,
+    predicciones_total: total,
+    predicciones_acertadas: acertadas,
+    historial: historial ?? [],
+  })
 }
