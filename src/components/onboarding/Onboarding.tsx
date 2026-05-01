@@ -24,7 +24,7 @@ const SLIDES: Slide[] = [
       'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.',
   },
   {
-    image: '/ui/coin.png',
+    image: '/ui/icon-coins.png',
     titulo: 'Las fichas',
     descripcion:
       'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
@@ -36,7 +36,7 @@ const SLIDES: Slide[] = [
       'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
   },
   {
-    image: '/ui/coin.png',
+    image: '/ui/icon-coins.png',
     titulo: 'El pote virtual',
     descripcion:
       'El pote es la suma de todas las fichas de tu liga. Al final del Mundial, quien tenga más fichas gana. El premio real (si lo hay) se coordina fuera de la app.',

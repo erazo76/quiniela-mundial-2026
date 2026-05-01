@@ -77,7 +77,7 @@ export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
             </p>
             <p className="text-3xl font-black text-yellow-300 leading-tight">{conteoSinPrediccion}</p>
           </div>
-          <Image src="/ui/icon-coins.png" alt="fichas" width={52} height={52} unoptimized />
+          <Image src="/ui/icon-exclamation.png" alt="!" width={44} height={44} unoptimized />
         </div>
       )}
 

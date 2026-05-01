@@ -92,15 +92,15 @@ function LobbyContent() {
         </div>
         <div className="flex items-center gap-2 flex-1 justify-end">
           <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5">
-            <Image src="/ui/coin.png" alt="fichas" width={16} height={16} className="opacity-90" />
+            <Image src="/ui/icon-coins.png" alt="fichas" width={20} height={20} className="opacity-90" unoptimized />
             <span className="text-yellow-400 font-black text-base leading-none">{fichas.toLocaleString()}</span>
           </div>
           <button
             onClick={() => setShowOnboarding(true)}
-            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white text-sm font-bold transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
             title="Ver tutorial"
           >
-            ?
+            <Image src="/ui/icon-question.png" alt="?" width={18} height={18} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
           </button>
         </div>
       </header>
