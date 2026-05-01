@@ -45,8 +45,8 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-10">
-      <Link href="/" className="mb-10 w-fit opacity-80 hover:opacity-100 transition-opacity active:scale-95">
-        <Image src="/ui/icon-back.png" alt="Volver" width={36} height={36} unoptimized />
+      <Link href="/" className="mb-10 w-fit opacity-80 hover:opacity-100 active:scale-95 transition-opacity">
+        <Image src="/ui/icon-back.png" alt="Volver" width={36} height={36} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
       </Link>
 
       <div className="flex flex-col gap-8 max-w-sm w-full mx-auto mt-8">
@@ -80,9 +80,9 @@ export default function AdminLoginPage() {
               <button
                 type="button"
                 onClick={() => setMostrar(!mostrar)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+                className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity"
               >
-                {mostrar ? 'Ocultar' : 'Ver'}
+                <Image src={mostrar ? '/ui/eye-on.png' : '/ui/eye-off.png'} alt={mostrar ? 'Ocultar' : 'Ver'} width={28} height={28} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
               </button>
             </div>
           </div>

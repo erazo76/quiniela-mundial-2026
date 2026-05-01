@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession } from '@/context/SessionContext'
 
 function PinBoxes({
@@ -91,11 +92,8 @@ export default function CrearLigaPage() {
 
   return (
     <main className="min-h-screen flex flex-col px-6 py-10">
-      <Link
-        href="/"
-        className="text-slate-400 hover:text-white text-sm flex items-center gap-1 mb-10 w-fit transition-colors"
-      >
-        ← Volver
+      <Link href="/" className="mb-10 w-fit opacity-80 hover:opacity-100 active:scale-95 transition-opacity">
+        <Image src="/ui/icon-back.png" alt="Volver" width={36} height={36} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
       </Link>
 
       <div className="flex flex-col gap-8 max-w-sm w-full mx-auto">

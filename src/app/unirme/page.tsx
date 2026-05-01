@@ -188,9 +188,9 @@ export default function UnirmePage() {
       <div className="flex items-center justify-between mb-10">
         <button
           onClick={volverAtras}
-          className="text-slate-400 hover:text-white text-sm flex items-center gap-1 transition-colors"
+          className="opacity-80 hover:opacity-100 active:scale-95 transition-opacity"
         >
-          ← Volver
+          <Image src="/ui/icon-back.png" alt="Volver" width={36} height={36} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
         </button>
         <Progreso paso={pasoNumero} />
       </div>
