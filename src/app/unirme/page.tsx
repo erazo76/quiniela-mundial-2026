@@ -364,7 +364,7 @@ export default function UnirmePage() {
 
                 {/* Motivación */}
                 <div className="bg-green-500/10 border border-green-500/20 rounded-2xl px-4 py-3 flex items-center gap-3">
-                  <Image src="/ui/coin.png" alt="fichas" width={28} height={28} unoptimized />
+                  <Image src="/ui/icon-coins.png" alt="fichas" width={36} height={36} unoptimized />
                   <p className="text-sm text-green-300 leading-snug">
                     Empiezas con <strong>500 fichas</strong> para apostar desde el primer partido
                   </p>
