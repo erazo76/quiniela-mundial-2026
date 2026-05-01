@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
       nombre_liga,
       codigo_invitacion,
       created_at,
+      pote_virtual,
       usuarios (
         id,
         nombre,
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
     nombre_liga: liga.nombre_liga,
     codigo_invitacion: liga.codigo_invitacion,
     created_at: liga.created_at,
+    pote_virtual: liga.pote_virtual ?? 0,
     miembros: (liga.usuarios as Array<{
       id: string; nombre: string; fichas: number; racha: number; pin: string | null; bono_usado: boolean
     }>).map((u) => ({

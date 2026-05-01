@@ -14,12 +14,19 @@ interface Miembro {
   bono_usado: boolean
 }
 
+interface PremioPote {
+  nombre: string
+  label: string
+  monto: number
+}
+
 interface Liga {
   id: string
   nombre_liga: string
   codigo_invitacion: string
   created_at: string
   miembros: Miembro[]
+  pote_virtual?: number
 }
 
 function FilaMiembro({
@@ -97,9 +104,31 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
   const [confirmando, setConfirmando] = useState(false)
   const [eliminando, setEliminando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [distribuyendo, setDistribuyendo] = useState(false)
+  const [distribucion, setDistribucion] = useState<PremioPote[] | null>(null)
+  const [confirmPote, setConfirmPote] = useState(false)
 
   function formatFecha(iso: string) {
     return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  async function distribuirPote() {
+    setDistribuyendo(true)
+    try {
+      const res = await fetch('/api/admin/ligas/cerrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, ligaId: liga.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al distribuir'); return }
+      setDistribucion(data.distribucion)
+      setConfirmPote(false)
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setDistribuyendo(false)
+    }
   }
 
   async function eliminar() {
@@ -176,6 +205,47 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
               {eliminando ? 'Eliminando...' : 'Eliminar'}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Pote y distribucion */}
+      {(liga.pote_virtual ?? 0) > 0 && !distribucion && (
+        <div className="border-t border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
+          <span className="text-sm text-slate-400">
+            Pote acumulado: <span className="text-yellow-400 font-black">{(liga.pote_virtual ?? 0).toLocaleString()} fichas</span>
+          </span>
+          {!confirmPote ? (
+            <button
+              onClick={() => setConfirmPote(true)}
+              className="text-xs font-bold px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg transition-colors"
+            >
+              Distribuir pote
+            </button>
+          ) : (
+            <div className="flex gap-2 items-center">
+              {error && <span className="text-xs text-red-400">{error}</span>}
+              <button onClick={() => setConfirmPote(false)} className="text-xs text-slate-500 hover:text-white px-2 py-1 rounded transition-colors">Cancelar</button>
+              <button
+                onClick={distribuirPote}
+                disabled={distribuyendo}
+                className="text-xs font-bold px-3 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg transition-colors disabled:opacity-40"
+              >
+                {distribuyendo ? 'Distribuyendo...' : 'Confirmar'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {distribucion && (
+        <div className="border-t border-yellow-500/30 bg-yellow-500/5 px-4 py-3 flex flex-col gap-2">
+          <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest">Pote distribuido</p>
+          {distribucion.map((p) => (
+            <div key={p.nombre} className="flex justify-between text-sm">
+              <span className="text-slate-300">{p.label} · {p.nombre}</span>
+              <span className="text-yellow-400 font-black">+{p.monto.toLocaleString()}</span>
+            </div>
+          ))}
         </div>
       )}
 
