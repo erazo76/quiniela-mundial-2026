@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const ADMIN_TOKEN_KEY = 'qm2026_admin_token'
 
@@ -43,17 +44,15 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col px-6 py-10 bg-slate-950">
-      <Link href="/" className="text-slate-400 hover:text-white text-sm flex items-center gap-1 mb-10 w-fit transition-colors">
-        ← Volver
+    <main className="min-h-screen flex flex-col px-6 py-10">
+      <Link href="/" className="mb-10 w-fit opacity-80 hover:opacity-100 transition-opacity active:scale-95">
+        <Image src="/ui/icon-back.png" alt="Volver" width={36} height={36} unoptimized />
       </Link>
 
       <div className="flex flex-col gap-8 max-w-sm w-full mx-auto mt-8">
         {/* Encabezado */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-3xl">
-            🔐
-          </div>
+          <Image src="/ui/icon-lock.png" alt="Admin" width={72} height={72} unoptimized />
           <div>
             <p className="text-green-400 text-sm font-semibold uppercase tracking-wider mb-1">
               Panel de administración
