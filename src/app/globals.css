@@ -26,23 +26,9 @@
 }
 
 body {
-  background: #020617 url('/ui/background.png') center top / cover no-repeat fixed;
+  background: #020617;
   color: #f8fafc;
   font-family: var(--font-exo2), system-ui, sans-serif;
-}
-
-@media (min-width: 768px) {
-  body { background-position: center 60%; }
-}
-
-/* Overlay oscuro global — capa fija encima del fondo, debajo de todo el contenido */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.68);
-  z-index: -1;
-  pointer-events: none;
 }
 
 * {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Exo_2 } from 'next/font/google'
+import Image from 'next/image'
 import './globals.css'
 import { Providers } from '@/components/Providers'
 
@@ -48,7 +49,19 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${exo2.variable} h-full`}>
-      <body className="min-h-full bg-slate-950 text-white antialiased">
+      <body className="min-h-full text-white antialiased">
+        {/* Fondo global fijo — visible en todas las vistas */}
+        <div className="fixed inset-0 -z-10 pointer-events-none select-none">
+          <Image
+            src="/ui/background.png"
+            alt=""
+            fill
+            className="object-cover object-top"
+            unoptimized
+            priority
+          />
+          <div className="absolute inset-0" style={{ background: 'rgba(2,6,23,0.68)' }} />
+        </div>
         <Providers>{children}</Providers>
       </body>
     </html>
