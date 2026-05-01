@@ -2,18 +2,16 @@ import { PrintButton } from '@/components/manual/PrintButton'
 
 export const metadata = { title: 'Manual Admin — Quiniela Mundial 2026' }
 
-function H2({ children }: { children: React.ReactNode }) {
+function H2({ n, children }: { n: number; children: React.ReactNode }) {
   return (
     <h2 className="text-lg font-black uppercase tracking-widest text-slate-800 border-b-2 border-slate-800 pb-1 mt-8 mb-4 print:mt-6">
-      {children}
+      {n}. {children}
     </h2>
   )
 }
 
 function H3({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="text-base font-bold text-slate-700 mt-5 mb-2">{children}</h3>
-  )
+  return <h3 className="text-base font-bold text-slate-700 mt-5 mb-2">{children}</h3>
 }
 
 function P({ children }: { children: React.ReactNode }) {
@@ -32,11 +30,7 @@ function Pill({ children, color = 'slate' }: { children: React.ReactNode; color?
     blue: 'bg-blue-100 text-blue-800 border border-blue-300',
     slate: 'bg-slate-100 text-slate-800 border border-slate-300',
   }
-  return (
-    <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded ${colors[color]}`}>
-      {children}
-    </span>
-  )
+  return <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded ${colors[color]}`}>{children}</span>
 }
 
 function Recuadro({ titulo, children, color = 'slate' }: { titulo: string; children: React.ReactNode; color?: string }) {
@@ -57,211 +51,209 @@ function Recuadro({ titulo, children, color = 'slate' }: { titulo: string; child
 export default function ManualAdminPage() {
   return (
     <>
-    <PrintButton />
-    <main className="relative z-10 min-h-screen bg-white max-w-3xl mx-auto px-6 py-10 print:py-4 print:px-4 font-sans shadow-xl">
-      <style>{`
-        @media print {
-          @page { margin: 1.5cm; size: A4; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        }
-      `}</style>
+      <PrintButton />
+      <main className="relative z-10 min-h-screen bg-white max-w-3xl mx-auto px-6 py-10 print:py-4 print:px-4 font-sans shadow-xl">
+        <style>{`
+          @media print {
+            @page { margin: 1.5cm; size: A4; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
+        `}</style>
 
-      {/* Portada */}
-      <div className="text-center mb-10 print:mb-6">
-        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de administrador</p>
-        <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
-        <p className="text-slate-500 text-sm mt-2">Guia completa para gestionar ligas, partidos y resultados</p>
-        <div className="mt-4 h-0.5 bg-slate-200 rounded" />
-      </div>
+        {/* Portada */}
+        <div className="text-center mb-10 print:mb-6">
+          <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de administrador</p>
+          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
+          <p className="text-slate-500 text-sm mt-2">Guia completa para gestionar ligas, partidos y resultados</p>
+          <div className="mt-4 h-0.5 bg-slate-200 rounded" />
+        </div>
 
-      {/* Indice */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
-        <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
-        <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
-          <li>Acceso al panel de administrador</li>
-          <li>Panel de partidos</li>
-          <li>Sincronizacion automatica de resultados</li>
-          <li>Panel de ligas</li>
-          <li>Gestion de miembros y PINs</li>
-          <li>Pote virtual — distribucion de premios</li>
-          <li>Eliminacion de ligas</li>
+        {/* Indice */}
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
+          <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
+            <li>Acceso al panel de administrador</li>
+            <li>Panel de partidos — actualizar resultados</li>
+            <li>Ver predicciones por partido</li>
+            <li>Sincronizacion de resultados</li>
+            <li>Panel de ligas</li>
+            <li>Gestion de miembros y PINs</li>
+            <li>Pote virtual — distribucion de premios</li>
+            <li>Eliminacion de ligas</li>
+            <li>Referencia de reglas del juego</li>
+          </ol>
+        </div>
+
+        {/* 1 */}
+        <H2 n={1}>Acceso al panel de administrador</H2>
+        <P>Accede a <strong>/admin</strong> desde el navegador e introduce el token de administrador configurado en la variable de entorno <code className="bg-slate-100 px-1 rounded text-xs">ADMIN_TOKEN</code>. El token se guarda en el navegador, por lo que no tendras que ingresarlo cada vez desde el mismo dispositivo.</P>
+        <P>El panel tiene dos secciones:</P>
+        <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
+          <Li><Pill color="green">Partidos</Pill> — gestion de resultados por fase</Li>
+          <Li><Pill color="slate">Ligas</Pill> — gestion de ligas, miembros y pote</Li>
+        </ul>
+        <Recuadro titulo="Seguridad" color="yellow">
+          <P>El token admin no expira automaticamente. Si crees que fue comprometido, cambia la variable <code className="bg-yellow-100 px-1 rounded text-xs">ADMIN_TOKEN</code> en Vercel y redespliega.</P>
+        </Recuadro>
+
+        {/* 2 */}
+        <H2 n={2}>Panel de partidos — actualizar resultados</H2>
+        <P>Muestra todos los partidos agrupados por fase. Usa las pestanas para navegar entre fases: Grupos, Dieciseisavos, Octavos, Cuartos, Semis, Tercer puesto y Final.</P>
+
+        <H3>Flujo para registrar un resultado</H3>
+        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+          <li>Selecciona la fase desde las pestanas horizontales.</li>
+          <li>Localiza el partido (los partidos finalizados aparecen en solo lectura).</li>
+          <li>Introduce los goles del equipo local y visitante en los campos numericos.</li>
+          <li>Cambia el estado: <Pill>Pendiente</Pill> <Pill color="green">En vivo</Pill> <Pill color="blue">Finalizado</Pill></li>
+          <li>Pulsa <strong>Guardar</strong>.</li>
         </ol>
-      </div>
 
-      {/* 1 */}
-      <H2>1. Acceso al panel de administrador</H2>
-      <P>
-        Accede a <strong>/admin</strong> desde el navegador. Introduce el token de administrador
-        configurado en la variable de entorno <code className="bg-slate-100 px-1 rounded text-xs">ADMIN_TOKEN</code>.
-        El token se guarda en el localStorage bajo la clave <code className="bg-slate-100 px-1 rounded text-xs">qm2026_admin_token</code>,
-        por lo que no tendrás que ingresarlo cada vez desde el mismo navegador.
-      </P>
-      <Recuadro titulo="Seguridad" color="yellow">
-        <P>El token admin nunca expira automáticamente. Si sospechas que fue comprometido, cambia la variable de entorno <code className="bg-yellow-100 px-1 rounded text-xs">ADMIN_TOKEN</code> en Vercel y redeploy.</P>
-      </Recuadro>
+        <Recuadro titulo="Al marcar Finalizado" color="green">
+          <P>El sistema calcula automaticamente todas las predicciones de ese partido: determina si cada prediccion fue Exacto, Ganador o Fallo, actualiza las fichas de cada jugador, aplica el bonus de racha de oro si corresponde, y activa el bono de rescate si alguien llega a 0 fichas. El mensaje de confirmacion muestra cuantas predicciones fueron procesadas.</P>
+        </Recuadro>
 
-      <P>El panel tiene dos secciones principales accesibles desde la barra de navegación:</P>
-      <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
-        <Li><Pill color="green">Partidos</Pill> — gestión de resultados y fases</Li>
-        <Li><Pill color="slate">Ligas</Pill> — gestión de ligas y miembros</Li>
-      </ul>
+        <Recuadro titulo="Importante — accion irreversible" color="red">
+          <P>Una vez que un partido se marca como <strong>Finalizado</strong>, los controles de edicion desaparecen y las fichas ya fueron distribuidas. No es posible revertir ni recalcular desde el panel.</P>
+        </Recuadro>
 
-      {/* 2 */}
-      <H2>2. Panel de partidos</H2>
-      <P>
-        Muestra todos los partidos del torneo, agrupados por fase. Las fases disponibles son:
-        Grupos, Dieciseisavos, Octavos, Cuartos, Semis, Tercer puesto y Final.
-      </P>
+        {/* 3 */}
+        <H2 n={3}>Ver predicciones por partido</H2>
+        <P>Cada tarjeta de partido tiene el enlace <strong>Ver predicciones</strong> que expande una tabla con todos los participantes que apostaron en ese partido.</P>
 
-      <H3>Actualizar resultado de un partido</H3>
-      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-        <li>Selecciona la fase desde las pestañas horizontales.</li>
-        <li>Localiza el partido. Los partidos finalizados aparecen en solo lectura.</li>
-        <li>Introduce los goles del equipo local y visitante en los campos numéricos.</li>
-        <li>Cambia el estado: <Pill>Pendiente</Pill> <Pill color="green">En vivo</Pill> <Pill color="blue">Finalizado</Pill></li>
-        <li>Pulsa <strong>Guardar</strong>. Si el estado es <em>Finalizado</em>, el sistema calcula automaticamente todas las predicciones de ese partido y actualiza las fichas de los jugadores.</li>
-      </ol>
-      <Recuadro titulo="Importante" color="red">
-        <P>Una vez que un partido se marca como <strong>Finalizado</strong>, los controles de edicion desaparecen. El resultado queda grabado y las fichas ya han sido distribuidas. No es posible revertirlo desde el panel.</P>
-      </Recuadro>
-
-      <H3>Ver predicciones por partido</H3>
-      <P>
-        Cada tarjeta de partido tiene un enlace <strong>&ldquo;Ver predicciones&rdquo;</strong> que expande una tabla
-        con todos los participantes que apostaron, su prediccion, fichas apostadas, tipo de acierto y ganancia.
-      </P>
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-          <thead className="bg-slate-100">
-            <tr>
-              <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Campo</th>
-              <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Descripcion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ['Nombre', 'Usuario que realizó la prediccion'],
-              ['Pred', 'Marcador predicho (ej. 2-1)'],
-              ['Fichas', 'Fichas apostadas en ese partido'],
-              ['Tipo acierto', 'exacto / ganador / fallo / pendiente'],
-              ['Ganancia', 'Fichas netas ganadas (negativo si perdio)'],
-            ].map(([campo, desc]) => (
-              <tr key={campo}>
-                <td className="border border-slate-200 px-2 py-1 font-mono text-slate-800">{campo}</td>
-                <td className="border border-slate-200 px-2 py-1 text-slate-600">{desc}</td>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Campo</th>
+                <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Descripcion</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {[
+                ['Nombre', 'Usuario que realizo la prediccion'],
+                ['Pred', 'Marcador predicho (ej. 2-1)'],
+                ['Fichas', 'Fichas apostadas'],
+                ['Tipo acierto', 'exacto / ganador / fallo / pendiente'],
+                ['Ganancia', 'Fichas netas recibidas (0 en caso de fallo)'],
+              ].map(([campo, desc]) => (
+                <tr key={campo}>
+                  <td className="border border-slate-200 px-2 py-1 font-mono text-slate-800">{campo}</td>
+                  <td className="border border-slate-200 px-2 py-1 text-slate-600">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* 3 */}
-      <H2>3. Sincronizacion automatica de resultados</H2>
-      <P>
-        El sistema puede sincronizar resultados en tiempo real desde la API de football-data.org.
-        Existen dos mecanismos:
-      </P>
-      <H3>Manual (desde el panel)</H3>
-      <P>
-        Boton <strong>Sincronizar</strong> en el encabezado del panel de partidos.
-        Llama a <code className="bg-slate-100 px-1 rounded text-xs">POST /api/admin/sync</code>.
-        Actualiza resultados y estados de partidos en vivo.
-      </P>
-      <H3>Automatica con Vercel Cron</H3>
-      <P>
-        El archivo <code className="bg-slate-100 px-1 rounded text-xs">vercel.json</code> incluye
-        una tarea programada cada 30 minutos que llama a{' '}
-        <code className="bg-slate-100 px-1 rounded text-xs">/api/cron/sync-resultados</code>.
-      </P>
-      <Recuadro titulo="Variable de entorno requerida" color="yellow">
-        <P>
-          Debes definir <code className="bg-yellow-100 px-1 rounded text-xs">CRON_SECRET</code> en el dashboard de Vercel
-          (Settings &gt; Environment Variables). El cron la usa para autenticarse. Sin ella, el cron retornara 401.
-        </P>
-      </Recuadro>
+        {/* 4 */}
+        <H2 n={4}>Sincronizacion de resultados</H2>
+        <H3>Automatica (cronjob.org)</H3>
+        <P>Un cron externo en cronjob.org llama a <code className="bg-slate-100 px-1 rounded text-xs">/api/cron/sync-resultados</code> cada 5 minutos durante el torneo. Sincroniza estados y resultados desde la API de football-data.org automaticamente.</P>
 
-      {/* 4 */}
-      <H2>4. Panel de ligas</H2>
-      <P>
-        Lista todas las ligas creadas, ordenadas por fecha de creación (mas recientes primero).
-        Cada tarjeta muestra: nombre de la liga, codigo de invitacion, número de miembros y fecha de creacion.
-      </P>
-      <P>
-        Pulsa en la tarjeta para expandirla y ver la lista de miembros con sus fichas y racha actual.
-      </P>
+        <H3>Manual (desde el panel)</H3>
+        <P>El boton <strong>Sincronizar</strong> en el encabezado del panel de partidos ejecuta el mismo proceso bajo demanda. Util si quieres forzar una actualizacion inmediata. El mensaje de resultado indica cuantos partidos fueron sincronizados o si no hubo cambios.</P>
 
-      {/* 5 */}
-      <H2>5. Gestion de miembros y PINs</H2>
-      <P>
-        Dentro de cada liga expandida, cada fila de miembro incluye:
-      </P>
-      <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
-        <Li>Nombre del jugador</Li>
-        <Li>Fichas actuales</Li>
-        <Li>Racha de aciertos (se muestra si &ge; 3)</Li>
-        <Li>Indicador <Pill color="yellow">Sin PIN</Pill> si el jugador no ha configurado su PIN</Li>
-        <Li>Indicador <Pill>bono usado</Pill> si el bono de rescate fue utilizado</Li>
-      </ul>
+        <Recuadro titulo="Variables de entorno requeridas" color="yellow">
+          <P><code className="bg-yellow-100 px-1 rounded text-xs">CRON_SECRET</code> — token que usa el cron para autenticarse en el endpoint.</P>
+          <P><code className="bg-yellow-100 px-1 rounded text-xs">FOOTBALL_DATA_API_KEY</code> — clave de la API de football-data.org para obtener resultados.</P>
+        </Recuadro>
 
-      <H3>Resetear PIN de un jugador</H3>
-      <P>
-        Si un jugador olvida su PIN, pulsa el boton <strong>Reset PIN</strong> en su fila.
-        Esto borra su PIN actual; el jugador podrá configurar uno nuevo al iniciar sesion.
-        El boton esta deshabilitado si el jugador no tiene PIN configurado.
-      </P>
+        {/* 5 */}
+        <H2 n={5}>Panel de ligas</H2>
+        <P>Lista todas las ligas creadas, ordenadas de mas reciente a mas antigua. Cada tarjeta muestra: nombre, codigo de invitacion, numero de miembros y fecha de creacion.</P>
+        <P>Pulsa en la tarjeta para expandirla y ver la lista de miembros con sus fichas, racha y estado del PIN.</P>
 
-      {/* 6 */}
-      <H2>6. Pote virtual — distribucion de premios</H2>
-      <P>
-        Cada apuesta genera una contribucion del <strong>5 %</strong> al pote virtual de la liga.
-        El pote acumulado se muestra en la tarjeta de liga cuando es mayor a 0.
-      </P>
+        {/* 6 */}
+        <H2 n={6}>Gestion de miembros y PINs</H2>
+        <P>Dentro de cada liga expandida, cada fila de miembro muestra:</P>
+        <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
+          <Li>Nombre del jugador y fichas actuales</Li>
+          <Li>Racha de aciertos consecutivos (se muestra si es 3 o mas)</Li>
+          <Li><Pill color="yellow">Sin PIN</Pill> si el jugador aun no ha configurado su PIN</Li>
+          <Li><Pill>bono usado</Pill> si el bono de rescate fue utilizado</Li>
+        </ul>
 
-      <H3>Como distribuir el pote</H3>
-      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-        <li>En la tarjeta de la liga, pulsa <strong>Distribuir pote</strong>.</li>
-        <li>Aparece un mensaje de confirmacion. Pulsa <strong>Confirmar</strong> para ejecutar.</li>
-        <li>El sistema reparte el pote entre los 3 primeros del ranking:</li>
-      </ol>
+        <H3>Resetear PIN</H3>
+        <P>Pulsa <strong>Reset PIN</strong> en la fila del jugador. Esto borra su PIN actual. En el siguiente inicio de sesion, el jugador podra asignar un PIN nuevo. El boton esta deshabilitado si el jugador no tiene PIN configurado.</P>
 
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-          <thead className="bg-slate-100">
-            <tr>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Porcentaje</th>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Ejemplo (1000 fichas de pote)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td className="border border-slate-200 px-3 py-1.5">1er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">60 %</td><td className="border border-slate-200 px-3 py-1.5">600 fichas</td></tr>
-            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">2do lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">25 %</td><td className="border border-slate-200 px-3 py-1.5">250 fichas</td></tr>
-            <tr><td className="border border-slate-200 px-3 py-1.5">3er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">15 %</td><td className="border border-slate-200 px-3 py-1.5">150 fichas</td></tr>
-          </tbody>
-        </table>
-      </div>
+        {/* 7 */}
+        <H2 n={7}>Pote virtual — distribucion de premios</H2>
+        <P>El <strong>5%</strong> de cada variacion neta de apuesta se acumula automaticamente en el pote virtual de la liga. El pote se muestra en la tarjeta de liga cuando es mayor a 0.</P>
 
-      <Recuadro titulo="Nota sobre el redondeo" color="slate">
-        <P>Si el reparto no es exacto por decimales, el residuo va al 1er lugar. El pote se resetea a 0 tras la distribucion. La operacion queda registrada en el historial de fichas de cada premiado.</P>
-      </Recuadro>
+        <H3>Distribuir el pote</H3>
+        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+          <li>En la tarjeta de la liga, pulsa <strong>Distribuir pote</strong>.</li>
+          <li>Aparece un mensaje de confirmacion. Pulsa <strong>Confirmar</strong>.</li>
+          <li>El sistema distribuye entre los 3 primeros del ranking por fichas:</li>
+        </ol>
 
-      {/* 7 */}
-      <H2>7. Eliminacion de ligas</H2>
-      <P>
-        Para eliminar una liga, pulsa el boton <strong>✕</strong> a la derecha de la tarjeta.
-        Aparece una banda de confirmacion roja con el nombre de la liga y el numero de miembros afectados.
-      </P>
-      <Recuadro titulo="Advertencia — accion irreversible" color="red">
-        <P>
-          Al confirmar, se eliminan en cascada: todos los miembros de la liga, sus predicciones y su historial de fichas.
-          La liga y todos sus datos desaparecen permanentemente. Esta accion no puede deshacerse.
-        </P>
-      </Recuadro>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
+                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Porcentaje</th>
+                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Ejemplo con pote de 1000</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td className="border border-slate-200 px-3 py-1.5">1er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">60%</td><td className="border border-slate-200 px-3 py-1.5">600 fichas</td></tr>
+              <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">2do lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">25%</td><td className="border border-slate-200 px-3 py-1.5">250 fichas</td></tr>
+              <tr><td className="border border-slate-200 px-3 py-1.5">3er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">15%</td><td className="border border-slate-200 px-3 py-1.5">150 fichas</td></tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-        <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.0</p>
-      </div>
-    </main>
+        <Recuadro titulo="Notas sobre la distribucion" color="slate">
+          <P>Si el redondeo no es exacto, el residuo va al 1er lugar. Si la liga tiene menos de 3 miembros, se distribuye entre los que haya con los mismos porcentajes. El pote se resetea a 0 tras la distribucion y queda registrado en el historial de fichas de cada premiado.</P>
+        </Recuadro>
+
+        {/* 8 */}
+        <H2 n={8}>Eliminacion de ligas</H2>
+        <P>Pulsa el boton <strong>✕</strong> en la tarjeta de la liga. Aparece una banda roja de confirmacion con el nombre y el numero de miembros afectados.</P>
+        <Recuadro titulo="Advertencia — accion irreversible" color="red">
+          <P>Al confirmar se eliminan en cascada: todos los miembros, sus predicciones y su historial de fichas. Esta accion no puede deshacerse.</P>
+        </Recuadro>
+
+        {/* 9 */}
+        <H2 n={9}>Referencia de reglas del juego</H2>
+        <P>Resumen de las reglas para que el admin pueda resolver dudas de los jugadores:</P>
+
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Regla</th>
+                <th className="border border-slate-200 px-2 py-1.5 text-left font-bold text-slate-700">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['Fichas iniciales', '1000 fichas (valor por defecto en la base de datos)'],
+                ['Apuesta minima', '10 fichas'],
+                ['Apuesta maxima', '30% del saldo actual del jugador'],
+                ['Cierre de predicciones', '5 minutos antes del inicio del partido'],
+                ['Exacto (marcador exacto)', 'El jugador recibe 3× lo apostado de vuelta'],
+                ['Ganador (resultado correcto)', 'El jugador recibe 1.5× lo apostado de vuelta'],
+                ['Fallo', 'El jugador no recupera nada'],
+                ['Racha de oro (3er acierto consecutivo en adelante)', '+0.5× al multiplicador (Exacto→3.5×, Ganador→2×)'],
+                ['Bono de rescate', '300 fichas automaticas si el jugador llega a 0, una sola vez'],
+                ['Comision al pote', '5% de cada variacion neta de apuesta'],
+              ].map(([regla, valor]) => (
+                <tr key={regla} className="odd:bg-slate-50">
+                  <td className="border border-slate-200 px-2 py-1.5 text-slate-700 font-medium">{regla}</td>
+                  <td className="border border-slate-200 px-2 py-1.5 text-slate-600">{valor}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.1</p>
+        </div>
+      </main>
     </>
   )
 }
