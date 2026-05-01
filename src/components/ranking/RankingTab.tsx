@@ -138,7 +138,7 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
     <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image src="/ui/trophy.png" alt="Clasificación" width={20} height={20} className="opacity-80" />
+          <Image src="/ui/icon-trophy-nav.png" alt="Clasificación" width={20} height={20} className="opacity-80" />
           <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
             Clasificación
           </h2>

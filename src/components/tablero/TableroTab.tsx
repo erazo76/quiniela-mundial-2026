@@ -53,23 +53,32 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
       <div className="px-3 py-2 bg-slate-800/60 border-b border-slate-700 flex items-center gap-2">
         <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Grupo {letra}</span>
       </div>
-      <table className="w-full text-[11px]">
+      <table className="w-full table-fixed text-[11px]">
+        <colgroup>
+          <col className="w-auto" />
+          <col className="w-7" />
+          <col className="w-7" />
+          <col className="w-7" />
+          <col className="w-7" />
+          <col className="w-8" />
+          <col className="w-9" />
+        </colgroup>
         <thead>
           <tr className="text-slate-500 border-b border-slate-800">
             <th className="text-left px-2 py-1 font-medium">Equipo</th>
-            <th className="px-1 py-1 font-medium w-6">PJ</th>
-            <th className="px-1 py-1 font-medium w-6">G</th>
-            <th className="px-1 py-1 font-medium w-6">E</th>
-            <th className="px-1 py-1 font-medium w-6">P</th>
-            <th className="px-1 py-1 font-medium w-8">DG</th>
-            <th className="px-2 py-1 font-medium w-8 text-yellow-400">Pts</th>
+            <th className="px-1 py-1 font-medium text-center">PJ</th>
+            <th className="px-1 py-1 font-medium text-center">G</th>
+            <th className="px-1 py-1 font-medium text-center">E</th>
+            <th className="px-1 py-1 font-medium text-center">P</th>
+            <th className="px-1 py-1 font-medium text-center">DG</th>
+            <th className="px-2 py-1 font-medium text-center text-yellow-400">Pts</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((s, i) => (
             <tr key={s.equipo} className={`border-b border-slate-800/40 last:border-0 ${i < 2 && grupoHaJugado ? 'text-white' : 'text-slate-500'}`}>
-              <td className="px-2 py-1.5">
-                <div className="flex items-center gap-1.5">
+              <td className="px-2 py-1.5 max-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
                   {i < 2 && grupoHaJugado && <span className="w-1 h-1 rounded-full bg-green-500 shrink-0" />}
                   {!(i < 2 && grupoHaJugado) && <span className="w-1 h-1 shrink-0" />}
                   {s.bandera
