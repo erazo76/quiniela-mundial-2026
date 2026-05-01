@@ -2,6 +2,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyAdminToken } from '@/lib/admin-auth'
 
+export async function DELETE(req: NextRequest) {
+  const { token, ligaId } = await req.json()
+  if (!token || !(await verifyAdminToken(token))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+  if (!ligaId) return NextResponse.json({ error: 'ligaId requerido' }, { status: 400 })
+
+  const supabase = createAdminClient()
+
+  // 1. Borrar usuarios de la liga (predicciones e historial_fichas se borran en cascade)
+  const { error: errUsuarios } = await supabase
+    .from('usuarios')
+    .delete()
+    .eq('liga_id', ligaId)
+  if (errUsuarios) return NextResponse.json({ error: errUsuarios.message }, { status: 500 })
+
+  // 2. Borrar la liga
+  const { error: errLiga } = await supabase
+    .from('ligas')
+    .delete()
+    .eq('id', ligaId)
+  if (errLiga) return NextResponse.json({ error: errLiga.message }, { status: 500 })
+
+  return NextResponse.json({ ok: true })
+}
+
 export async function GET(req: NextRequest) {
   const token = req.headers.get('x-admin-token')
   if (!token || !(await verifyAdminToken(token))) {

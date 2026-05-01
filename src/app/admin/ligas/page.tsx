@@ -92,37 +92,92 @@ function FilaMiembro({
   )
 }
 
-function TarjetaLiga({ liga, token }: { liga: Liga; token: string }) {
+function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; onEliminada: (id: string) => void }) {
   const [expandida, setExpandida] = useState(false)
+  const [confirmando, setConfirmando] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   function formatFecha(iso: string) {
     return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
+  async function eliminar() {
+    setEliminando(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/ligas', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, ligaId: liga.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al eliminar'); setEliminando(false); return }
+      onEliminada(liga.id)
+    } catch {
+      setError('Error de conexión')
+      setEliminando(false)
+    }
+  }
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      <button
-        onClick={() => setExpandida(!expandida)}
-        className="w-full flex items-center justify-between px-4 py-4 hover:bg-slate-800/40 transition-colors"
-      >
-        <div className="text-left">
-          <p className="text-base font-bold text-white">{liga.nombre_liga}</p>
-          <div className="flex items-center gap-3 mt-0.5">
-            <span className="text-sm font-mono font-bold text-green-400 tracking-widest">
-              {liga.codigo_invitacion}
-            </span>
-            <span className="text-xs text-slate-500">·</span>
-            <span className="text-xs text-slate-500">
-              {liga.miembros.length} miembro{liga.miembros.length !== 1 ? 's' : ''}
-            </span>
-            <span className="text-xs text-slate-500">·</span>
-            <span className="text-xs text-slate-500">{formatFecha(liga.created_at)}</span>
+      <div className="flex items-center">
+        <button
+          onClick={() => setExpandida(!expandida)}
+          className="flex-1 flex items-center justify-between px-4 py-4 hover:bg-slate-800/40 transition-colors text-left"
+        >
+          <div>
+            <p className="text-base font-bold text-white">{liga.nombre_liga}</p>
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-sm font-mono font-bold text-green-400 tracking-widest">
+                {liga.codigo_invitacion}
+              </span>
+              <span className="text-xs text-slate-500">·</span>
+              <span className="text-xs text-slate-500">
+                {liga.miembros.length} miembro{liga.miembros.length !== 1 ? 's' : ''}
+              </span>
+              <span className="text-xs text-slate-500">·</span>
+              <span className="text-xs text-slate-500">{formatFecha(liga.created_at)}</span>
+            </div>
+          </div>
+          <span className={`text-slate-500 text-sm transition-transform mr-2 ${expandida ? 'rotate-180' : ''}`}>
+            ▾
+          </span>
+        </button>
+        <button
+          onClick={() => { setConfirmando(true); setError(null) }}
+          className="px-4 py-4 text-slate-600 hover:text-red-400 transition-colors"
+          title="Eliminar liga"
+        >
+          ✕
+        </button>
+      </div>
+
+      {confirmando && (
+        <div className="border-t border-slate-800 bg-red-950/20 px-4 py-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-red-300">
+            ¿Eliminar <span className="font-bold">{liga.nombre_liga}</span> y sus {liga.miembros.length} miembro{liga.miembros.length !== 1 ? 's' : ''}?
+            {error && <span className="block text-xs text-red-400 mt-1">{error}</span>}
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => { setConfirmando(false); setError(null) }}
+              disabled={eliminando}
+              className="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-40"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={eliminar}
+              disabled={eliminando}
+              className="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-40"
+            >
+              {eliminando ? 'Eliminando...' : 'Eliminar'}
+            </button>
           </div>
         </div>
-        <span className={`text-slate-500 text-sm transition-transform ${expandida ? 'rotate-180' : ''}`}>
-          ▾
-        </span>
-      </button>
+      )}
 
       {expandida && (
         <div className="border-t border-slate-800 px-2 py-2">
@@ -212,7 +267,12 @@ export default function AdminLigasPage() {
           <p className="text-slate-600 text-center py-8 text-sm">No hay ligas creadas</p>
         ) : (
           ligas.map((liga) => (
-            <TarjetaLiga key={liga.id} liga={liga} token={token} />
+            <TarjetaLiga
+              key={liga.id}
+              liga={liga}
+              token={token}
+              onEliminada={(id) => setLigas(prev => prev.filter(l => l.id !== id))}
+            />
           ))
         )}
       </div>
