@@ -55,10 +55,13 @@ export async function procesarResultadoPartido(
       resultadoLocal,
       resultadoVisitante
     )
-    const ganancia = Math.floor(pred.fichas_apostadas * multiplicador)
-    updatesPred.push({ id: pred.id, ganancia_fichas: ganancia, tipo_acierto: tipo, acertado })
 
     const usuario = usuariosMap.get(pred.usuario_id)
+    // Racha de oro: +0.5× a partir del 3er acierto consecutivo
+    const enRacha = acertado && (usuario?.racha ?? 0) >= 2
+    const ganancia = Math.floor(pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador))
+    updatesPred.push({ id: pred.id, ganancia_fichas: ganancia, tipo_acierto: tipo, acertado })
+
     if (usuario) {
       usuario.fichas += ganancia
       usuario.racha = acertado ? usuario.racha + 1 : 0

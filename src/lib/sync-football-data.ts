@@ -171,8 +171,11 @@ export async function syncResultadosFootballData(
   )
 
   if (!fdRes.ok) {
-    const text = await fdRes.text()
-    throw new Error(`football-data.org ${fdRes.status}: ${text}`)
+    return {
+      sincronizados: 0,
+      equiposActualizados: equiposActualizados || undefined,
+      mensaje: `API no disponible (HTTP ${fdRes.status}). El Mundial 2026 aún no ha comenzado o verifica la clave API.`,
+    }
   }
 
   const fdData = await fdRes.json()
