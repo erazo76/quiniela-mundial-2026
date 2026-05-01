@@ -201,7 +201,7 @@ export default function UnirmePage() {
         {paso === 'codigo' && (
           <>
             <div className="text-center">
-              <Image src="/ui/copa.png" alt="Copa del Mundo" width={110} height={110} className="mb-4 drop-shadow-lg mx-auto block" unoptimized />
+              <Image src="/ui/icon-soccer.png" alt="Copa del Mundo" width={110} height={110} className="mb-4 drop-shadow-lg mx-auto block" unoptimized />
               <h1 className="text-3xl font-black uppercase text-white">¡Bienvenido!</h1>
               <p className="text-slate-400 text-sm mt-2 leading-relaxed">
                 Ingresa el código de 6 letras que te compartieron para unirte a tu liga.
@@ -214,9 +214,9 @@ export default function UnirmePage() {
                 ¿Cómo funciona?
               </p>
               {[
-                { img: '/ui/star.png', titulo: 'Predice',     desc: 'Elige el marcador exacto de cada partido' },
-                { img: '/ui/coin.png', titulo: 'Gana fichas', desc: 'Exacto ×3 · Ganador ×1.5 · Fallo ×0' },
-                { img: '/ui/copa.png', titulo: 'Compite',     desc: 'El que más fichas tenga al final, gana' },
+                { img: '/ui/icon-star.png',    titulo: 'Predice',     desc: 'Elige el marcador exacto de cada partido' },
+                { img: '/ui/icon-coins.png',  titulo: 'Gana fichas', desc: 'Exacto ×3 · Ganador ×1.5 · Fallo ×0' },
+                { img: '/ui/icon-compete.png', titulo: 'Compite',     desc: 'El que más fichas tenga al final, gana' },
               ].map(({ img, titulo, desc }) => (
                 <div key={titulo} className="flex items-start gap-3">
                   <Image src={img} alt={titulo} width={22} height={22} className="mt-0.5 shrink-0" unoptimized />
