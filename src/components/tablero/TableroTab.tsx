@@ -26,7 +26,7 @@ function calcularGrupo(partidos: Partido[]): Standing[] {
     else if (rl === rv){ L.pe++; L.pts++;    V.pe++; V.pts++ }
     else               { V.pg++; V.pts += 3; L.pp++ }
   }
-  return Object.values(map).sort((a, b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf)
+  return Object.values(map).sort((a, b) => b.pts - a.pts || a.equipo.localeCompare(b.equipo))
 }
 
 function shortName(name: string) {
@@ -47,6 +47,7 @@ function shortName(name: string) {
 
 function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) {
   const rows = calcularGrupo(partidos)
+  const grupoHaJugado = rows.some(r => r.pj > 0)
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
       <div className="px-3 py-2 bg-slate-800/60 border-b border-slate-700 flex items-center gap-2">
@@ -66,11 +67,11 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
         </thead>
         <tbody>
           {rows.map((s, i) => (
-            <tr key={s.equipo} className={`border-b border-slate-800/40 last:border-0 ${i < 2 ? 'text-white' : 'text-slate-500'}`}>
+            <tr key={s.equipo} className={`border-b border-slate-800/40 last:border-0 ${i < 2 && grupoHaJugado ? 'text-white' : 'text-slate-500'}`}>
               <td className="px-2 py-1.5">
                 <div className="flex items-center gap-1.5">
-                  {i < 2 && <span className="w-1 h-1 rounded-full bg-green-500 shrink-0" />}
-                  {i >= 2 && <span className="w-1 h-1 shrink-0" />}
+                  {i < 2 && grupoHaJugado && <span className="w-1 h-1 rounded-full bg-green-500 shrink-0" />}
+                  {!(i < 2 && grupoHaJugado) && <span className="w-1 h-1 shrink-0" />}
                   {s.bandera
                     ? <img src={s.bandera} alt="" className="w-4 h-3 object-cover rounded-sm shrink-0" />
                     : <div className="w-4 h-3 bg-slate-700 rounded-sm shrink-0" />

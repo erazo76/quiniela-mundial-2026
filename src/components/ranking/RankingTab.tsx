@@ -27,10 +27,10 @@ interface Props {
   usuarioId: string
 }
 
-const MEDALLAS_COLOR = [
-  'bg-yellow-500 text-black',
-  'bg-slate-400 text-black',
-  'bg-orange-700 text-white',
+const MEDALLAS_IMG = [
+  '/ui/BrainMedal1st.png',
+  '/ui/BrainMedal2nd.png',
+  '/ui/BrainMedal3rd.png',
 ]
 const COLORES_PODIO = [
   'border-yellow-500/60 bg-yellow-500/5',
@@ -51,9 +51,7 @@ function FilaPodio({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-700 bg-slate-800">
           <Image src={avatarSrc(getAvatarIndex(entrada.id, entrada.nombre))} alt={entrada.nombre} width={48} height={48} className="w-full h-full object-cover" />
         </div>
-        <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center leading-none ${MEDALLAS_COLOR[idx]}`}>
-          {entrada.posicion}
-        </span>
+        <Image src={MEDALLAS_IMG[idx]} alt={`${entrada.posicion}°`} width={22} height={22} unoptimized className="absolute -bottom-1 -right-1" />
       </div>
       <p className="text-xs text-slate-400 font-semibold text-center truncate w-full text-center">
         {entrada.nombre}
@@ -77,9 +75,10 @@ function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
           : 'border-slate-800 bg-slate-900'
       }`}
     >
-      <span className="text-slate-500 font-bold w-5 text-center text-sm shrink-0">
-        {entrada.posicion}
-      </span>
+      {entrada.posicion <= 3
+        ? <Image src={MEDALLAS_IMG[entrada.posicion - 1]} alt={`${entrada.posicion}°`} width={22} height={22} unoptimized className="shrink-0" />
+        : <span className="text-slate-500 font-bold w-5 text-center text-sm shrink-0">{entrada.posicion}</span>
+      }
       <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
         <Image src={avatarSrc(getAvatarIndex(entrada.id, entrada.nombre))} alt={entrada.nombre} width={32} height={32} className="w-full h-full object-cover" />
       </div>

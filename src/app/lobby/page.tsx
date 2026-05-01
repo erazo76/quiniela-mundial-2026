@@ -17,7 +17,7 @@ type Tab = 'partidos' | 'tablero' | 'ranking' | 'perfil'
 function NavIcon({ id, active }: { id: Tab; active: boolean }) {
   const cls = active ? 'opacity-100' : 'opacity-40'
   const icons: Record<Tab, { src: string; invert?: boolean }> = {
-    partidos: { src: '/ui/icon-whistle.png',    invert: true },
+    partidos: { src: '/ui/icon-whistle.png' },
     tablero:  { src: '/ui/icon-tablero.png' },
     ranking:  { src: '/ui/icon-trophy-nav.png' },
     perfil:   { src: '/ui/icon-profile.png',    invert: true },
@@ -100,7 +100,7 @@ function LobbyContent() {
             className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity"
             title="Ver tutorial"
           >
-            <Image src="/ui/icon-question.png" alt="?" width={18} height={18} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
+            <Image src="/ui/questionIcon.png" alt="?" width={18} height={18} unoptimized style={{ filter: 'brightness(0) invert(1)' }} />
           </button>
         </div>
       </header>
