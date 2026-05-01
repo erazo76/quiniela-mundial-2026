@@ -16,30 +16,23 @@ type Tab = 'partidos' | 'tablero' | 'ranking' | 'perfil'
 
 function NavIcon({ id, active }: { id: Tab; active: boolean }) {
   const cls = active ? 'opacity-100' : 'opacity-40'
-  if (id === 'partidos') {
-    return (
-      <svg viewBox="0 0 24 24" className={`w-5 h-5 ${cls}`} fill="currentColor">
-        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a1 1 0 110 2 1 1 0 010-2zm0 12a1 1 0 110-2 1 1 0 010 2zm5-5H7a1 1 0 010-2h10a1 1 0 010 2z"/>
-      </svg>
-    )
+  const icons: Record<Tab, { src: string; invert?: boolean }> = {
+    partidos: { src: '/ui/icon-whistle.png',    invert: true },
+    tablero:  { src: '/ui/icon-tablero.png' },
+    ranking:  { src: '/ui/icon-trophy-nav.png' },
+    perfil:   { src: '/ui/icon-profile.png',    invert: true },
   }
-  if (id === 'tablero') {
-    return (
-      <svg viewBox="0 0 24 24" className={`w-5 h-5 ${cls}`} fill="currentColor">
-        <path d="M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"/>
-      </svg>
-    )
-  }
-  if (id === 'ranking') {
-    return (
-      <Image src="/ui/trophy.png" alt="Ranking" width={20} height={20} className={cls} />
-    )
-  }
-  // perfil
+  const { src, invert } = icons[id]
   return (
-    <svg viewBox="0 0 24 24" className={`w-5 h-5 ${cls}`} fill="currentColor">
-      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-    </svg>
+    <Image
+      src={src}
+      alt={id}
+      width={24}
+      height={24}
+      className={cls}
+      style={invert ? { filter: 'brightness(0) invert(1)' } : undefined}
+      unoptimized
+    />
   )
 }
 
@@ -95,7 +88,7 @@ function LobbyContent() {
           </div>
         </div>
         <div className="shrink-0 px-2">
-          <Image src="/ui/copa.png" alt="Copa del Mundo 2026" width={32} height={32} unoptimized />
+          <Image src="/ui/icon-soccer.png" alt="Copa del Mundo 2026" width={36} height={36} unoptimized />
         </div>
         <div className="flex items-center gap-2 flex-1 justify-end">
           <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5">

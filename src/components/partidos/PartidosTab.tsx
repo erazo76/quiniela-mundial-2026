@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Partido, Prediccion } from '@/types'
 import { TarjetaPartido } from './TarjetaPartido'
 import { ModalPrediccion } from './ModalPrediccion'
@@ -71,16 +72,14 @@ export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
       {conteoSinPrediccion > 0 && (
         <div className="mx-4 mt-4 rounded-2xl overflow-hidden border border-yellow-500/20">
           <WcStripe height={3} />
-          <div className="bg-yellow-500/10 px-4 py-3 flex items-center justify-between">
+          <div className="bg-yellow-500/10 px-4 py-4 flex items-center justify-between min-h-[72px]">
             <div>
               <p className="text-xs text-yellow-400 font-semibold uppercase tracking-wide">
                 Partidos sin predicción
               </p>
               <p className="text-2xl font-black text-yellow-300">{conteoSinPrediccion}</p>
             </div>
-            <svg viewBox="0 0 24 24" className="w-8 h-8 text-yellow-400/60" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
+            <Image src="/ui/icon-exclamation.png" alt="!" width={36} height={36} unoptimized className="opacity-80" />
           </div>
         </div>
       )}
