@@ -23,6 +23,11 @@ const ESTADOS_BADGE: Record<string, string> = {
   finalizado: 'bg-blue-500/20 text-blue-400',
 }
 
+interface PredAdmin {
+  id: string; nombre: string; pred: string
+  fichas: number; tipo_acierto: string | null; acertado: boolean; ganancia: number
+}
+
 interface FilaPartidoProps {
   partido: Partido
   token: string
@@ -35,6 +40,22 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
   const [estado, setEstado] = useState(partido.estado)
   const [guardando, setGuardando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
+  const [verPreds, setVerPreds] = useState(false)
+  const [preds, setPreds] = useState<PredAdmin[] | null>(null)
+  const [cargandoPreds, setCargandoPreds] = useState(false)
+
+  async function togglePreds() {
+    if (verPreds) { setVerPreds(false); return }
+    setVerPreds(true)
+    if (preds !== null) return
+    setCargandoPreds(true)
+    const res = await fetch(`/api/admin/predicciones-partido?partido_id=${partido.id}`, {
+      headers: { 'x-admin-token': token },
+    })
+    const data = await res.json()
+    setPreds(Array.isArray(data) ? data : [])
+    setCargandoPreds(false)
+  }
 
   const finalizado = partido.estado === 'finalizado'
 
@@ -158,6 +179,37 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
         <p className={`text-xs font-semibold ${msg.ok ? 'text-green-400' : 'text-red-400'}`}>
           {msg.texto}
         </p>
+      )}
+
+      {/* Predicciones */}
+      <button
+        onClick={togglePreds}
+        className="text-xs text-slate-500 hover:text-slate-300 transition-colors text-left"
+      >
+        {verPreds ? 'Ocultar predicciones' : 'Ver predicciones'}
+      </button>
+
+      {verPreds && (
+        <div className="border-t border-slate-800 pt-3 flex flex-col gap-1.5">
+          {cargandoPreds && <p className="text-xs text-slate-600">Cargando...</p>}
+          {preds?.length === 0 && <p className="text-xs text-slate-600">Sin predicciones</p>}
+          {preds?.map((p) => (
+            <div key={p.id} className="flex items-center justify-between text-xs">
+              <span className="text-slate-300 font-semibold w-28 truncate">{p.nombre}</span>
+              <span className="text-white font-black">{p.pred}</span>
+              <span className="text-yellow-400">{p.fichas} fichas</span>
+              <span className={
+                p.tipo_acierto === 'exacto' ? 'text-yellow-300 font-bold' :
+                p.tipo_acierto === 'ganador' ? 'text-green-400 font-bold' :
+                p.tipo_acierto ? 'text-red-400' : 'text-slate-600'
+              }>
+                {p.tipo_acierto
+                  ? `${p.tipo_acierto} ${p.ganancia > 0 ? `+${p.ganancia}` : ''}`
+                  : 'pendiente'}
+              </span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )
