@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   // Verificar fichas del usuario
   const { data: usuario, error: errorUsuario } = await supabase
     .from('usuarios')
-    .select('fichas')
+    .select('fichas, liga_id')
     .eq('id', usuario_id)
     .single()
 
@@ -105,6 +105,23 @@ export async function POST(req: NextRequest) {
       cantidad: diferencia > 0 ? -cantidad : cantidad,
       descripcion: `Predicción ${accion}: partido ${partido_id}`,
     })
+
+    // Acumular 5% de la apuesta neta al pote de la liga
+    if (usuario.liga_id) {
+      const COMISION = 0.05
+      const poteDelta = Math.round(diferencia * COMISION)
+      if (poteDelta !== 0) {
+        const { data: liga } = await supabase
+          .from('ligas')
+          .select('pote_virtual')
+          .eq('id', usuario.liga_id)
+          .single()
+        if (liga) {
+          const nuevoPote = Math.max(0, (liga.pote_virtual ?? 0) + poteDelta)
+          await supabase.from('ligas').update({ pote_virtual: nuevoPote }).eq('id', usuario.liga_id)
+        }
+      }
+    }
   }
 
   return NextResponse.json({ ok: true, fichas: nuevasFichas })

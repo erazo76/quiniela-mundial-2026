@@ -7,14 +7,13 @@ export async function GET(req: NextRequest) {
 
   const supabase = createAdminClient()
 
-  const { data: usuarios, error: errUsuarios } = await supabase
-    .from('usuarios')
-    .select('id, nombre, fichas, racha, bono_usado')
-    .eq('liga_id', ligaId)
-    .order('fichas', { ascending: false })
+  const [{ data: liga }, { data: usuarios, error: errUsuarios }] = await Promise.all([
+    supabase.from('ligas').select('pote_virtual').eq('id', ligaId).single(),
+    supabase.from('usuarios').select('id, nombre, fichas, racha, bono_usado').eq('liga_id', ligaId).order('fichas', { ascending: false }),
+  ])
 
   if (errUsuarios) return NextResponse.json({ error: errUsuarios.message }, { status: 500 })
-  if (!usuarios?.length) return NextResponse.json([])
+  if (!usuarios?.length) return NextResponse.json({ ranking: [], pote: 0 })
 
   const ids = usuarios.map((u) => u.id)
 
@@ -33,7 +32,7 @@ export async function GET(req: NextRequest) {
     statsMap.set(p.usuario_id, s)
   }
 
-  const resultado = usuarios.map((u, i) => {
+  const ranking = usuarios.map((u, i) => {
     const stats = statsMap.get(u.id) ?? { total: 0, acertadas: 0 }
     return {
       posicion: i + 1,
@@ -47,5 +46,5 @@ export async function GET(req: NextRequest) {
     }
   })
 
-  return NextResponse.json(resultado)
+  return NextResponse.json({ ranking, pote: liga?.pote_virtual ?? 0 })
 }

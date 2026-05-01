@@ -3,14 +3,24 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { avatarSrc, getAvatarIndex } from '@/lib/avatar'
 
-function FireBadge({ racha }: { racha: number }) {
-  return (
-    <span className="flex items-center gap-1 text-xs text-yellow-400 font-bold">
-      <Image src="/ui/fire.png" alt="racha" width={14} height={14} unoptimized />
-      {racha}
-    </span>
-  )
-}
+const COMISION = 0.05
+const DISTRIBUCION = [
+  { label: '1er lugar', pct: 0.60, color: 'text-yellow-400', border: 'border-yellow-500/40', bg: 'bg-yellow-500/5' },
+  { label: '2do lugar', pct: 0.25, color: 'text-slate-300',  border: 'border-slate-500/30',  bg: 'bg-slate-800/40' },
+  { label: '3er lugar', pct: 0.15, color: 'text-orange-400', border: 'border-orange-700/40', bg: 'bg-orange-700/5' },
+]
+
+const MEDALLAS_IMG = [
+  '/ui/BrainMedal1st.png',
+  '/ui/BrainMedal2nd.png',
+  '/ui/BrainMedal3rd.png',
+]
+const COLORES_PODIO = [
+  'border-yellow-500/60 bg-yellow-500/5',
+  'border-slate-400/40 bg-slate-400/5',
+  'border-orange-700/50 bg-orange-700/5',
+]
+const COLORES_FICHAS = ['text-yellow-400', 'text-slate-300', 'text-orange-400']
 
 interface EntradaRanking {
   posicion: number
@@ -27,17 +37,66 @@ interface Props {
   usuarioId: string
 }
 
-const MEDALLAS_IMG = [
-  '/ui/BrainMedal1st.png',
-  '/ui/BrainMedal2nd.png',
-  '/ui/BrainMedal3rd.png',
-]
-const COLORES_PODIO = [
-  'border-yellow-500/60 bg-yellow-500/5',
-  'border-slate-400/40 bg-slate-400/5',
-  'border-orange-700/50 bg-orange-700/5',
-]
-const COLORES_FICHAS = ['text-yellow-400', 'text-slate-300', 'text-orange-400']
+function FireBadge({ racha }: { racha: number }) {
+  return (
+    <span className="flex items-center gap-1 text-xs text-yellow-400 font-bold">
+      <Image src="/ui/fire.png" alt="racha" width={14} height={14} unoptimized />
+      {racha}
+    </span>
+  )
+}
+
+function SeccionPote({ pote, ranking }: { pote: number; ranking: EntradaRanking[] }) {
+  const top3 = ranking.slice(0, 3)
+
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      {/* Encabezado del pote */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+        <div className="flex items-center gap-2">
+          <Image src="/ui/icon-coins.png" alt="pote" width={18} height={18} unoptimized className="opacity-80" />
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pote</span>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-2xl font-black text-yellow-400">{pote.toLocaleString()}</span>
+          <span className="text-xs text-slate-500">fichas</span>
+        </div>
+      </div>
+
+      {/* Filas de distribución */}
+      <div className="divide-y divide-slate-800/60">
+        {DISTRIBUCION.map((d, i) => {
+          const premio = Math.floor(pote * d.pct)
+          const jugador = top3[i]
+          return (
+            <div key={d.label} className={`flex items-center gap-3 px-4 py-3 ${d.bg}`}>
+              <Image src={MEDALLAS_IMG[i]} alt={d.label} width={20} height={20} unoptimized className="shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-slate-500 uppercase tracking-wider leading-none mb-0.5">{d.label}</p>
+                {jugador ? (
+                  <p className="text-sm font-bold text-white truncate">{jugador.nombre}</p>
+                ) : (
+                  <p className="text-sm text-slate-600 italic">Sin definir</p>
+                )}
+              </div>
+              <div className="text-right shrink-0">
+                <p className={`text-base font-black ${d.color}`}>{premio.toLocaleString()}</p>
+                <p className="text-[10px] text-slate-600">{Math.round(d.pct * 100)}%</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Nota comision */}
+      <div className="px-4 py-2 border-t border-slate-800/60">
+        <p className="text-[10px] text-slate-600 text-center">
+          {Math.round(COMISION * 100)}% de cada apuesta va al pote · Premio referencial
+        </p>
+      </div>
+    </div>
+  )
+}
 
 function FilaPodio({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }) {
   const idx = entrada.posicion - 1
@@ -103,13 +162,17 @@ function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
 
 export function RankingTab({ ligaId, usuarioId }: Props) {
   const [ranking, setRanking] = useState<EntradaRanking[]>([])
+  const [pote, setPote] = useState(0)
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     setCargando(true)
     fetch(`/api/ranking?liga_id=${ligaId}`)
       .then((r) => r.json())
-      .then((data) => setRanking(Array.isArray(data) ? data : []))
+      .then((data) => {
+        setRanking(Array.isArray(data.ranking) ? data.ranking : [])
+        setPote(data.pote ?? 0)
+      })
       .finally(() => setCargando(false))
   }, [ligaId])
 
@@ -135,7 +198,11 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+    <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+      {/* Pote */}
+      <SeccionPote pote={pote} ranking={ranking} />
+
+      {/* Clasificacion */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Image src="/ui/icon-trophy-nav.png" alt="Clasificación" width={20} height={20} className="opacity-80" />
