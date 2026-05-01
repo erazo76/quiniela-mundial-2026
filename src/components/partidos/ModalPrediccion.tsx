@@ -1,7 +1,19 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Partido, Prediccion } from '@/types'
+import { playSound } from '@/lib/audio'
+import { WcStripe } from '@/components/WcStripe'
+
+interface InfoEquipo {
+  nombre: string
+  dato_freak_1: string | null
+  dato_freak_2: string | null
+  dato_freak_3: string | null
+  figura_clave_nombre: string | null
+  mejor_puesto_mundial: string | null
+  participaciones: number | null
+}
 
 interface Props {
   partido: Partido
@@ -12,23 +24,72 @@ interface Props {
   onGuardada: (fichasNuevas: number, prediccion: Prediccion) => void
 }
 
-function Bandera({ src, nombre }: { src: string | null; nombre: string }) {
-  if (!src) {
-    return (
-      <div className="w-12 h-9 rounded-lg bg-slate-700 flex items-center justify-center text-slate-500 text-sm">
-        ?
-      </div>
-    )
+function BanderaConTooltip({
+  src,
+  nombre,
+  info,
+}: {
+  src: string | null
+  nombre: string
+  info: InfoEquipo | undefined
+}) {
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const datos = info
+    ? ([info.dato_freak_1, info.dato_freak_2, info.dato_freak_3].filter(Boolean) as string[])
+    : []
+
+  function pickFact() {
+    if (!datos.length) return null
+    return datos[Math.floor(Math.random() * datos.length)]
   }
+
+  function show() {
+    const text = pickFact()
+    if (!text || !ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    setTooltip({ text, x: rect.left + rect.width / 2, y: rect.top })
+  }
+
+  function hide() { setTooltip(null) }
+
+  const img = src ? (
+    <Image src={src} alt={nombre} width={48} height={36} className="rounded-lg object-cover w-12 h-9" unoptimized />
+  ) : (
+    <div className="w-12 h-9 rounded-lg bg-slate-700 flex items-center justify-center text-slate-500 text-sm">?</div>
+  )
+
+  if (!datos.length) return img
+
   return (
-    <Image
-      src={src}
-      alt={nombre}
-      width={48}
-      height={36}
-      className="rounded-lg object-cover w-12 h-9"
-      unoptimized
-    />
+    <>
+      <div
+        ref={ref}
+        className="relative cursor-pointer"
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onClick={() => tooltip ? hide() : show()}
+      >
+        <div className="relative">
+          {img}
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 border border-slate-950 text-[7px] flex items-center justify-center font-black text-black leading-none">i</span>
+        </div>
+      </div>
+      {tooltip && (
+        <div
+          className="fixed w-52 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-[11px] text-slate-200 leading-snug z-[200] shadow-xl pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y - 8,
+            transform: 'translateX(-50%) translateY(-100%)',
+          }}
+        >
+          {tooltip.text}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-700" />
+        </div>
+      )}
+    </>
   )
 }
 
@@ -62,6 +123,7 @@ function Stepper({
   )
 }
 
+
 export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioId, onClose, onGuardada }: Props) {
   const [golesLocal, setGolesLocal] = useState(prediccionExistente?.goles_local ?? 1)
   const [golesVisitante, setGolesVisitante] = useState(prediccionExistente?.goles_visitante ?? 0)
@@ -71,6 +133,30 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
   )
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [infoEquipos, setInfoEquipos] = useState<Record<string, InfoEquipo> | null>(null)
+
+  useEffect(() => {
+    const local = encodeURIComponent(partido.equipo_local)
+    const visitante = encodeURIComponent(partido.equipo_visitante)
+    fetch(`/api/info-equipo?local=${local}&visitante=${visitante}`)
+      .then((r) => r.json())
+      .then(setInfoEquipos)
+      .catch(() => {})
+  }, [partido.equipo_local, partido.equipo_visitante])
+
+  useEffect(() => {
+    if (partido.estado !== 'finalizado' || !prediccionExistente) return
+    if (prediccionExistente.tipo_acierto === 'exacto') {
+      playSound('reveal.ogg', 0.4)
+      setTimeout(() => playSound('winner.ogg', 0.6), 500)
+    } else if (prediccionExistente.tipo_acierto === 'ganador') {
+      playSound('reveal.ogg', 0.4)
+      setTimeout(() => playSound('crowd_goal.ogg', 0.5), 400)
+    } else if (prediccionExistente.tipo_acierto && !prediccionExistente.acertado) {
+      playSound('disappointed.ogg', 0.4)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const esEmpate = golesLocal === golesVisitante
   const gananciaExacto = fichasApostadas * 3
@@ -96,6 +182,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
         setError(data.error ?? 'Error al guardar la prediccion')
         return
       }
+      playSound('coin.ogg', 0.5)
       onGuardada(data.fichas, {
         id: prediccionExistente?.id ?? '',
         usuario_id: usuarioId,
@@ -114,7 +201,9 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl p-6 flex flex-col gap-6">
+      <div className="w-full max-w-md bg-slate-950 border border-slate-800 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col max-h-[92dvh]">
+        <WcStripe height={3} />
+        <div className="p-6 flex flex-col gap-5 overflow-y-auto flex-1">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -125,7 +214,11 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
         {/* Equipos */}
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-center gap-2 flex-1">
-            <Bandera src={partido.bandera_local} nombre={partido.equipo_local} />
+            <BanderaConTooltip
+              src={partido.bandera_local}
+              nombre={partido.equipo_local}
+              info={infoEquipos?.[partido.equipo_local]}
+            />
             <span className="text-xs text-slate-300 text-center font-semibold leading-tight">
               {partido.equipo_local}
             </span>
@@ -134,7 +227,11 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
           <div className="text-slate-600 text-sm font-bold px-4">VS</div>
 
           <div className="flex flex-col items-center gap-2 flex-1">
-            <Bandera src={partido.bandera_visitante} nombre={partido.equipo_visitante} />
+            <BanderaConTooltip
+              src={partido.bandera_visitante}
+              nombre={partido.equipo_visitante}
+              info={infoEquipos?.[partido.equipo_visitante]}
+            />
             <span className="text-xs text-slate-300 text-center font-semibold leading-tight">
               {partido.equipo_visitante}
             </span>
@@ -200,6 +297,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
         >
           {guardando ? 'Guardando...' : prediccionExistente ? 'Actualizar predicción' : 'Confirmar predicción'}
         </button>
+        </div>
       </div>
     </div>
   )

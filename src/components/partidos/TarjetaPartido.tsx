@@ -55,15 +55,36 @@ function Bandera({ src, nombre }: { src: string | null; nombre: string }) {
   )
 }
 
+function badgeResultado(tipoAcierto: string | null, acertado: boolean) {
+  if (!tipoAcierto) return null
+  if (tipoAcierto === 'exacto')
+    return { label: 'EXACTO', cls: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40' }
+  if (tipoAcierto === 'ganador')
+    return { label: 'GANADOR', cls: 'bg-green-500/20 text-green-300 border-green-500/40' }
+  if (!acertado)
+    return { label: 'FALLO', cls: 'bg-red-500/15 text-red-400 border-red-500/30' }
+  return null
+}
+
+function cardBorder(tipoAcierto: string | null, acertado: boolean) {
+  if (!tipoAcierto) return 'border-slate-800 hover:border-slate-600'
+  if (tipoAcierto === 'exacto') return 'border-yellow-500/50'
+  if (tipoAcierto === 'ganador') return 'border-green-500/40'
+  if (!acertado) return 'border-red-900/40'
+  return 'border-slate-800'
+}
+
 export function TarjetaPartido({ partido, onClick }: Props) {
   const pred = partido.prediccion
   const puedePredicir = canPredict(partido)
+  const badge = pred ? badgeResultado(pred.tipo_acierto, pred.acertado) : null
+  const borderCls = pred ? cardBorder(pred.tipo_acierto, pred.acertado) : 'border-slate-800 hover:border-slate-600'
 
   return (
     <button
       onClick={onClick}
       disabled={!puedePredicir && !pred}
-      className="w-full text-left bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3 transition-colors hover:border-slate-600 disabled:opacity-50 disabled:cursor-default"
+      className={`w-full text-left bg-slate-900 border ${borderCls} rounded-2xl p-4 flex flex-col gap-3 transition-colors disabled:opacity-50 disabled:cursor-default`}
     >
       {/* Fecha y sede */}
       <div className="flex items-center justify-between text-xs text-slate-500">
@@ -116,17 +137,39 @@ export function TarjetaPartido({ partido, onClick }: Props) {
 
       {/* Prediccion o CTA */}
       {pred ? (
-        <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2">
-          <span className="text-xs text-green-400 font-semibold">Tu predicción</span>
+        <div className={`flex items-center justify-between rounded-xl px-3 py-2 border ${
+          badge?.cls
+            ? badge.cls.includes('yellow')
+              ? 'bg-yellow-500/10 border-yellow-500/25'
+              : badge.cls.includes('green')
+              ? 'bg-green-500/10 border-green-500/25'
+              : badge.cls.includes('red')
+              ? 'bg-red-500/10 border-red-500/25'
+              : 'bg-green-500/10 border-green-500/20'
+            : 'bg-green-500/10 border-green-500/20'
+        }`}>
           <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-semibold">Tu pred.</span>
             <span className="text-white font-bold text-sm">
               {pred.goles_local} - {pred.goles_visitante}
             </span>
             <span className="text-yellow-400 text-xs font-semibold">
               {pred.fichas_apostadas} fichas
             </span>
-            {puedePredicir && (
-              <span className="text-slate-500 text-xs">· Editar</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {badge ? (
+              <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full border ${badge.cls}`}>
+                {badge.label}
+              </span>
+            ) : puedePredicir ? (
+              <span className="text-slate-500 text-xs">Editar</span>
+            ) : null}
+            {badge?.label === 'EXACTO' && (
+              <span className="text-yellow-300 text-xs font-bold">+{pred.ganancia_fichas}</span>
+            )}
+            {badge?.label === 'GANADOR' && (
+              <span className="text-green-300 text-xs font-bold">+{pred.ganancia_fichas}</span>
             )}
           </div>
         </div>

@@ -226,7 +226,7 @@ export default function AdminPartidosPage() {
   const conteoFinalizado = partidos.filter((p) => p.estado === 'finalizado').length
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
         <div>

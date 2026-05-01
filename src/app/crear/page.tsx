@@ -90,7 +90,7 @@ export default function CrearLigaPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col px-6 py-10 bg-slate-950">
+    <main className="min-h-screen flex flex-col px-6 py-10">
       <Link
         href="/"
         className="text-slate-400 hover:text-white text-sm flex items-center gap-1 mb-10 w-fit transition-colors"

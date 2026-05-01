@@ -168,7 +168,7 @@ export default function AdminLigasPage() {
   const sinPin = ligas.reduce((acc, l) => acc + l.miembros.filter((m) => !m.tienePin).length, 0)
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen text-white">
       {/* Header */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
         <div>

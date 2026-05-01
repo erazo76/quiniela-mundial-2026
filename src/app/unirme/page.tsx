@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useSession } from '@/context/SessionContext'
 
@@ -182,7 +183,7 @@ export default function UnirmePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col px-6 py-10 bg-slate-950">
+    <main className="min-h-screen flex flex-col px-6 py-10">
       {/* Header con navegación y progreso */}
       <div className="flex items-center justify-between mb-10">
         <button
@@ -200,7 +201,7 @@ export default function UnirmePage() {
         {paso === 'codigo' && (
           <>
             <div className="text-center">
-              <div className="text-7xl mb-4 select-none">⚽</div>
+              <Image src="/ui/copa.png" alt="Copa del Mundo" width={110} height={110} className="mb-4 drop-shadow-lg mx-auto block" unoptimized />
               <h1 className="text-3xl font-black uppercase text-white">¡Bienvenido!</h1>
               <p className="text-slate-400 text-sm mt-2 leading-relaxed">
                 Ingresa el código de 6 letras que te compartieron para unirte a tu liga.
@@ -213,12 +214,12 @@ export default function UnirmePage() {
                 ¿Cómo funciona?
               </p>
               {[
-                { icon: '🎯', titulo: 'Predice', desc: 'Elige el marcador exacto de cada partido' },
-                { icon: '🪙', titulo: 'Gana fichas', desc: 'Exacto ×3 · Ganador ×1.5 · Fallo ×0' },
-                { icon: '🏆', titulo: 'Compite', desc: 'El que más fichas tenga al final, gana' },
-              ].map(({ icon, titulo, desc }) => (
+                { img: '/ui/star.png', titulo: 'Predice',     desc: 'Elige el marcador exacto de cada partido' },
+                { img: '/ui/coin.png', titulo: 'Gana fichas', desc: 'Exacto ×3 · Ganador ×1.5 · Fallo ×0' },
+                { img: '/ui/copa.png', titulo: 'Compite',     desc: 'El que más fichas tenga al final, gana' },
+              ].map(({ img, titulo, desc }) => (
                 <div key={titulo} className="flex items-start gap-3">
-                  <span className="text-xl mt-0.5">{icon}</span>
+                  <Image src={img} alt={titulo} width={22} height={22} className="mt-0.5 shrink-0" unoptimized />
                   <div>
                     <p className="text-sm font-bold text-white">{titulo}</p>
                     <p className="text-xs text-slate-400">{desc}</p>
@@ -363,7 +364,7 @@ export default function UnirmePage() {
 
                 {/* Motivación */}
                 <div className="bg-green-500/10 border border-green-500/20 rounded-2xl px-4 py-3 flex items-center gap-3">
-                  <span className="text-2xl">🪙</span>
+                  <Image src="/ui/coin.png" alt="fichas" width={28} height={28} unoptimized />
                   <p className="text-sm text-green-300 leading-snug">
                     Empiezas con <strong>500 fichas</strong> para apostar desde el primer partido
                   </p>

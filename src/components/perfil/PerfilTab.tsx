@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Session } from '@/lib/session'
+import { avatarSrc, getAvatarIndex, setAvatarIndex, TOTAL_AVATARES } from '@/lib/avatar'
 
 interface Stats {
   fichas: number
@@ -27,9 +29,57 @@ function Stat({ label, valor, sub }: { label: string; valor: string | number; su
   )
 }
 
+function SelectorAvatar({
+  actual,
+  onSeleccionar,
+  onCerrar,
+}: {
+  actual: number
+  onSeleccionar: (idx: number) => void
+  onCerrar: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-md bg-slate-950 border border-slate-800 rounded-t-3xl p-5 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wide">Elige tu avatar</h3>
+          <button onClick={onCerrar} className="text-slate-500 hover:text-white text-xl">×</button>
+        </div>
+        <div className="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto">
+          {Array.from({ length: TOTAL_AVATARES }, (_, i) => i + 1).map((idx) => (
+            <button
+              key={idx}
+              onClick={() => onSeleccionar(idx)}
+              className={`rounded-xl overflow-hidden border-2 transition-all active:scale-95 ${
+                idx === actual
+                  ? 'border-green-400 ring-2 ring-green-400/30'
+                  : 'border-slate-700 hover:border-slate-500'
+              }`}
+            >
+              <Image
+                src={avatarSrc(idx)}
+                alt={`Avatar ${idx}`}
+                width={64}
+                height={64}
+                className="w-full object-cover aspect-square"
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
   const [stats, setStats] = useState<Stats | null>(null)
   const [copiado, setCopiado] = useState(false)
+  const [avatarIdx, setAvatarIdx] = useState<number>(1)
+  const [showSelector, setShowSelector] = useState(false)
+
+  useEffect(() => {
+    setAvatarIdx(getAvatarIndex(session.usuarioId, session.nombre))
+  }, [session.usuarioId, session.nombre])
 
   useEffect(() => {
     fetch(`/api/usuario?id=${session.usuarioId}`)
@@ -37,6 +87,12 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
       .then((data) => setStats(data))
       .catch(() => {})
   }, [session.usuarioId])
+
+  function elegirAvatar(idx: number) {
+    setAvatarIndex(session.usuarioId, idx)
+    setAvatarIdx(idx)
+    setShowSelector(false)
+  }
 
   function copiarCodigo() {
     navigator.clipboard.writeText(session.codigoInvitacion).then(() => {
@@ -61,20 +117,36 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
     }
   }
 
-  const iniciales = session.nombre
-    .split(' ')
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6">
+      {showSelector && (
+        <SelectorAvatar
+          actual={avatarIdx}
+          onSeleccionar={elegirAvatar}
+          onCerrar={() => setShowSelector(false)}
+        />
+      )}
+
       {/* Avatar y nombre */}
       <div className="flex flex-col items-center gap-3">
-        <div className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center">
-          <span className="text-3xl font-black text-green-400">{iniciales}</span>
-        </div>
+        <button
+          onClick={() => setShowSelector(true)}
+          className="relative group"
+          title="Cambiar avatar"
+        >
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-700 bg-slate-800">
+            <Image
+              src={avatarSrc(avatarIdx)}
+              alt={session.nombre}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <span className="text-white text-xs font-bold">Cambiar</span>
+          </div>
+        </button>
         <div className="text-center">
           <h2 className="text-2xl font-black text-white uppercase">{session.nombre}</h2>
           <p className="text-slate-500 text-sm">{session.ligaNombre}</p>
@@ -87,7 +159,7 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
         <Stat
           label="Racha actual"
           valor={stats?.racha ?? 0}
-          sub={stats && stats.racha >= 3 ? '🔥 Racha de oro' : undefined}
+          sub={stats && stats.racha >= 3 ? 'Racha de oro' : undefined}
         />
         <Stat label="Predicciones" valor={stats?.predicciones_total ?? 0} />
         <Stat
@@ -130,7 +202,6 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
           Invitar amigos
         </p>
 
-        {/* Código grande */}
         <button
           onClick={copiarCodigo}
           className="flex items-center justify-between bg-slate-900 border border-slate-800 hover:border-slate-600 rounded-2xl px-4 py-3 transition-colors"
@@ -143,7 +214,6 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
           </span>
         </button>
 
-        {/* Botones de compartir */}
         <div className="flex gap-2">
           <button
             onClick={compartirWhatsApp}

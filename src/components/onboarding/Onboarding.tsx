@@ -1,47 +1,54 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { marcarOnboardingVisto } from '@/lib/session'
 
-const SLIDES = [
+interface Slide {
+  image: string | null
+  titulo: string
+  descripcion: string
+}
+
+const SLIDES: Slide[] = [
   {
-    emoji: '🏆',
+    image: '/ui/trophy.png',
     titulo: '¡Bienvenido a la Quiniela!',
     descripcion:
       'Predice los resultados de los partidos del Mundial 2026. Ganas fichas al acertar y quien termina con más fichas se queda con el pote de la liga.',
   },
   {
-    emoji: '🎯',
+    image: '/ui/star.png',
     titulo: 'Cómo predecir',
     descripcion:
       'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.',
   },
   {
-    emoji: '🪙',
+    image: '/ui/coin.png',
     titulo: 'Las fichas',
     descripcion:
       'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
   },
   {
-    emoji: '✖️',
+    image: '/ui/copa.png',
     titulo: 'Los multiplicadores',
     descripcion:
-      'Marcador exacto → ganas 3x lo apostado\nAciertas ganador o empate → ganas 1.5x\nFallas → pierdes lo apostado',
+      'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
   },
   {
-    emoji: '💰',
+    image: '/ui/coin.png',
     titulo: 'El pote virtual',
     descripcion:
       'El pote es la suma de todas las fichas de tu liga. Al final del Mundial, quien tenga más fichas gana. El premio real (si lo hay) se coordina fuera de la app.',
   },
   {
-    emoji: '🔥',
+    image: '/ui/fire.png',
     titulo: 'Extras y bonos',
     descripcion:
-      '3 aciertos seguidos = Racha de oro (fichas doradas ✨)\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
+      '3 aciertos seguidos activan la Racha de oro.\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
   },
   {
-    emoji: '⚖️',
+    image: null,
     titulo: 'Aviso importante',
     descripcion:
       'Esta app es exclusivamente recreativa entre amigos. No se realizan transacciones con dinero real dentro de la plataforma. Cualquier premio en efectivo es responsabilidad exclusiva de los usuarios.',
@@ -108,7 +115,20 @@ export function Onboarding({ onClose }: OnboardingProps) {
               transition={{ duration: 0.2 }}
               className="flex flex-col items-center text-center gap-4"
             >
-              <span className="text-6xl">{current.emoji}</span>
+              {current.image ? (
+                <Image
+                  src={current.image}
+                  alt=""
+                  width={72}
+                  height={72}
+                  className="drop-shadow-lg"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full border-2 border-yellow-400/50 bg-yellow-400/10 flex items-center justify-center">
+                  <span className="text-yellow-400 font-black text-2xl">!</span>
+                </div>
+              )}
               <h2 className="text-xl font-black uppercase text-white leading-tight">{current.titulo}</h2>
               <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line">{current.descripcion}</p>
             </motion.div>
