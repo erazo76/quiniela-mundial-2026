@@ -131,7 +131,7 @@ const GAP0    = 12    // min gap between cards in the base round
 const SLOT_H  = CARD_H + GAP0   // 64 px — height unit per match in base round
 const CON_W   = 28    // width of the SVG connector strip between columns
 const LABEL_H = 22    // px reserved above bracket for phase labels
-const LINE    = '#475569'  // connector line color (slate-600)
+const LINE    = '#39ff14'  // connector line color (electric green)
 
 /** Top offset of a match card given its bracket round and position index */
 function slotTop(round: number, idx: number): number {
