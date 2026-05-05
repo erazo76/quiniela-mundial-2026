@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { Partido } from '@/types'
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -114,15 +114,37 @@ function GruposView({ partidos }: { partidos: Partido[] }) {
   )
 }
 
-// ─── Llave View ────────────────────────────────────────────────────────────
+// ─── Llave (Bracket) View ──────────────────────────────────────────────────
 
 const FASES: { key: string; label: string }[] = [
   { key: 'dieciseisavos', label: 'Ronda de 32' },
-  { key: 'octavos',       label: 'Octavos de final' },
-  { key: 'cuartos',       label: 'Cuartos de final' },
-  { key: 'semis',         label: 'Semifinales' },
+  { key: 'octavos',       label: 'Octavos' },
+  { key: 'cuartos',       label: 'Cuartos' },
+  { key: 'semis',         label: 'Semis' },
   { key: 'final',         label: 'Final' },
 ]
+
+// Bracket layout constants
+const CARD_W  = 172   // match card width in px
+const CARD_H  = 52    // approximate rendered card height in px
+const GAP0    = 12    // min gap between cards in the base round
+const SLOT_H  = CARD_H + GAP0   // 64 px — height unit per match in base round
+const CON_W   = 28    // width of the SVG connector strip between columns
+const LABEL_H = 22    // px reserved above bracket for phase labels
+const LINE    = '#475569'  // connector line color (slate-600)
+
+/** Top offset of a match card given its bracket round and position index */
+function slotTop(round: number, idx: number): number {
+  const p = Math.pow(2, round)
+  return (idx * p + (p - 1) / 2) * SLOT_H
+}
+
+/** Vertical center of a match card */
+function slotCenter(round: number, idx: number): number {
+  return slotTop(round, idx) + CARD_H / 2
+}
+
+// ─── MatchSlot ─────────────────────────────────────────────────────────────
 
 function MatchSlot({ partido }: { partido: Partido }) {
   const hasResult = partido.resultado_local != null && partido.resultado_visitante != null
@@ -157,29 +179,111 @@ function MatchSlot({ partido }: { partido: Partido }) {
   )
 }
 
-function RondaCol({ label, partidos }: { label: string; partidos: Partido[] }) {
+// ─── Connector SVG ─────────────────────────────────────────────────────────
+
+function Connector({ round, n, totalH }: { round: number; n: number; totalH: number }) {
+  const mx = CON_W / 2
+  const pairs = Math.floor(n / 2)
   return (
-    <div className="flex flex-col shrink-0 w-[172px]">
-      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 text-center">{label}</p>
-      <div className="flex flex-col gap-3">
-        {partidos.map(p => <MatchSlot key={p.id} partido={p} />)}
-      </div>
-    </div>
+    <svg
+      width={CON_W}
+      height={totalH}
+      style={{ display: 'block', flexShrink: 0 }}
+      aria-hidden
+    >
+      {Array.from({ length: pairs }, (_, j) => {
+        const y1 = slotCenter(round, j * 2)
+        const y2 = slotCenter(round, j * 2 + 1)
+        const ym = (y1 + y2) / 2
+        return (
+          <g key={j} stroke={LINE} strokeWidth={1.5} fill="none" strokeLinecap="round">
+            {/* horizontal from left match to midpoint */}
+            <line x1={0} y1={y1} x2={mx} y2={y1} />
+            {/* horizontal from left match to midpoint (bottom) */}
+            <line x1={0} y1={y2} x2={mx} y2={y2} />
+            {/* vertical bracket bar */}
+            <line x1={mx} y1={y1} x2={mx} y2={y2} />
+            {/* horizontal to right match */}
+            <line x1={mx} y1={ym} x2={CON_W} y2={ym} />
+          </g>
+        )
+      })}
+    </svg>
   )
 }
+
+// ─── LlaveView ─────────────────────────────────────────────────────────────
 
 function LlaveView({ partidos }: { partidos: Partido[] }) {
   const byFase: Record<string, Partido[]> = {}
   for (const f of FASES) byFase[f.key] = []
-  for (const p of partidos) { if (byFase[p.fase]) byFase[p.fase].push(p) }
+  for (const p of partidos) {
+    if (byFase[p.fase] !== undefined) byFase[p.fase].push(p)
+  }
+
   const cols = FASES.filter(f => byFase[f.key].length > 0)
 
+  if (cols.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
+        Sin partidos de eliminatorias
+      </div>
+    )
+  }
+
+  const baseCount = byFase[cols[0].key].length
+  const totalH = baseCount * SLOT_H
+  const minW = cols.length * CARD_W + (cols.length - 1) * CON_W
+
   return (
-    <div className="flex-1 min-h-0 overflow-auto p-4">
-      <div className="flex gap-5 items-start pb-4" style={{ minWidth: cols.length * 192 }}>
-        {cols.map(f => (
-          <RondaCol key={f.key} label={f.label} partidos={byFase[f.key]} />
-        ))}
+    <div className="flex-1 min-h-0 overflow-auto">
+      <div className="p-4 pb-8 flex justify-center" style={{ minWidth: minW + 32 }}>
+        {/* paddingTop reserves space for the phase labels */}
+        <div className="flex items-start" style={{ paddingTop: LABEL_H }}>
+          {cols.map((fase, ci) => {
+            const matches = byFase[fase.key]
+            return (
+              <Fragment key={fase.key}>
+                {/* Column of match cards */}
+                <div style={{ position: 'relative', width: CARD_W, height: totalH, flexShrink: 0 }}>
+                  {/* Phase label */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -LABEL_H,
+                      left: 0,
+                      right: 0,
+                      textAlign: 'center',
+                      fontSize: 9,
+                      fontWeight: 900,
+                      color: '#64748b',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.12em',
+                      lineHeight: `${LABEL_H}px`,
+                    }}
+                  >
+                    {fase.label}
+                  </div>
+
+                  {/* Match cards positioned absolutely */}
+                  {matches.map((p, mi) => (
+                    <div
+                      key={p.id}
+                      style={{ position: 'absolute', top: slotTop(ci, mi), left: 0 }}
+                    >
+                      <MatchSlot partido={p} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* SVG connector to the next column */}
+                {ci < cols.length - 1 && (
+                  <Connector round={ci} n={matches.length} totalH={totalH} />
+                )}
+              </Fragment>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
