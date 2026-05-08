@@ -34,15 +34,22 @@ interface FilaPartidoProps {
   onActualizado: (id: string, campos: Partial<Partido>) => void
 }
 
+const FASES_ELIMINACION = ['dieciseisavos', 'octavos', 'cuartos', 'semis']
+
 function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
   const [resLocal, setResLocal] = useState(partido.resultado_local ?? 0)
   const [resVisit, setResVisit] = useState(partido.resultado_visitante ?? 0)
   const [estado, setEstado] = useState(partido.estado)
+  const [ganadorManual, setGanadorManual] = useState<string>('')
   const [guardando, setGuardando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
   const [verPreds, setVerPreds] = useState(false)
   const [preds, setPreds] = useState<PredAdmin[] | null>(null)
   const [cargandoPreds, setCargandoPreds] = useState(false)
+
+  const esEliminatoria = FASES_ELIMINACION.includes(partido.fase)
+  const esEmpate = resLocal === resVisit
+  const necesitaGanadorManual = esEliminatoria && esEmpate && estado === 'finalizado'
 
   async function togglePreds() {
     if (verPreds) { setVerPreds(false); return }
@@ -72,6 +79,7 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
           resultado_local: resLocal,
           resultado_visitante: resVisit,
           estado,
+          ...(ganadorManual ? { ganador_manual: ganadorManual } : {}),
         }),
       })
       const data = await res.json()
@@ -88,6 +96,7 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
         resultado_local: resLocal,
         resultado_visitante: resVisit,
         estado,
+        ganador: ganadorManual || undefined,
       })
     } catch {
       setMsg({ texto: 'Error de conexión', ok: false })
@@ -122,47 +131,73 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
 
       {/* Controles */}
       {!finalizado && (
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Score */}
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={0}
-              max={20}
-              value={resLocal}
-              onChange={(e) => setResLocal(Number(e.target.value))}
-              className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-green-500"
-            />
-            <span className="text-slate-600 font-bold">-</span>
-            <input
-              type="number"
-              min={0}
-              max={20}
-              value={resVisit}
-              onChange={(e) => setResVisit(Number(e.target.value))}
-              className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-green-500"
-            />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Score */}
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                max={20}
+                value={resLocal}
+                onChange={(e) => setResLocal(Number(e.target.value))}
+                className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-green-500"
+              />
+              <span className="text-slate-600 font-bold">-</span>
+              <input
+                type="number"
+                min={0}
+                max={20}
+                value={resVisit}
+                onChange={(e) => setResVisit(Number(e.target.value))}
+                className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-green-500"
+              />
+            </div>
+
+            {/* Estado */}
+            <select
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+            >
+              <option value="pendiente">Pendiente</option>
+              <option value="en_vivo">En vivo</option>
+              <option value="finalizado">Finalizado</option>
+            </select>
+
+            {/* Guardar */}
+            <button
+              onClick={guardar}
+              disabled={guardando || (necesitaGanadorManual && !ganadorManual)}
+              className="px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-40 text-black text-sm font-bold rounded-lg transition-colors"
+            >
+              {guardando ? '...' : 'Guardar'}
+            </button>
           </div>
 
-          {/* Estado */}
-          <select
-            value={estado}
-            onChange={(e) => setEstado(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-500"
-          >
-            <option value="pendiente">Pendiente</option>
-            <option value="en_vivo">En vivo</option>
-            <option value="finalizado">Finalizado</option>
-          </select>
-
-          {/* Guardar */}
-          <button
-            onClick={guardar}
-            disabled={guardando}
-            className="px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-40 text-black text-sm font-bold rounded-lg transition-colors"
-          >
-            {guardando ? '...' : 'Guardar'}
-          </button>
+          {/* Selector de ganador por penales (eliminatoria + empate + finalizado) */}
+          {necesitaGanadorManual && (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-amber-400 font-semibold">
+                Empate en eliminatoria — ¿Quién ganó en penales?
+              </p>
+              <div className="flex gap-2">
+                {[partido.equipo_local, partido.equipo_visitante].map((equipo) => (
+                  <button
+                    key={equipo}
+                    onClick={() => setGanadorManual(equipo)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${
+                      ganadorManual === equipo
+                        ? 'bg-amber-500 border-amber-500 text-black'
+                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-500/50'
+                    }`}
+                  >
+                    {equipo}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

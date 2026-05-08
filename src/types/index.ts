@@ -11,6 +11,7 @@ export interface Partido {
   resultado_visitante: number | null
   estado: string
   sede: string | null
+  ganador: string | null
   prediccion?: Prediccion
 }
 

@@ -30,7 +30,7 @@ export async function procesarResultadoPartido(
   // Query 1: fetch predictions for this match
   const { data: predicciones, error: errPred } = await supabase
     .from('predicciones')
-    .select('id, usuario_id, goles_local, goles_visitante, fichas_apostadas')
+    .select('id, usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas')
     .eq('partido_id', partidoId)
 
   if (errPred) return { procesadas: 0, error: errPred.message }
@@ -40,13 +40,18 @@ export async function procesarResultadoPartido(
   const usuarioIds = [...new Set(predicciones.map((p) => p.usuario_id))]
   const { data: usuarios } = await supabase
     .from('usuarios')
-    .select('id, fichas, racha, bono_usado')
+    .select('id, nombre, liga_id, fichas, racha, bono_usado')
     .in('id', usuarioIds)
 
   const usuariosMap = new Map((usuarios ?? []).map((u) => [u.id, { ...u }]))
 
   const updatesPred: Array<{
     id: string
+    usuario_id: string
+    partido_id: string
+    goles_local: number
+    goles_visitante: number
+    fichas_apostadas: number
     ganancia_fichas: number
     tipo_acierto: string
     acertado: boolean
@@ -74,7 +79,7 @@ export async function procesarResultadoPartido(
     const enRacha = acertado && (usuario?.racha ?? 0) >= 2
     const ganancia = Math.floor(pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador))
 
-    updatesPred.push({ id: pred.id, ganancia_fichas: ganancia, tipo_acierto: tipo, acertado })
+    updatesPred.push({ id: pred.id, usuario_id: pred.usuario_id, partido_id: pred.partido_id, goles_local: pred.goles_local, goles_visitante: pred.goles_visitante, fichas_apostadas: pred.fichas_apostadas, ganancia_fichas: ganancia, tipo_acierto: tipo, acertado })
 
     if (usuario) {
       usuario.fichas += ganancia
@@ -114,7 +119,7 @@ export async function procesarResultadoPartido(
   const usuarioUpdates = usuarioIds
     .map((id) => usuariosMap.get(id))
     .filter(Boolean)
-    .map((u) => ({ id: u!.id, fichas: u!.fichas, racha: u!.racha, bono_usado: u!.bono_usado }))
+    .map((u) => ({ id: u!.id, nombre: u!.nombre, liga_id: u!.liga_id, fichas: u!.fichas, racha: u!.racha, bono_usado: u!.bono_usado }))
 
   const { error: errUsuarios } = await supabase
     .from('usuarios')

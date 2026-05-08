@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node --env-file=.env.local --import=tsx/esm scripts/seed.ts"
+    "seed": "node --env-file=.env.local --import=tsx/esm scripts/seed.ts",
+    "simular": "node --env-file=.env.local --import=tsx/esm scripts/simular-liga.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "playwright": "^1.59.1",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"
