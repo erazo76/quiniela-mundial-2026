@@ -326,6 +326,8 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
 
   const baseCount = cols.length > 0 ? byFase[cols[0].key].length : 0
   const totalH    = baseCount * SLOT_H
+  // bracketH extends totalH to accommodate the 3rd-place card in the Final column
+  const bracketH  = hasTercer ? Math.max(totalH, TERCERO_Y + CARD_H + 16) : totalH
   const mainMinW  = cols.length * CARD_W + Math.max(0, cols.length - 1) * CON_W
 
   // Derive medal teams from final / tercer_puesto results
@@ -368,7 +370,7 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
                 return (
                   <Fragment key={fase.key}>
                     {/* Column */}
-                    <div style={{ position: 'relative', width: CARD_W, height: totalH, flexShrink: 0 }}>
+                    <div style={{ position: 'relative', width: CARD_W, height: bracketH, flexShrink: 0 }}>
                       <div style={LABEL_STYLE}>{fase.label}</div>
 
                       {matches.map((p, mi) => (
@@ -393,8 +395,8 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
                     {/* Connector to next column */}
                     {ci < cols.length - 1 && (
                       isSemis
-                        ? <SemisConnector round={ci} n={matches.length} totalH={totalH} terceroCY={TERCERO_CY} />
-                        : <Connector round={ci} n={matches.length} totalH={totalH} />
+                        ? <SemisConnector round={ci} n={matches.length} totalH={bracketH} terceroCY={TERCERO_CY} />
+                        : <Connector round={ci} n={matches.length} totalH={bracketH} />
                     )}
                   </Fragment>
                 )
