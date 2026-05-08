@@ -160,9 +160,16 @@ function MatchSlot({ partido }: { partido: Partido }) {
     (esPenales && partido.ganador === partido.equipo_visitante)
   )
 
-  function Row({ nombre, bandera, goles, win }: { nombre: string; bandera: string | null; goles: number | null; win: boolean }) {
+  function Row({ nombre, bandera, goles, win, showPBadge }: {
+    nombre: string; bandera: string | null; goles: number | null; win: boolean; showPBadge?: boolean
+  }) {
     return (
-      <div className={`flex items-center gap-1.5 px-2 py-[5px] ${win ? 'bg-green-500/10' : ''}`}>
+      <div className={`relative flex items-center gap-1.5 px-2 py-[5px] ${win ? 'bg-green-500/10' : ''}`}>
+        {showPBadge && (
+          <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-500 text-black text-[8px] font-black leading-none z-10">
+            p
+          </span>
+        )}
         {bandera
           ? <img src={bandera} alt="" className="w-5 h-3.5 object-cover rounded-sm shrink-0" />
           : <div className="w-5 h-3.5 bg-slate-700/60 rounded-sm shrink-0" />
@@ -181,14 +188,9 @@ function MatchSlot({ partido }: { partido: Partido }) {
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden w-[172px] shrink-0">
-      <Row nombre={partido.equipo_local}     bandera={partido.bandera_local}     goles={partido.resultado_local}     win={lWin} />
+      <Row nombre={partido.equipo_local}     bandera={partido.bandera_local}     goles={partido.resultado_local}     win={lWin} showPBadge={esPenales && lWin} />
       <div className="h-px bg-slate-800" />
-      <Row nombre={partido.equipo_visitante} bandera={partido.bandera_visitante} goles={partido.resultado_visitante} win={vWin} />
-      {esPenales && (
-        <div className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[9px] font-bold tracking-wide text-right">
-          penales
-        </div>
-      )}
+      <Row nombre={partido.equipo_visitante} bandera={partido.bandera_visitante} goles={partido.resultado_visitante} win={vWin} showPBadge={esPenales && vWin} />
     </div>
   )
 }

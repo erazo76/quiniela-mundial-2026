@@ -257,6 +257,7 @@ export default function AdminPartidosPage() {
   const [token, setToken] = useState('')
   const [sincronizando, setSincronizando] = useState(false)
   const [backfilling, setBackfilling] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [msgSync, setMsgSync] = useState<string | null>(null)
   const router = useRouter()
 
@@ -328,6 +329,31 @@ export default function AdminPartidosPage() {
     }
   }
 
+  async function resetPartidos() {
+    if (!confirm('¿Resetear TODOS los resultados a pendiente? Esta acción no se puede deshacer.')) return
+    setResetting(true)
+    setMsgSync(null)
+    try {
+      const res = await fetch('/api/admin/reset-partidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMsgSync(`Error al resetear: ${data.error ?? 'intenta de nuevo'}`)
+      } else {
+        setMsgSync('Todos los partidos reseteados a pendiente')
+        const r = await fetch('/api/partidos?fase=all')
+        setPartidos(await r.json())
+      }
+    } catch {
+      setMsgSync('Error de conexión')
+    } finally {
+      setResetting(false)
+    }
+  }
+
   function salir() {
     localStorage.removeItem(ADMIN_TOKEN_KEY)
     router.push('/admin')
@@ -348,6 +374,13 @@ export default function AdminPartidosPage() {
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-500">
             <span>{conteoEnVivo} en vivo · {conteoFinalizado} finalizados</span>
+            <button
+              onClick={resetPartidos}
+              disabled={resetting}
+              className="px-3 py-1.5 bg-red-950 hover:bg-red-900 disabled:opacity-40 text-red-400 font-semibold rounded-lg transition-colors"
+            >
+              {resetting ? 'Reseteando...' : 'Reset'}
+            </button>
             <button
               onClick={backfillBracket}
               disabled={backfilling}
