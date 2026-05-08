@@ -347,22 +347,20 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
   const tercerLugar = getTeam(tercerMatch, 'winner')
 
   return (
-    <div className="flex-1 min-h-0 relative overflow-hidden">
-      {/* Medal badges — top-right overlay, fixed above scroll */}
+    <div className="flex-1 min-h-0 overflow-auto relative">
+      {/* Medal badges — sticky top-right so remain visible while scrolling */}
       {(campeon || subcampeon || tercerLugar) && (
-        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 pointer-events-none">
+        <div className="sticky top-2 float-right z-10 flex flex-col gap-1.5 pointer-events-none mr-2">
           {campeon     && <MedalBadge pos={1} team={campeon} />}
           {subcampeon  && <MedalBadge pos={2} team={subcampeon} />}
           {tercerLugar && <MedalBadge pos={3} team={tercerLugar} />}
         </div>
       )}
 
-      {/* Scrollable bracket */}
-      <div className="h-full overflow-auto">
-        {cols.length > 0 && (
-          <div className="p-4 pb-8 flex justify-center" style={{ minWidth: mainMinW + 32 }}>
-            <div className="flex items-start" style={{ paddingTop: LABEL_H }}>
-              {cols.map((fase, ci) => {
+      {cols.length > 0 && (
+        <div className="p-4 pb-8 flex justify-center" style={{ minWidth: mainMinW + 32 }}>
+          <div className="flex items-start" style={{ paddingTop: LABEL_H }}>
+            {cols.map((fase, ci) => {
                 const matches = byFase[fase.key]
                 const isFinal = fase.key === 'final'
                 const isSemis = ci === semisIdx && hasTercer
@@ -404,7 +402,6 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
             </div>
           </div>
         )}
-      </div>
     </div>
   )
 }
