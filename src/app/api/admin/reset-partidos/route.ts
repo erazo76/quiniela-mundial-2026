@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
   // ─── 2. Resetear partidos ──────────────────────────────────────────────────
 
-  // Reset grupos + dieciseisavos: keep team names/flags, clear results
+  // Reset grupos: keep team names/flags, clear results only
   await supabase
     .from('partidos')
     .update({
@@ -89,7 +89,52 @@ export async function POST(req: NextRequest) {
       estado: 'pendiente',
       ganador: null,
     })
-    .in('fase', ['grupos', 'dieciseisavos'])
+    .eq('fase', 'grupos')
+
+  // Reset dieciseisavos: restore original FIFA 2026 bracket placeholders (ordered by fecha_hora)
+  const DIECISEISAVOS_PH = [
+    { local: '1E',  visitante: '3°(ABCDF)' },
+    { local: '1I',  visitante: '3°(CDFGH)' },
+    { local: '2A',  visitante: '2B'        },
+    { local: '1F',  visitante: '2C'        },
+    { local: '2K',  visitante: '2L'        },
+    { local: '1H',  visitante: '2J'        },
+    { local: '1D',  visitante: '3°(BEFIJ)' },
+    { local: '1G',  visitante: '3°(AEHIJ)' },
+    { local: '1C',  visitante: '2F'        },
+    { local: '2E',  visitante: '2I'        },
+    { local: '1A',  visitante: '3°(CEFHI)' },
+    { local: '1L',  visitante: '3°(EHIJK)' },
+    { local: '1J',  visitante: '2H'        },
+    { local: '2D',  visitante: '2G'        },
+    { local: '1B',  visitante: '3°(EFGIJ)' },
+    { local: '1K',  visitante: '3°(DEIJL)' },
+  ]
+
+  const { data: d32 } = await supabase
+    .from('partidos')
+    .select('id')
+    .eq('fase', 'dieciseisavos')
+    .order('fecha_hora', { ascending: true })
+
+  if (d32?.length) {
+    for (let i = 0; i < d32.length; i++) {
+      const ph = DIECISEISAVOS_PH[i]
+      if (!ph) continue
+      await supabase.from('partidos').update({
+        equipo_local: ph.local,
+        equipo_visitante: ph.visitante,
+        bandera_local: null,
+        bandera_visitante: null,
+        resultado_local: null,
+        resultado_visitante: null,
+        penales_local: null,
+        penales_visitante: null,
+        estado: 'pendiente',
+        ganador: null,
+      }).eq('id', d32[i].id)
+    }
+  }
 
   // Reset knockout bracket to original placeholders (order by fecha_hora gives positions)
   const FASES_KNOCKOUT: Array<{ fase: string; local: (n: number) => string; visitante: (n: number) => string }> = [
