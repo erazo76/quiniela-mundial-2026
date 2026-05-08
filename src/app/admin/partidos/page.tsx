@@ -256,6 +256,7 @@ export default function AdminPartidosPage() {
   const [faseActiva, setFaseActiva] = useState('grupos')
   const [token, setToken] = useState('')
   const [sincronizando, setSincronizando] = useState(false)
+  const [backfilling, setBackfilling] = useState(false)
   const [msgSync, setMsgSync] = useState<string | null>(null)
   const router = useRouter()
 
@@ -303,6 +304,30 @@ export default function AdminPartidosPage() {
     }
   }
 
+  async function backfillBracket() {
+    setBackfilling(true)
+    setMsgSync(null)
+    try {
+      const res = await fetch('/api/admin/backfill-bracket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMsgSync(`Error en backfill: ${data.error ?? 'intenta de nuevo'}`)
+      } else {
+        setMsgSync(`Bracket resuelto · ${data.procesados} partido(s) procesados`)
+        const r = await fetch('/api/partidos?fase=all')
+        setPartidos(await r.json())
+      }
+    } catch {
+      setMsgSync('Error de conexión')
+    } finally {
+      setBackfilling(false)
+    }
+  }
+
   function salir() {
     localStorage.removeItem(ADMIN_TOKEN_KEY)
     router.push('/admin')
@@ -323,6 +348,13 @@ export default function AdminPartidosPage() {
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-500">
             <span>{conteoEnVivo} en vivo · {conteoFinalizado} finalizados</span>
+            <button
+              onClick={backfillBracket}
+              disabled={backfilling}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 font-semibold rounded-lg transition-colors"
+            >
+              {backfilling ? 'Resolviendo...' : 'Resolver bracket'}
+            </button>
             <button
               onClick={sincronizar}
               disabled={sincronizando}

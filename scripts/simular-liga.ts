@@ -43,8 +43,8 @@ const PARTICIPANTES: Participante[] = [
 
 // Fases del Mundial 2026 en orden y cuántos partidos simular por fase
 const FASES: Array<{ nombre: string; limite: number }> = [
-  { nombre: 'grupos',        limite: 8 },
-  { nombre: 'dieciseisavos', limite: 8 },
+  { nombre: 'grupos',        limite: 72 }, // all 72 group matches → resolver fires for each completed group
+  { nombre: 'dieciseisavos', limite: 16 },
   { nombre: 'octavos',       limite: 8 },
   { nombre: 'cuartos',       limite: 4 },
   { nombre: 'semis',         limite: 2 },

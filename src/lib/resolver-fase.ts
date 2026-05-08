@@ -145,27 +145,54 @@ async function reemplazarPlaceholder(
   placeholder: string,
   equipo: string
 ): Promise<void> {
+  // Look up the flag for this team from any existing match
+  const bandera = await buscarBandera(supabase, equipo)
+
   // local
   const { data: local } = await supabase
     .from('partidos')
-    .select('id')
+    .select('id, ganador')
     .eq('fase', fase)
     .eq('equipo_local', placeholder)
     .maybeSingle()
   if (local) {
-    await supabase.from('partidos').update({ equipo_local: equipo }).eq('id', local.id)
+    const upd: Record<string, string | null> = { equipo_local: equipo, bandera_local: bandera }
+    if (local.ganador === placeholder) upd.ganador = equipo
+    await supabase.from('partidos').update(upd).eq('id', local.id)
   }
 
   // visitante
   const { data: visit } = await supabase
     .from('partidos')
-    .select('id')
+    .select('id, ganador')
     .eq('fase', fase)
     .eq('equipo_visitante', placeholder)
     .maybeSingle()
   if (visit) {
-    await supabase.from('partidos').update({ equipo_visitante: equipo }).eq('id', visit.id)
+    const upd: Record<string, string | null> = { equipo_visitante: equipo, bandera_visitante: bandera }
+    if (visit.ganador === placeholder) upd.ganador = equipo
+    await supabase.from('partidos').update(upd).eq('id', visit.id)
   }
+}
+
+async function buscarBandera(supabase: SupabaseClient, equipo: string): Promise<string | null> {
+  const { data: asLocal } = await supabase
+    .from('partidos')
+    .select('bandera_local')
+    .eq('equipo_local', equipo)
+    .not('bandera_local', 'is', null)
+    .limit(1)
+    .maybeSingle()
+  if (asLocal?.bandera_local) return asLocal.bandera_local
+
+  const { data: asVisit } = await supabase
+    .from('partidos')
+    .select('bandera_visitante')
+    .eq('equipo_visitante', equipo)
+    .not('bandera_visitante', 'is', null)
+    .limit(1)
+    .maybeSingle()
+  return asVisit?.bandera_visitante ?? null
 }
 
 // ---------------------------------------------------------------------------
