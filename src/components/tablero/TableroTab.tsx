@@ -221,32 +221,7 @@ function Connector({ round, n, totalH }: { round: number; n: number; totalH: num
   )
 }
 
-// ─── LoserSlot ─────────────────────────────────────────────────────────────
-
-function LoserSlot({ partido, label }: { partido: Partido; label: string }) {
-  const rl = partido.resultado_local
-  const rv = partido.resultado_visitante
-  const hasResult = rl != null && rv != null
-  const nombre = !hasResult ? label : rl! < rv! ? partido.equipo_local : partido.equipo_visitante
-  const bandera = !hasResult ? null : rl! < rv! ? partido.bandera_local : partido.bandera_visitante
-
-  return (
-    <div
-      className="bg-slate-900/50 border border-slate-800/50 rounded-lg w-[172px] shrink-0 flex items-center"
-      style={{ height: CARD_H }}
-    >
-      <div className="flex items-center gap-1.5 px-2">
-        {bandera
-          ? <img src={bandera} alt="" className="w-5 h-3.5 object-cover rounded-sm shrink-0 opacity-50" />
-          : <div className="w-5 h-3.5 bg-slate-800 rounded-sm shrink-0" />
-        }
-        <span className="text-[11px] text-slate-500 italic truncate">{shortName(nombre)}</span>
-      </div>
-    </div>
-  )
-}
-
-// ─── Phase label helper ────────────────────────────────────────────────────
+// ─── Phase label style ─────────────────────────────────────────────────────
 
 const LABEL_STYLE: CSSProperties = {
   position: 'absolute',
@@ -262,6 +237,63 @@ const LABEL_STYLE: CSSProperties = {
   lineHeight: `${LABEL_H}px`,
 }
 
+// ─── SemisConnector ────────────────────────────────────────────────────────
+// Like Connector but adds dashed loser lines branching to the 3rd-place card
+
+function SemisConnector({ round, n, totalH, terceroCY }: {
+  round: number; n: number; totalH: number; terceroCY: number
+}) {
+  const mx = CON_W / 2
+  const pairs = Math.floor(n / 2)
+  return (
+    <svg width={CON_W} height={totalH} style={{ display: 'block', flexShrink: 0 }} aria-hidden>
+      {Array.from({ length: pairs }, (_, j) => {
+        const y1 = slotCenter(round, j * 2)
+        const y2 = slotCenter(round, j * 2 + 1)
+        const ym = (y1 + y2) / 2
+        return (
+          <g key={j}>
+            {/* Winner path — solid green (same as regular Connector) */}
+            <g stroke={LINE} strokeWidth={1.5} fill="none" strokeLinecap="round">
+              <line x1={0} y1={y1} x2={mx} y2={y1} />
+              <line x1={0} y1={y2} x2={mx} y2={y2} />
+              <line x1={mx} y1={y1} x2={mx} y2={y2} />
+              <line x1={mx} y1={ym} x2={CON_W} y2={ym} />
+            </g>
+            {/* Loser path — dashed slate, branches from winner midbar down to 3rd-place */}
+            <g stroke="#475569" strokeWidth={1} fill="none" strokeLinecap="round" strokeDasharray="3 3">
+              <line x1={mx} y1={ym} x2={mx} y2={terceroCY} />
+              <line x1={mx} y1={terceroCY} x2={CON_W} y2={terceroCY} />
+            </g>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+// ─── MedalBadge ────────────────────────────────────────────────────────────
+
+const MEDALLAS_IMG = ['/ui/BrainMedal1st.png', '/ui/BrainMedal2nd.png', '/ui/BrainMedal3rd.png']
+
+function MedalBadge({ pos, team }: {
+  pos: 1 | 2 | 3
+  team: { nombre: string; bandera: string | null }
+}) {
+  return (
+    <div className="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 rounded-lg px-2 py-1 shadow-lg">
+      <img src={MEDALLAS_IMG[pos - 1]} alt={`${pos}°`} className="w-5 h-5 shrink-0" />
+      {team.bandera
+        ? <img src={team.bandera} alt="" className="w-5 h-3.5 object-cover rounded-sm shrink-0" />
+        : <div className="w-5 h-3.5 bg-slate-700 rounded-sm shrink-0" />
+      }
+      <span className="text-[11px] text-white font-semibold truncate max-w-[80px]">
+        {shortName(team.nombre)}
+      </span>
+    </div>
+  )
+}
+
 // ─── LlaveView ─────────────────────────────────────────────────────────────
 
 function LlaveView({ partidos }: { partidos: Partido[] }) {
@@ -270,16 +302,21 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
   for (const p of partidos) {
     if (byFase[p.fase] !== undefined) byFase[p.fase].push(p)
   }
-
-  // Tercer puesto is handled separately (not in the main winner bracket)
-  const tercer = partidos
+  byFase['tercer_puesto'] = partidos
     .filter(p => p.fase === 'tercer_puesto')
     .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
-  const semis = byFase['semis'] ?? []
 
   const cols = FASES.filter(f => byFase[f.key].length > 0)
+  const semisIdx = cols.findIndex(c => c.key === 'semis')
+  const finalIdx = cols.findIndex(c => c.key === 'final')
+  const hasTercer = byFase['tercer_puesto'].length > 0 && finalIdx >= 0
 
-  if (cols.length === 0 && tercer.length === 0) {
+  // 3rd-place card sits just below the Final card in the same column
+  const FINAL_Y    = finalIdx >= 0 ? slotTop(finalIdx, 0) : 0
+  const TERCERO_Y  = FINAL_Y + CARD_H + 24         // top of 3rd-place card
+  const TERCERO_CY = TERCERO_Y + CARD_H / 2        // center Y (for connector target)
+
+  if (cols.length === 0 && !hasTercer) {
     return (
       <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
         Sin partidos de eliminatorias
@@ -288,72 +325,84 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
   }
 
   const baseCount = cols.length > 0 ? byFase[cols[0].key].length : 0
-  const totalH = baseCount * SLOT_H
-  const mainMinW = cols.length * CARD_W + Math.max(0, cols.length - 1) * CON_W
-  const scrollMinW = Math.max(mainMinW, 2 * CARD_W + CON_W) + 32
+  const totalH    = baseCount * SLOT_H
+  const mainMinW  = cols.length * CARD_W + Math.max(0, cols.length - 1) * CON_W
+
+  // Derive medal teams from final / tercer_puesto results
+  const finalMatch  = byFase['final']?.[0]
+  const tercerMatch = byFase['tercer_puesto']?.[0]
+
+  function getTeam(m: Partido | undefined, role: 'winner' | 'loser') {
+    if (!m || m.resultado_local == null || m.resultado_visitante == null) return null
+    const lw = m.resultado_local > m.resultado_visitante
+    return role === 'winner'
+      ? { nombre: lw ? m.equipo_local : m.equipo_visitante, bandera: lw ? m.bandera_local : m.bandera_visitante }
+      : { nombre: lw ? m.equipo_visitante : m.equipo_local, bandera: lw ? m.bandera_visitante : m.bandera_local }
+  }
+
+  const campeon     = getTeam(finalMatch,  'winner')
+  const subcampeon  = getTeam(finalMatch,  'loser')
+  const tercerLugar = getTeam(tercerMatch, 'winner')
 
   return (
-    <div className="flex-1 min-h-0 overflow-auto" style={{ minWidth: scrollMinW }}>
-      {/* Main winner bracket */}
-      {cols.length > 0 && (
-        <div className="p-4 pb-4 flex justify-center">
-          <div className="flex items-start" style={{ paddingTop: LABEL_H }}>
-            {cols.map((fase, ci) => {
-              const matches = byFase[fase.key]
-              return (
-                <Fragment key={fase.key}>
-                  <div style={{ position: 'relative', width: CARD_W, height: totalH, flexShrink: 0 }}>
-                    <div style={LABEL_STYLE}>{fase.label}</div>
-                    {matches.map((p, mi) => (
-                      <div key={p.id} style={{ position: 'absolute', top: slotTop(ci, mi), left: 0 }}>
-                        <MatchSlot partido={p} />
-                      </div>
-                    ))}
-                  </div>
-                  {ci < cols.length - 1 && (
-                    <Connector round={ci} n={matches.length} totalH={totalH} />
-                  )}
-                </Fragment>
-              )
-            })}
-          </div>
+    <div className="flex-1 min-h-0 relative overflow-hidden">
+      {/* Medal badges — top-right overlay, fixed above scroll */}
+      {(campeon || subcampeon || tercerLugar) && (
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 pointer-events-none">
+          {campeon     && <MedalBadge pos={1} team={campeon} />}
+          {subcampeon  && <MedalBadge pos={2} team={subcampeon} />}
+          {tercerLugar && <MedalBadge pos={3} team={tercerLugar} />}
         </div>
       )}
 
-      {/* Consolation bracket: semis losers → 3rd place match */}
-      {tercer.length > 0 && semis.length >= 2 && (
-        <div
-          className="px-4 pb-8 flex justify-center"
-          style={{ borderTop: '1px dashed #1e293b', paddingTop: 24 }}
-        >
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: 16, color: '#475569', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-              3er y 4to Lugar
-            </div>
+      {/* Scrollable bracket */}
+      <div className="h-full overflow-auto">
+        {cols.length > 0 && (
+          <div className="p-4 pb-8 flex justify-center" style={{ minWidth: mainMinW + 32 }}>
             <div className="flex items-start" style={{ paddingTop: LABEL_H }}>
-              {/* Loser slots from semis */}
-              <div style={{ position: 'relative', width: CARD_W, height: 2 * SLOT_H, flexShrink: 0 }}>
-                <div style={LABEL_STYLE}>Semis</div>
-                {semis.map((p, i) => (
-                  <div key={p.id} style={{ position: 'absolute', top: slotTop(0, i), left: 0 }}>
-                    <LoserSlot partido={p} label={`Perdedor S${i + 1}`} />
-                  </div>
-                ))}
-              </div>
-              <Connector round={0} n={2} totalH={2 * SLOT_H} />
-              {/* Tercer puesto match */}
-              <div style={{ position: 'relative', width: CARD_W, height: 2 * SLOT_H, flexShrink: 0 }}>
-                <div style={LABEL_STYLE}>3er Puesto</div>
-                {tercer.map((p, i) => (
-                  <div key={p.id} style={{ position: 'absolute', top: slotTop(1, i), left: 0 }}>
-                    <MatchSlot partido={p} />
-                  </div>
-                ))}
-              </div>
+              {cols.map((fase, ci) => {
+                const matches = byFase[fase.key]
+                const isFinal = fase.key === 'final'
+                const isSemis = ci === semisIdx && hasTercer
+
+                return (
+                  <Fragment key={fase.key}>
+                    {/* Column */}
+                    <div style={{ position: 'relative', width: CARD_W, height: totalH, flexShrink: 0 }}>
+                      <div style={LABEL_STYLE}>{fase.label}</div>
+
+                      {matches.map((p, mi) => (
+                        <div key={p.id} style={{ position: 'absolute', top: slotTop(ci, mi), left: 0 }}>
+                          <MatchSlot partido={p} />
+                        </div>
+                      ))}
+
+                      {/* 3rd-place card in the Final column */}
+                      {isFinal && byFase['tercer_puesto'].map((p) => (
+                        <Fragment key={p.id}>
+                          <div style={{ ...LABEL_STYLE, position: 'absolute', top: TERCERO_Y - LABEL_H, left: 0, right: 0 }}>
+                            3er Puesto
+                          </div>
+                          <div style={{ position: 'absolute', top: TERCERO_Y, left: 0 }}>
+                            <MatchSlot partido={p} />
+                          </div>
+                        </Fragment>
+                      ))}
+                    </div>
+
+                    {/* Connector to next column */}
+                    {ci < cols.length - 1 && (
+                      isSemis
+                        ? <SemisConnector round={ci} n={matches.length} totalH={totalH} terceroCY={TERCERO_CY} />
+                        : <Connector round={ci} n={matches.length} totalH={totalH} />
+                    )}
+                  </Fragment>
+                )
+              })}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
