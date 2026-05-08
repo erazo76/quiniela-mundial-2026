@@ -148,17 +148,10 @@ function slotCenter(round: number, idx: number): number {
 
 function MatchSlot({ partido }: { partido: Partido }) {
   const hasResult = partido.resultado_local != null && partido.resultado_visitante != null
-  const esPenales = hasResult
-    && partido.resultado_local === partido.resultado_visitante
-    && !!partido.ganador
-  const lWin = hasResult && (
-    partido.resultado_local! > partido.resultado_visitante! ||
-    (esPenales && partido.ganador === partido.equipo_local)
-  )
-  const vWin = hasResult && (
-    partido.resultado_visitante! > partido.resultado_local! ||
-    (esPenales && partido.ganador === partido.equipo_visitante)
-  )
+  // esPenales cuando existen goles de penales registrados (resultado_local ya incluye el total)
+  const esPenales = hasResult && partido.penales_local != null
+  const lWin = hasResult && partido.resultado_local! > partido.resultado_visitante!
+  const vWin = hasResult && partido.resultado_visitante! > partido.resultado_local!
 
   function Row({ nombre, bandera, goles, win, showPBadge }: {
     nombre: string; bandera: string | null; goles: number | null; win: boolean; showPBadge?: boolean
@@ -166,7 +159,7 @@ function MatchSlot({ partido }: { partido: Partido }) {
     return (
       <div className={`relative flex items-center gap-1.5 px-2 py-[5px] ${win ? 'bg-green-500/10' : ''}`}>
         {showPBadge && (
-          <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-500 text-black text-[8px] font-black leading-none z-10">
+          <span className="absolute bottom-0.5 right-0.5 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-500 text-black text-[8px] font-black leading-none z-10">
             p
           </span>
         )}

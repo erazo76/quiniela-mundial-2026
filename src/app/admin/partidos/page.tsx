@@ -34,13 +34,14 @@ interface FilaPartidoProps {
   onActualizado: (id: string, campos: Partial<Partido>) => void
 }
 
-const FASES_ELIMINACION = ['dieciseisavos', 'octavos', 'cuartos', 'semis']
+const FASES_ELIMINACION = ['dieciseisavos', 'octavos', 'cuartos', 'semis', 'tercer_puesto', 'final']
 
 function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
   const [resLocal, setResLocal] = useState(partido.resultado_local ?? 0)
   const [resVisit, setResVisit] = useState(partido.resultado_visitante ?? 0)
+  const [penalesLocal, setPenalesLocal] = useState(0)
+  const [penalesVisitante, setPenalesVisitante] = useState(0)
   const [estado, setEstado] = useState(partido.estado)
-  const [ganadorManual, setGanadorManual] = useState<string>('')
   const [guardando, setGuardando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
   const [verPreds, setVerPreds] = useState(false)
@@ -49,7 +50,8 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
 
   const esEliminatoria = FASES_ELIMINACION.includes(partido.fase)
   const esEmpate = resLocal === resVisit
-  const necesitaGanadorManual = esEliminatoria && esEmpate && estado === 'finalizado'
+  const necesitaPenales = esEliminatoria && esEmpate && estado === 'finalizado'
+  const penalesValidos = penalesLocal !== penalesVisitante
 
   async function togglePreds() {
     if (verPreds) { setVerPreds(false); return }
@@ -70,17 +72,21 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
     setGuardando(true)
     setMsg(null)
     try {
+      const body: Record<string, unknown> = {
+        token,
+        partido_id: partido.id,
+        resultado_local: resLocal,
+        resultado_visitante: resVisit,
+        estado,
+      }
+      if (necesitaPenales && penalesValidos) {
+        body.penales_local = penalesLocal
+        body.penales_visitante = penalesVisitante
+      }
       const res = await fetch('/api/admin/resultado', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          partido_id: partido.id,
-          resultado_local: resLocal,
-          resultado_visitante: resVisit,
-          estado,
-          ...(ganadorManual ? { ganador_manual: ganadorManual } : {}),
-        }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -92,11 +98,12 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
           ? `Guardado · ${data.procesadas} predicciones calculadas`
           : 'Guardado'
       setMsg({ texto, ok: true })
+      const totalLocal = resLocal + (necesitaPenales && penalesValidos ? penalesLocal : 0)
+      const totalVisitante = resVisit + (necesitaPenales && penalesValidos ? penalesVisitante : 0)
       onActualizado(partido.id, {
-        resultado_local: resLocal,
-        resultado_visitante: resVisit,
+        resultado_local: totalLocal,
+        resultado_visitante: totalVisitante,
         estado,
-        ganador: ganadorManual || undefined,
       })
     } catch {
       setMsg({ texto: 'Error de conexión', ok: false })
@@ -168,33 +175,41 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
             {/* Guardar */}
             <button
               onClick={guardar}
-              disabled={guardando || (necesitaGanadorManual && !ganadorManual)}
+              disabled={guardando || (necesitaPenales && !penalesValidos)}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-40 text-black text-sm font-bold rounded-lg transition-colors"
             >
               {guardando ? '...' : 'Guardar'}
             </button>
           </div>
 
-          {/* Selector de ganador por penales (eliminatoria + empate + finalizado) */}
-          {necesitaGanadorManual && (
+          {/* Goles en penales (eliminatoria + empate en regulación + finalizado) */}
+          {necesitaPenales && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-amber-400 font-semibold">
-                Empate en eliminatoria — ¿Quién ganó en penales?
+                Empate en regulación — ingresá los goles en penales
               </p>
-              <div className="flex gap-2">
-                {[partido.equipo_local, partido.equipo_visitante].map((equipo) => (
-                  <button
-                    key={equipo}
-                    onClick={() => setGanadorManual(equipo)}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-colors ${
-                      ganadorManual === equipo
-                        ? 'bg-amber-500 border-amber-500 text-black'
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-500/50'
-                    }`}
-                  >
-                    {equipo}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={penalesLocal}
+                  onChange={(e) => setPenalesLocal(Number(e.target.value))}
+                  className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-amber-500"
+                />
+                <span className="text-slate-600 font-bold">-</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={penalesVisitante}
+                  onChange={(e) => setPenalesVisitante(Number(e.target.value))}
+                  className="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg py-2 text-white font-bold focus:outline-none focus:border-amber-500"
+                />
+                <span className="text-xs text-slate-500">(penales)</span>
+                {necesitaPenales && !penalesValidos && (
+                  <span className="text-xs text-red-400">Los penales deben tener ganador</span>
+                )}
               </div>
             </div>
           )}
@@ -205,6 +220,9 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
       {finalizado && (
         <p className="text-slate-400 text-sm font-bold">
           Resultado: {partido.resultado_local} - {partido.resultado_visitante}
+          {partido.penales_local != null && (
+            <span className="ml-1.5 text-amber-400 text-xs font-semibold">(p)</span>
+          )}
           <span className="ml-2 text-slate-600 font-normal text-xs">calculado</span>
         </p>
       )}

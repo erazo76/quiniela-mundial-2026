@@ -12,6 +12,8 @@ export interface Partido {
   estado: string
   sede: string | null
   ganador: string | null
+  penales_local: number | null
+  penales_visitante: number | null
   prediccion?: Prediccion
 }
 

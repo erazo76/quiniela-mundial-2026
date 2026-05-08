@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { procesarResultadoPartido } from './calcular-resultado'
+import { resolverTrasResultado } from './resolver-fase'
 
 const TEAM_MAP: Record<string, string> = {
   Argentina: 'Argentina',
@@ -183,7 +184,10 @@ export async function syncResultadosFootballData(
   const partidosApi: Array<{
     homeTeam: { name: string }
     awayTeam: { name: string }
-    score: { fullTime: { home: number | null; away: number | null } }
+    score: {
+      fullTime: { home: number | null; away: number | null }
+      penalties: { home: number | null; away: number | null } | null
+    }
   }> = fdData.matches ?? []
 
   if (!partidosApi.length) {
@@ -214,19 +218,36 @@ export async function syncResultadosFootballData(
   for (const partido of partidosApi) {
     const localMapeado = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
     const visitanteMapeado = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
-    const resLocal = partido.score.fullTime.home
-    const resVisit = partido.score.fullTime.away
+    const ftLocal = partido.score.fullTime.home
+    const ftVisitante = partido.score.fullTime.away
 
-    if (resLocal == null || resVisit == null) continue
+    if (ftLocal == null || ftVisitante == null) continue
 
     const nuestroPartido = nuestrosPartidos.find(
       (p) => p.equipo_local === localMapeado && p.equipo_visitante === visitanteMapeado
     )
     if (!nuestroPartido) continue
 
+    // Penales: solo aplican si la regulación terminó empatada
+    const pen = partido.score.penalties
+    const penLocal = ftLocal === ftVisitante && pen?.home != null ? pen.home : null
+    const penVisitante = ftLocal === ftVisitante && pen?.away != null ? pen.away : null
+    const totalLocal = ftLocal + (penLocal ?? 0)
+    const totalVisitante = ftVisitante + (penVisitante ?? 0)
+
+    const updatePartido: Record<string, unknown> = {
+      resultado_local: totalLocal,
+      resultado_visitante: totalVisitante,
+      estado: 'finalizado',
+    }
+    if (penLocal != null) {
+      updatePartido.penales_local = penLocal
+      updatePartido.penales_visitante = penVisitante
+    }
+
     const { error: errUpdate } = await supabase
       .from('partidos')
-      .update({ resultado_local: resLocal, resultado_visitante: resVisit, estado: 'finalizado' })
+      .update(updatePartido)
       .eq('id', nuestroPartido.id)
 
     if (errUpdate) {
@@ -237,15 +258,18 @@ export async function syncResultadosFootballData(
     const { error: errCalculo } = await procesarResultadoPartido(
       supabase,
       nuestroPartido.id,
-      resLocal,
-      resVisit
+      totalLocal,
+      totalVisitante
     )
 
     if (errCalculo) {
       errores.push(`Calculo ${nuestroPartido.id}: ${errCalculo}`)
-    } else {
-      sincronizados++
+      continue
     }
+
+    // Resolver bracket (avanzar equipos a la siguiente fase)
+    await resolverTrasResultado(supabase, nuestroPartido.id)
+    sincronizados++
   }
 
   return {

@@ -111,19 +111,24 @@ function randomScore(): [number, number] {
   ]
 }
 
-const FASES_ELIMINACION = new Set(['dieciseisavos', 'octavos', 'cuartos', 'semis'])
+const FASES_ELIMINACION = new Set(['dieciseisavos', 'octavos', 'cuartos', 'semis', 'tercer_puesto', 'final'])
 
-// In knockout phases, draws go to penalties — pick a random winner
-function ganadorPenales(
+// In knockout phases, draws go to penalties — generate random penalty scores
+function penalesAleatorios(
   fase: string,
-  equipoLocal: string,
-  equipoVisitante: string,
   rl: number,
   rv: number
-): string | undefined {
+): { penales_local: number; penales_visitante: number } | undefined {
   if (!FASES_ELIMINACION.has(fase)) return undefined
   if (rl !== rv) return undefined
-  return Math.random() < 0.5 ? equipoLocal : equipoVisitante
+  // Simulate penalty shootout: 3-7 kicks each, must have a winner
+  const pool = [3, 4, 4, 5, 5, 5, 6, 7]
+  let pl = 0, pv = 0
+  while (pl === pv) {
+    pl = pool[Math.floor(Math.random() * pool.length)]
+    pv = pool[Math.floor(Math.random() * pool.length)]
+  }
+  return { penales_local: pl, penales_visitante: pv }
 }
 
 function calcApuesta(fichas: number): number {
@@ -328,16 +333,18 @@ async function main() {
 
       // Cargar resultado oficial (aleatorio)
       const [rl, rv] = randomScore()
-      const ganadorManual = ganadorPenales(fase, partido.equipo_local, partido.equipo_visitante, rl, rv)
+      const penales = penalesAleatorios(fase, rl, rv)
       await apiPost('/api/admin/resultado', {
         token: adminToken,
         partido_id: partido.id,
         resultado_local: rl,
         resultado_visitante: rv,
         estado: 'finalizado',
-        ...(ganadorManual ? { ganador_manual: ganadorManual } : {}),
+        ...(penales ?? {}),
       })
-      const extra = ganadorManual ? ` (penales: ${ganadorManual})` : ''
+      const extra = penales
+        ? ` (penales: ${penales.penales_local}-${penales.penales_visitante} → total ${rl + penales.penales_local}-${rv + penales.penales_visitante})`
+        : ''
       console.log(`    Resultado: ${partido.equipo_local} ${rl} — ${rv} ${partido.equipo_visitante}${extra}`)
       resultadosFase++
     }
