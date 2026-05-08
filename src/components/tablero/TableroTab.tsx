@@ -148,8 +148,17 @@ function slotCenter(round: number, idx: number): number {
 
 function MatchSlot({ partido }: { partido: Partido }) {
   const hasResult = partido.resultado_local != null && partido.resultado_visitante != null
-  const lWin = hasResult && partido.resultado_local! > partido.resultado_visitante!
-  const vWin = hasResult && partido.resultado_visitante! > partido.resultado_local!
+  const esPenales = hasResult
+    && partido.resultado_local === partido.resultado_visitante
+    && !!partido.ganador
+  const lWin = hasResult && (
+    partido.resultado_local! > partido.resultado_visitante! ||
+    (esPenales && partido.ganador === partido.equipo_local)
+  )
+  const vWin = hasResult && (
+    partido.resultado_visitante! > partido.resultado_local! ||
+    (esPenales && partido.ganador === partido.equipo_visitante)
+  )
 
   function Row({ nombre, bandera, goles, win }: { nombre: string; bandera: string | null; goles: number | null; win: boolean }) {
     return (
@@ -175,6 +184,11 @@ function MatchSlot({ partido }: { partido: Partido }) {
       <Row nombre={partido.equipo_local}     bandera={partido.bandera_local}     goles={partido.resultado_local}     win={lWin} />
       <div className="h-px bg-slate-800" />
       <Row nombre={partido.equipo_visitante} bandera={partido.bandera_visitante} goles={partido.resultado_visitante} win={vWin} />
+      {esPenales && (
+        <div className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[9px] font-bold tracking-wide text-right">
+          penales
+        </div>
+      )}
     </div>
   )
 }
