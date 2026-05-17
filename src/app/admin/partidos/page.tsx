@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Partido } from '@/types'
+import { getEmpatadosSinResolver } from '@/lib/grupos'
 
 const ADMIN_TOKEN_KEY = 'qm2026_admin_token'
 
@@ -274,6 +275,191 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
     </div>
   )
 }
+
+// ─── Desempate components ──────────────────────────────────────────────────
+
+function GrupoDesempate({
+  letra, equipos, ordenActual, token, onGuardado,
+}: {
+  letra: string
+  equipos: string[]
+  ordenActual: Record<string, number>
+  token: string
+  onGuardado: (grupo: string, orden: Record<string, number>) => void
+}) {
+  const [orden, setOrden] = useState<string[]>(() =>
+    [...equipos].sort((a, b) => {
+      const oa = ordenActual[a] ?? Infinity, ob = ordenActual[b] ?? Infinity
+      return oa !== ob ? oa - ob : a.localeCompare(b)
+    })
+  )
+  const [guardando, setGuardando] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+
+  function mover(idx: number, dir: -1 | 1) {
+    const next = [...orden]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    setOrden(next)
+    setMsg(null)
+  }
+
+  async function guardar() {
+    setGuardando(true); setMsg(null)
+    const items = orden.map((equipo, i) => ({ grupo: letra, equipo, orden: i + 1 }))
+    const res = await fetch('/api/admin/desempates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, items }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setMsg('Guardado')
+      const map: Record<string, number> = {}
+      orden.forEach((eq, i) => { map[eq] = i + 1 })
+      onGuardado(letra, map)
+    } else {
+      setMsg(data.error ?? 'Error')
+    }
+    setGuardando(false)
+  }
+
+  async function borrar() {
+    setGuardando(true)
+    const res = await fetch('/api/admin/desempates', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, grupo: letra }),
+    })
+    if (res.ok) {
+      setMsg('Borrado')
+      onGuardado(letra, {})
+      setOrden([...equipos].sort((a, b) => a.localeCompare(b)))
+    }
+    setGuardando(false)
+  }
+
+  const hasOrden = Object.keys(ordenActual).length > 0
+
+  return (
+    <div className="bg-amber-950/20 border border-amber-700/40 rounded-xl p-4 flex flex-col gap-3">
+      <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Grupo {letra}</p>
+      <div className="flex flex-col gap-2">
+        {orden.map((equipo, idx) => (
+          <div key={equipo} className="flex items-center gap-3">
+            <span className="text-slate-500 text-xs w-5 shrink-0 tabular-nums">{idx + 1}°</span>
+            <span className="text-white text-sm flex-1 truncate">{equipo}</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => mover(idx, -1)}
+                disabled={idx === 0}
+                className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 disabled:opacity-20 rounded-lg text-xs text-slate-300 transition-colors"
+              >↑</button>
+              <button
+                onClick={() => mover(idx, 1)}
+                disabled={idx === orden.length - 1}
+                className="w-7 h-7 flex items-center justify-center bg-slate-800 hover:bg-slate-700 disabled:opacity-20 rounded-lg text-xs text-slate-300 transition-colors"
+              >↓</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-3 pt-1">
+        <button
+          onClick={guardar}
+          disabled={guardando}
+          className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg transition-colors disabled:opacity-40"
+        >
+          {guardando ? '...' : 'Guardar orden'}
+        </button>
+        {hasOrden && (
+          <button
+            onClick={borrar}
+            disabled={guardando}
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-semibold rounded-lg transition-colors disabled:opacity-40"
+          >
+            Borrar
+          </button>
+        )}
+        {msg && (
+          <span className={`text-xs font-semibold ${msg === 'Guardado' ? 'text-green-400' : msg === 'Borrado' ? 'text-slate-400' : 'text-red-400'}`}>
+            {msg}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const GRUPOS_LETRAS = ['A','B','C','D','E','F','G','H','I','J','K','L']
+
+function DesempatePanel({ partidos, token }: { partidos: Partido[]; token: string }) {
+  const [ordenData, setOrdenData] = useState<Record<string, Record<string, number>>>({})
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/desempates')
+      .then(r => r.json())
+      .then((rows: { grupo: string; equipo: string; orden: number }[]) => {
+        const map: Record<string, Record<string, number>> = {}
+        for (const row of rows) {
+          if (!map[row.grupo]) map[row.grupo] = {}
+          map[row.grupo][row.equipo] = row.orden
+        }
+        setOrdenData(map)
+      })
+      .finally(() => setCargando(false))
+  }, [])
+
+  if (cargando) return null
+
+  // Detect groups with all matches done and unresolvable ties
+  const gruposConEmpate: { letra: string; equiposEmpatados: string[][] }[] = []
+  for (const letra of GRUPOS_LETRAS) {
+    const gPartidos = partidos.filter(p => p.grupo === letra)
+    if (gPartidos.length === 0) continue
+    if (!gPartidos.every(p => p.estado === 'finalizado')) continue
+    const empatados = getEmpatadosSinResolver(gPartidos)
+    if (empatados.length > 0) gruposConEmpate.push({ letra, equiposEmpatados: empatados })
+  }
+
+  return (
+    <div className="flex flex-col gap-3 mt-4 max-w-2xl mx-auto px-4 pb-8">
+      <div className="border-b border-amber-700/30 pb-2">
+        <p className="text-xs font-black text-amber-400 uppercase tracking-widest">
+          Desempates manuales — Criterios 7/8 FIFA
+        </p>
+        <p className="text-xs text-slate-500 mt-1">
+          Solo se muestran grupos con todos los partidos finalizados donde puntos, diferencia de goles, goles a favor y enfrentamientos directos (H2H) siguen igualados.
+        </p>
+      </div>
+
+      {gruposConEmpate.length === 0 ? (
+        <p className="text-xs text-slate-600 py-2">
+          Sin empates pendientes — todos los criterios automáticos resuelven correctamente.
+        </p>
+      ) : (
+        gruposConEmpate.flatMap(({ letra, equiposEmpatados }) =>
+          equiposEmpatados.map((equipos, idx) => (
+            <GrupoDesempate
+              key={`${letra}-${idx}`}
+              letra={letra}
+              equipos={equipos}
+              ordenActual={ordenData[letra] ?? {}}
+              token={token}
+              onGuardado={(g, orden) =>
+                setOrdenData(prev => ({ ...prev, [g]: orden }))
+              }
+            />
+          ))
+        )
+      )}
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 export default function AdminPartidosPage() {
   const [partidos, setPartidos] = useState<Partido[]>([])
@@ -600,6 +786,14 @@ export default function AdminPartidosPage() {
           ))
         )}
       </div>
+
+      {/* Panel de desempates manuales — solo visible en fase de grupos */}
+      {!cargando && faseActiva === 'grupos' && (
+        <DesempatePanel
+          partidos={partidos.filter(p => p.fase === 'grupos')}
+          token={token}
+        />
+      )}
     </main>
   )
 }

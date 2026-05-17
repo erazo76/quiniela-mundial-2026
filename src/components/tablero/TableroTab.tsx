@@ -1,33 +1,7 @@
 'use client'
 import { useState, useEffect, Fragment, type CSSProperties } from 'react'
 import { Partido } from '@/types'
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-interface Standing {
-  equipo: string
-  bandera: string | null
-  pj: number; pg: number; pe: number; pp: number
-  gf: number; gc: number; dif: number; pts: number
-}
-
-function calcularGrupo(partidos: Partido[]): Standing[] {
-  const map: Record<string, Standing> = {}
-  for (const p of partidos) {
-    if (!map[p.equipo_local]) map[p.equipo_local] = { equipo: p.equipo_local, bandera: p.bandera_local, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dif:0,pts:0 }
-    if (!map[p.equipo_visitante]) map[p.equipo_visitante] = { equipo: p.equipo_visitante, bandera: p.bandera_visitante, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dif:0,pts:0 }
-    const rl = p.resultado_local, rv = p.resultado_visitante
-    if (rl == null || rv == null) continue
-    const L = map[p.equipo_local], V = map[p.equipo_visitante]
-    L.pj++; V.pj++
-    L.gf += rl; L.gc += rv; L.dif = L.gf - L.gc
-    V.gf += rv; V.gc += rl; V.dif = V.gf - V.gc
-    if (rl > rv)      { L.pg++; L.pts += 3; V.pp++ }
-    else if (rl === rv){ L.pe++; L.pts++;    V.pe++; V.pts++ }
-    else               { V.pg++; V.pts += 3; L.pp++ }
-  }
-  return Object.values(map).sort((a, b) => b.pts - a.pts || a.equipo.localeCompare(b.equipo))
-}
+import { calcularGrupo, DesempatesGrupo } from '@/lib/grupos'
 
 function shortName(name: string) {
   const abbr: Record<string, string> = {
@@ -47,8 +21,8 @@ function shortName(name: string) {
 
 const COL = 'grid-cols-[1fr_22px_18px_18px_18px_26px_28px]'
 
-function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) {
-  const rows = calcularGrupo(partidos)
+function GrupoCard({ letra, partidos, desempates }: { letra: string; partidos: Partido[]; desempates: DesempatesGrupo }) {
+  const rows = calcularGrupo(partidos, desempates)
   const grupoHaJugado = rows.some(r => r.pj > 0)
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
@@ -100,7 +74,7 @@ function GrupoCard({ letra, partidos }: { letra: string; partidos: Partido[] }) 
   )
 }
 
-function GruposView({ partidos }: { partidos: Partido[] }) {
+function GruposView({ partidos, desempatesAll }: { partidos: Partido[]; desempatesAll: Record<string, DesempatesGrupo> }) {
   const GRUPOS = ['A','B','C','D','E','F','G','H','I','J','K','L']
   const byGrupo: Record<string, Partido[]> = {}
   for (const g of GRUPOS) byGrupo[g] = []
@@ -108,7 +82,14 @@ function GruposView({ partidos }: { partidos: Partido[] }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {GRUPOS.map(g => <GrupoCard key={g} letra={g} partidos={byGrupo[g] ?? []} />)}
+        {GRUPOS.map(g => (
+          <GrupoCard
+            key={g}
+            letra={g}
+            partidos={byGrupo[g] ?? []}
+            desempates={desempatesAll[g] ?? {}}
+          />
+        ))}
       </div>
     </div>
   )
@@ -411,13 +392,22 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
 export function TableroTab() {
   const [vista, setVista] = useState<'grupos' | 'llave'>('grupos')
   const [partidos, setPartidos] = useState<Partido[]>([])
+  const [desempatesAll, setDesempatesAll] = useState<Record<string, DesempatesGrupo>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/partidos?fase=all')
-      .then(r => r.json())
-      .then((data: Partido[]) => { setPartidos(data); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/partidos?fase=all').then(r => r.json()),
+      fetch('/api/desempates').then(r => r.json()),
+    ]).then(([partidos, desempates]: [Partido[], { grupo: string; equipo: string; orden: number }[]]) => {
+      setPartidos(partidos)
+      const map: Record<string, DesempatesGrupo> = {}
+      for (const row of desempates) {
+        if (!map[row.grupo]) map[row.grupo] = {}
+        map[row.grupo][row.equipo] = row.orden
+      }
+      setDesempatesAll(map)
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   return (
@@ -444,7 +434,10 @@ export function TableroTab() {
           <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : vista === 'grupos' ? (
-        <GruposView partidos={partidos.filter(p => p.fase === 'grupos')} />
+        <GruposView
+          partidos={partidos.filter(p => p.fase === 'grupos')}
+          desempatesAll={desempatesAll}
+        />
       ) : (
         <LlaveView partidos={partidos.filter(p => p.fase !== 'grupos')} />
       )}
