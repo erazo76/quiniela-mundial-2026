@@ -283,6 +283,7 @@ export default function AdminPartidosPage() {
   const [sincronizando, setSincronizando] = useState(false)
   const [backfilling, setBackfilling] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [simulando, setSimulando] = useState(false)
   const [confirmarReset, setConfirmarReset] = useState(false)
   const [msgSync, setMsgSync] = useState<string | null>(null)
   const router = useRouter()
@@ -380,6 +381,39 @@ export default function AdminPartidosPage() {
     }
   }
 
+  async function simularLote() {
+    setSimulando(true)
+    setMsgSync(null)
+    try {
+      const res = await fetch('/api/admin/simular-lote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, fase: faseActiva }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMsgSync(`Error al simular: ${data.error ?? 'intenta de nuevo'}`)
+      } else if (data.procesados === 0) {
+        setMsgSync('Sin partidos pendientes en esta fase')
+      } else {
+        setMsgSync(`${data.procesados} partido(s) simulados en ${faseActiva}`)
+        for (const p of data.partidos) {
+          handleActualizado(p.id, {
+            resultado_local: p.resultado_local,
+            resultado_visitante: p.resultado_visitante,
+            penales_local: p.penales_local ?? undefined,
+            penales_visitante: p.penales_visitante ?? undefined,
+            estado: 'finalizado',
+          })
+        }
+      }
+    } catch {
+      setMsgSync('Error de conexión')
+    } finally {
+      setSimulando(false)
+    }
+  }
+
   function salir() {
     localStorage.removeItem(ADMIN_TOKEN_KEY)
     router.push('/admin')
@@ -406,6 +440,13 @@ export default function AdminPartidosPage() {
               className="px-3 py-1.5 bg-red-950 hover:bg-red-900 disabled:opacity-40 text-red-400 font-semibold rounded-lg transition-colors"
             >
               {resetting ? 'Reseteando...' : 'Reset'}
+            </button>
+            <button
+              onClick={simularLote}
+              disabled={simulando}
+              className="px-3 py-1.5 bg-violet-900 hover:bg-violet-800 disabled:opacity-40 text-violet-300 font-semibold rounded-lg transition-colors"
+            >
+              {simulando ? 'Simulando...' : `Simular lote (${faseActiva})`}
             </button>
             <button
               onClick={backfillBracket}
