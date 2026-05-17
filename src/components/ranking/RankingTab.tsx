@@ -28,8 +28,11 @@ interface EntradaRanking {
   nombre: string
   fichas: number
   racha: number
+  bono_usado: boolean
   predicciones_total: number
   predicciones_acertadas: number
+  partidos_finalizados: number
+  es_espectador: boolean
 }
 
 interface Props {
@@ -47,7 +50,7 @@ function FireBadge({ racha }: { racha: number }) {
 }
 
 function SeccionPote({ pote, ranking }: { pote: number; ranking: EntradaRanking[] }) {
-  const top3 = ranking.slice(0, 3)
+  const top3 = ranking.filter(e => !e.es_espectador).slice(0, 3)
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
@@ -126,15 +129,20 @@ function FilaPodio({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
 }
 
 function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }) {
+  const esEspectador = entrada.es_espectador
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-colors ${
-        esYo
+        esEspectador
+          ? 'border-slate-800/50 bg-slate-900/50 opacity-60'
+          : esYo
           ? 'border-green-500/30 bg-green-500/5'
           : 'border-slate-800 bg-slate-900'
       }`}
     >
-      {entrada.posicion <= 3
+      {esEspectador
+        ? <span className="text-slate-600 font-bold w-5 text-center text-sm shrink-0">—</span>
+        : entrada.posicion <= 3
         ? <Image src={MEDALLAS_IMG[entrada.posicion - 1]} alt={`${entrada.posicion}°`} width={22} height={22} unoptimized className="shrink-0" />
         : <span className="text-slate-500 font-bold w-5 text-center text-sm shrink-0">{entrada.posicion}</span>
       }
@@ -142,18 +150,19 @@ function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
         <Image src={avatarSrc(getAvatarIndex(entrada.id, entrada.nombre))} alt={entrada.nombre} width={32} height={32} className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-white truncate">
+        <p className={`text-sm font-bold truncate ${esEspectador ? 'text-slate-500' : 'text-white'}`}>
           {entrada.nombre}
           {esYo && <span className="ml-2 text-xs text-green-400 font-normal">(tú)</span>}
         </p>
         <p className="text-xs text-slate-600">
-          {entrada.predicciones_total} predicciones
-          {entrada.predicciones_acertadas > 0 &&
-            ` · ${entrada.predicciones_acertadas} acertadas`}
+          {esEspectador
+            ? `${entrada.predicciones_total}/${entrada.partidos_finalizados} predicciones · Sin participar`
+            : `${entrada.predicciones_total} predicciones${entrada.predicciones_acertadas > 0 ? ` · ${entrada.predicciones_acertadas} acertadas` : ''}`
+          }
         </p>
       </div>
-      {entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
-      <span className="text-yellow-400 font-black text-sm">
+      {!esEspectador && entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
+      <span className={`font-black text-sm ${esEspectador ? 'text-slate-500' : 'text-yellow-400'}`}>
         {entrada.fichas.toLocaleString()}
       </span>
     </div>
@@ -176,8 +185,10 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
       .finally(() => setCargando(false))
   }, [ligaId])
 
-  const podio = ranking.slice(0, 3)
-  const resto = ranking.slice(3)
+  const activos      = ranking.filter(e => !e.es_espectador)
+  const espectadores = ranking.filter(e => e.es_espectador)
+  const podio = activos.slice(0, 3)
+  const resto = activos.slice(3)
 
   if (cargando) {
     return (
@@ -230,10 +241,26 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
         </div>
       )}
 
-      {/* Resto */}
+      {/* Resto activos */}
       {resto.length > 0 && (
         <div className="flex flex-col gap-2">
           {resto.map((entrada) => (
+            <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} />
+          ))}
+        </div>
+      )}
+
+      {/* Espectadores */}
+      {espectadores.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 pt-1">
+            <div className="flex-1 h-px bg-slate-800" />
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-2">
+              Sin participación mínima
+            </span>
+            <div className="flex-1 h-px bg-slate-800" />
+          </div>
+          {espectadores.map((entrada) => (
             <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} />
           ))}
         </div>

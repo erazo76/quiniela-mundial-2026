@@ -1,5 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 
+const PENALIDAD_OMISION = 10 // fichas que pierde quien no predice un partido
+
 function determinarAcierto(
   predLocal: number,
   predVisit: number,
@@ -27,23 +29,24 @@ export async function procesarResultadoPartido(
   equipoLocal = 'Local',
   equipoVisitante = 'Visitante'
 ): Promise<{ procesadas: number; error?: string }> {
-  // Query 1: fetch predictions for this match
+  // Fetch predictions for this match
   const { data: predicciones, error: errPred } = await supabase
     .from('predicciones')
     .select('id, usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas')
     .eq('partido_id', partidoId)
 
   if (errPred) return { procesadas: 0, error: errPred.message }
-  if (!predicciones?.length) return { procesadas: 0 }
 
-  // Query 2: fetch all involved users in one shot
-  const usuarioIds = [...new Set(predicciones.map((p) => p.usuario_id))]
-  const { data: usuarios } = await supabase
+  // Fetch ALL users — needed to apply penalty to non-predictors
+  const { data: todosUsuarios, error: errUsers } = await supabase
     .from('usuarios')
     .select('id, nombre, liga_id, fichas, racha, bono_usado')
-    .in('id', usuarioIds)
 
-  const usuariosMap = new Map((usuarios ?? []).map((u) => [u.id, { ...u }]))
+  if (errUsers) return { procesadas: 0, error: errUsers.message }
+  if (!todosUsuarios?.length) return { procesadas: 0 }
+
+  const predMap = new Map((predicciones ?? []).map((p) => [p.usuario_id, p]))
+  const usuariosMap = new Map(todosUsuarios.map((u) => [u.id, { ...u }]))
 
   const updatesPred: Array<{
     id: string
@@ -64,8 +67,8 @@ export async function procesarResultadoPartido(
     descripcion: string
   }> = []
 
-  // Single pass: calculate all results, update users in memory, collect historial
-  for (const pred of predicciones) {
+  // ── Procesar predicciones ──────────────────────────────────────────────────
+  for (const pred of predicciones ?? []) {
     const { tipo, acertado, multiplicador } = determinarAcierto(
       pred.goles_local,
       pred.goles_visitante,
@@ -79,7 +82,17 @@ export async function procesarResultadoPartido(
     const enRacha = acertado && (usuario?.racha ?? 0) >= 2
     const ganancia = Math.floor(pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador))
 
-    updatesPred.push({ id: pred.id, usuario_id: pred.usuario_id, partido_id: pred.partido_id, goles_local: pred.goles_local, goles_visitante: pred.goles_visitante, fichas_apostadas: pred.fichas_apostadas, ganancia_fichas: ganancia, tipo_acierto: tipo, acertado })
+    updatesPred.push({
+      id: pred.id,
+      usuario_id: pred.usuario_id,
+      partido_id: pred.partido_id,
+      goles_local: pred.goles_local,
+      goles_visitante: pred.goles_visitante,
+      fichas_apostadas: pred.fichas_apostadas,
+      ganancia_fichas: ganancia,
+      tipo_acierto: tipo,
+      acertado,
+    })
 
     if (usuario) {
       usuario.fichas += ganancia
@@ -108,29 +121,58 @@ export async function procesarResultadoPartido(
     }
   }
 
-  // Query 3: batch upsert predicciones (1 query regardless of N users)
-  const { error: errPredUpdate } = await supabase
-    .from('predicciones')
-    .upsert(updatesPred)
+  // ── Penalidad por omisión ──────────────────────────────────────────────────
+  // Usuarios que no predijeron: pierden PENALIDAD_OMISION fichas y se les rompe la racha
+  for (const u of todosUsuarios) {
+    if (predMap.has(u.id)) continue // predijo — ya procesado arriba
 
-  if (errPredUpdate) return { procesadas: 0, error: errPredUpdate.message }
+    const usuario = usuariosMap.get(u.id)!
+    usuario.fichas -= PENALIDAD_OMISION
+    usuario.racha = 0 // omitir un partido rompe la racha
 
-  // Query 4: batch upsert usuarios (1 query regardless of N users)
-  const usuarioUpdates = usuarioIds
-    .map((id) => usuariosMap.get(id))
-    .filter(Boolean)
-    .map((u) => ({ id: u!.id, nombre: u!.nombre, liga_id: u!.liga_id, fichas: u!.fichas, racha: u!.racha, bono_usado: u!.bono_usado }))
+    historial.push({
+      usuario_id: u.id,
+      tipo: 'penalidad_omision',
+      cantidad: PENALIDAD_OMISION,
+      descripcion: `${equipoLocal} vs ${equipoVisitante} · Sin predicción`,
+    })
 
-  const { error: errUsuarios } = await supabase
-    .from('usuarios')
-    .upsert(usuarioUpdates)
+    // Bono de rescate también aplica si la penalidad lleva a 0
+    if (usuario.fichas <= 0 && !usuario.bono_usado) {
+      usuario.fichas += 300
+      usuario.bono_usado = true
+      historial.push({
+        usuario_id: u.id,
+        tipo: 'bono_rescate',
+        cantidad: 300,
+        descripcion: 'Bono de rescate (fichas a 0)',
+      })
+    }
+  }
 
+  // ── Writes ─────────────────────────────────────────────────────────────────
+
+  if (updatesPred.length) {
+    const { error: errPredUpdate } = await supabase.from('predicciones').upsert(updatesPred)
+    if (errPredUpdate) return { procesadas: 0, error: errPredUpdate.message }
+  }
+
+  // Actualizar TODOS los usuarios (predictores + penalizados)
+  const usuarioUpdates = [...usuariosMap.values()].map((u) => ({
+    id: u.id,
+    nombre: u.nombre,
+    liga_id: u.liga_id,
+    fichas: u.fichas,
+    racha: u.racha,
+    bono_usado: u.bono_usado,
+  }))
+
+  const { error: errUsuarios } = await supabase.from('usuarios').upsert(usuarioUpdates)
   if (errUsuarios) return { procesadas: 0, error: errUsuarios.message }
 
-  // Query 5: batch insert historial (already was 1 query)
   if (historial.length) {
     await supabase.from('historial_fichas').insert(historial)
   }
 
-  return { procesadas: predicciones.length }
+  return { procesadas: (predicciones ?? []).length }
 }
