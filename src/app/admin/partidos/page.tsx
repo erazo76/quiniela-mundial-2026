@@ -48,6 +48,13 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
   const [preds, setPreds] = useState<PredAdmin[] | null>(null)
   const [cargandoPreds, setCargandoPreds] = useState(false)
 
+  // Sincronizar estado local cuando las props cambian (ej: tras reset masivo)
+  useEffect(() => {
+    setResLocal(partido.resultado_local ?? 0)
+    setResVisit(partido.resultado_visitante ?? 0)
+    setEstado(partido.estado)
+  }, [partido.resultado_local, partido.resultado_visitante, partido.estado])
+
   const esEliminatoria = FASES_ELIMINACION.includes(partido.fase)
   const esEmpate = resLocal === resVisit
   const necesitaPenales = esEliminatoria && esEmpate && estado === 'finalizado'
@@ -276,6 +283,7 @@ export default function AdminPartidosPage() {
   const [sincronizando, setSincronizando] = useState(false)
   const [backfilling, setBackfilling] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [confirmarReset, setConfirmarReset] = useState(false)
   const [msgSync, setMsgSync] = useState<string | null>(null)
   const router = useRouter()
 
@@ -348,7 +356,7 @@ export default function AdminPartidosPage() {
   }
 
   async function resetPartidos() {
-    if (!confirm('¿Resetear TODOS los resultados a pendiente? Esta acción no se puede deshacer.')) return
+    setConfirmarReset(false)
     setResetting(true)
     setMsgSync(null)
     try {
@@ -393,7 +401,7 @@ export default function AdminPartidosPage() {
           <div className="flex items-center gap-3 text-xs text-slate-500">
             <span>{conteoEnVivo} en vivo · {conteoFinalizado} finalizados</span>
             <button
-              onClick={resetPartidos}
+              onClick={() => setConfirmarReset(true)}
               disabled={resetting}
               className="px-3 py-1.5 bg-red-950 hover:bg-red-900 disabled:opacity-40 text-red-400 font-semibold rounded-lg transition-colors"
             >
@@ -472,6 +480,36 @@ export default function AdminPartidosPage() {
           )
         })}
       </div>
+
+      {/* Modal confirmación reset */}
+      {confirmarReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="bg-slate-950 border border-red-900/50 rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4">
+            <div>
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">Acción irreversible</p>
+              <h2 className="text-base font-black text-white">¿Resetear todos los partidos?</h2>
+            </div>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Se pondrán todos los resultados en <span className="text-white font-semibold">0 - 0</span> y
+              el estado en <span className="text-white font-semibold">pendiente</span>. No se puede deshacer.
+            </p>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setConfirmarReset(false)}
+                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={resetPartidos}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl transition-colors"
+              >
+                Resetear
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lista de partidos */}
       <div className="px-4 py-4 flex flex-col gap-3 max-w-2xl mx-auto">

@@ -127,9 +127,10 @@ function Stepper({
 export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioId, onClose, onGuardada }: Props) {
   const [golesLocal, setGolesLocal] = useState(prediccionExistente?.goles_local ?? 1)
   const [golesVisitante, setGolesVisitante] = useState(prediccionExistente?.goles_visitante ?? 0)
-  const maxApuesta = Math.max(10, Math.floor(fichas * 0.3))
+  const fichasEfectivas = fichas + (prediccionExistente?.fichas_apostadas ?? 0)
+  const maxApuesta = Math.max(10, Math.floor(fichasEfectivas * 0.3))
   const [fichasApostadas, setFichasApostadas] = useState(
-    prediccionExistente?.fichas_apostadas ?? Math.min(50, maxApuesta)
+    Math.min(prediccionExistente?.fichas_apostadas ?? Math.min(50, maxApuesta), maxApuesta)
   )
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -247,9 +248,29 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
 
         {/* Fichas */}
         <div className="flex flex-col gap-3">
+          {/* Info callout — reglas de apuesta */}
+          <div className="flex items-start gap-2.5 bg-yellow-500/10 border border-yellow-500/25 rounded-xl px-3 py-2.5">
+            <span className="text-yellow-400 text-base leading-none mt-px shrink-0">!</span>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xs font-black text-yellow-300 uppercase tracking-wide">
+                Límite de apuesta
+              </p>
+              <p className="text-[11px] text-yellow-200/70 leading-snug">
+                Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
+                <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
+                (30% de tus {fichasEfectivas.toLocaleString()} fichas).
+                {prediccionExistente && (
+                  <span className="block mt-0.5 text-yellow-200/50">
+                    Editando predicción existente — tus fichas apostadas se devuelven al actualizar.
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <span className="text-sm text-slate-400">Fichas a apostar</span>
-            <span className="text-yellow-400 font-bold text-sm">{fichasApostadas} / {fichas} disponibles</span>
+            <span className="text-yellow-400 font-bold text-sm tabular-nums">{fichasApostadas.toLocaleString()}</span>
           </div>
           <input
             type="range"
@@ -261,8 +282,8 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
             className="w-full accent-green-400"
           />
           <div className="flex justify-between text-xs text-slate-600">
-            <span>Min: 10</span>
-            <span>Max: {maxApuesta} (30%)</span>
+            <span>Mín: 10</span>
+            <span>Máx: {maxApuesta.toLocaleString()} fichas</span>
           </div>
         </div>
 
@@ -286,7 +307,10 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
         </div>
 
         {error && (
-          <p className="text-red-400 text-sm text-center">{error}</p>
+          <div className="flex items-start gap-2.5 bg-red-950/50 border border-red-900/50 rounded-xl px-3 py-3">
+            <span className="text-red-400 text-base leading-none mt-px shrink-0">✕</span>
+            <p className="text-sm text-red-300 leading-snug">{error}</p>
+          </div>
         )}
 
         {/* Confirmar */}

@@ -304,9 +304,11 @@ async function resolverTodosTerceros(supabase: SupabaseClient): Promise<void> {
 
   // Aplicar en DB
   for (const [equipo, slot] of assignment.entries()) {
+    const bandera = await buscarBandera(supabase, equipo)
+    const banderaCampo = slot.campo === 'equipo_local' ? 'bandera_local' : 'bandera_visitante'
     await supabase
       .from('partidos')
-      .update({ [slot.campo]: equipo })
+      .update({ [slot.campo]: equipo, [banderaCampo]: bandera })
       .eq('id', slot.id)
   }
 }
