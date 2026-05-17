@@ -26,11 +26,27 @@ export async function POST(req: NextRequest) {
     codigo = generarCodigo()
   }
 
+  // Cierre de inscripción: explícito si se pasa, sino 5 min antes del primer partido
+  let cierreCalculado: string | null = cierreInscripcion ?? null
+  if (!cierreCalculado) {
+    const { data: primerPartido } = await supabase
+      .from('partidos')
+      .select('fecha_hora')
+      .order('fecha_hora', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    if (primerPartido?.fecha_hora) {
+      const cierre = new Date(primerPartido.fecha_hora)
+      cierre.setMinutes(cierre.getMinutes() - 5)
+      cierreCalculado = cierre.toISOString()
+    }
+  }
+
   const insertPayload: Record<string, unknown> = {
     nombre_liga: nombreLiga.trim(),
     codigo_invitacion: codigo,
   }
-  if (cierreInscripcion) insertPayload.cierre_inscripcion = cierreInscripcion
+  if (cierreCalculado) insertPayload.cierre_inscripcion = cierreCalculado
 
   const { data: liga, error: ligaError } = await supabase
     .from('ligas')

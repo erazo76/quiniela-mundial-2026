@@ -145,7 +145,7 @@ export default function ManualAdminPage() {
             <li className="text-sm text-slate-600">Diferencia de goles en enfrentamientos directos</li>
             <li className="text-sm text-slate-600">Goles a favor en enfrentamientos directos</li>
           </ol>
-          <P className="mt-2">El criterio manual (7-8) solo entra en juego si los 6 anteriores dejan equipos igualados — una situacion muy rara en la practica.</P>
+          <P>El criterio manual (7-8) solo entra en juego si los 6 anteriores dejan equipos igualados — una situacion muy rara en la practica.</P>
         </Recuadro>
 
         {/* 3 */}
