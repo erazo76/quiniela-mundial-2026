@@ -73,7 +73,7 @@ export default function ManualAdminPage() {
           <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
           <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
             <li>Acceso al panel de administrador</li>
-            <li>Panel de partidos — actualizar resultados</li>
+            <li>Panel de partidos — actualizar resultados y desempates de grupos</li>
             <li>Ver predicciones por partido</li>
             <li>Sincronizacion de resultados</li>
             <li>Panel de ligas</li>
@@ -116,6 +116,36 @@ export default function ManualAdminPage() {
 
         <Recuadro titulo="Importante — accion irreversible" color="red">
           <P>Una vez que un partido se marca como <strong>Finalizado</strong>, los controles de edicion desaparecen y las fichas ya fueron distribuidas. No es posible revertir ni recalcular desde el panel.</P>
+        </Recuadro>
+
+        <H3>Desempates en la fase de grupos</H3>
+        <P>Al final del tab <strong>Fase de grupos</strong>, debajo de todos los partidos, aparece automaticamente el panel de <strong>Desempates manuales (Criterios 7-8 FIFA)</strong>. Este panel:</P>
+        <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
+          <Li>Solo es visible cuando al menos un grupo tiene <strong>todos sus partidos finalizados</strong>.</Li>
+          <Li>Solo muestra grupos donde equipos siguen igualados tras aplicar los 6 criterios automaticos de la FIFA (puntos, diferencia de goles, goles a favor y sus equivalentes en enfrentamientos directos).</Li>
+          <Li>Si todos los criterios automaticos resuelven el orden, el panel indica "Sin empates pendientes" y no requiere ninguna accion.</Li>
+        </ul>
+
+        <H3>Como resolver un desempate manual</H3>
+        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+          <li>Anda a <strong>Admin → Partidos → Fase de grupos</strong> y desplazate hasta el final de la pagina.</li>
+          <li>Localiza el bloque amarillo del grupo con empate (ej. <em>Grupo A</em>).</li>
+          <li>Usa las flechas <strong>↑ ↓</strong> para ordenar los equipos empatados segun la decision oficial de la FIFA (por disciplina o sorteo).</li>
+          <li>Pulsa <strong>Guardar orden</strong>. La tabla de grupos en la app publica se actualiza de inmediato.</li>
+          <li>Si necesitas deshacer el orden, pulsa <strong>Borrar</strong>: el bloque vuelve al orden alfabetico hasta que guardes uno nuevo.</li>
+        </ol>
+
+        <Recuadro titulo="Criterios automaticos de desempate (FIFA)" color="slate">
+          <P>El sistema aplica estos criterios en orden antes de requerir decision manual:</P>
+          <ol className="list-decimal list-inside space-y-1 mt-1">
+            <li className="text-sm text-slate-600">Puntos (global)</li>
+            <li className="text-sm text-slate-600">Diferencia de goles (global)</li>
+            <li className="text-sm text-slate-600">Goles a favor (global)</li>
+            <li className="text-sm text-slate-600">Puntos en enfrentamientos directos (H2H)</li>
+            <li className="text-sm text-slate-600">Diferencia de goles en enfrentamientos directos</li>
+            <li className="text-sm text-slate-600">Goles a favor en enfrentamientos directos</li>
+          </ol>
+          <P className="mt-2">El criterio manual (7-8) solo entra en juego si los 6 anteriores dejan equipos igualados — una situacion muy rara en la practica.</P>
         </Recuadro>
 
         {/* 3 */}
@@ -254,6 +284,7 @@ export default function ManualAdminPage() {
                 ['Bono de rescate', '300 fichas automaticas si el jugador llega a 0, una sola vez; aplica tambien si la penalidad lleva a 0'],
                 ['Comision al pote', '5% de cada variacion neta de apuesta'],
                 ['Cierre de inscripciones', 'Opcional por liga; pasada la fecha configurada no se permiten nuevos jugadores (existentes no se ven afectados)'],
+                ['Orden tabla de grupos', 'Criterios FIFA en orden: 1) Pts · 2) Dif goles · 3) Goles a favor · 4) Pts H2H · 5) Dif goles H2H · 6) Goles H2H · 7-8) Decision manual del admin'],
               ].map(([regla, valor]) => (
                 <tr key={regla} className="odd:bg-slate-50">
                   <td className="border border-slate-200 px-2 py-1.5 text-slate-700 font-medium">{regla}</td>
@@ -265,7 +296,7 @@ export default function ManualAdminPage() {
         </div>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.2</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.3</p>
         </div>
       </main>
     </>

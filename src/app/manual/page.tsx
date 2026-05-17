@@ -293,7 +293,42 @@ export default function ManualUsuarioPage() {
           <Li><Pill color="red">FALLO</Pill> — no acertaste (borde rojo)</Li>
         </ul>
         <H3>Grupos</H3>
-        <P>Vista de tabla por grupo (A, B, C...) con todos los partidos de la fase de grupos.</P>
+        <P>Vista de tabla por grupo (A al L) con la clasificacion de cada grupo. Las columnas son: PJ (partidos jugados), G (ganados), E (empatados), P (perdidos), DG (diferencia de goles) y Pts (puntos).</P>
+        <P>Los dos primeros de cada grupo clasifican a la siguiente fase (indicados con un punto verde). El orden dentro de la tabla sigue los <strong>criterios oficiales de desempate de la FIFA</strong>:</P>
+
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border border-slate-200 px-2 py-1.5 text-center font-bold text-slate-500 w-8">#</th>
+                <th className="border border-slate-200 px-3 py-1.5 text-left font-bold text-slate-700">Criterio</th>
+                <th className="border border-slate-200 px-3 py-1.5 text-left font-bold text-slate-700">Descripcion</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['1', 'Puntos', 'Mayor cantidad de puntos acumulados en todos los partidos del grupo'],
+                ['2', 'Diferencia de goles', 'Mayor diferencia entre goles a favor y en contra (global)'],
+                ['3', 'Goles a favor', 'Mayor cantidad de goles marcados en todos los partidos del grupo'],
+                ['4', 'Puntos H2H', 'Mayor puntos obtenidos solo en los partidos entre los equipos empatados'],
+                ['5', 'Diferencia de goles H2H', 'Mayor diferencia de goles solo en esos enfrentamientos directos'],
+                ['6', 'Goles a favor H2H', 'Mayor cantidad de goles marcados en esos enfrentamientos directos'],
+                ['7-8', 'Decision del organizador', 'Si persiste el empate tras los 6 criterios anteriores, el administrador define el orden manualmente'],
+              ].map(([num, criterio, desc]) => (
+                <tr key={num} className="odd:bg-slate-50">
+                  <td className="border border-slate-200 px-2 py-1.5 text-center font-black text-slate-400">{num}</td>
+                  <td className="border border-slate-200 px-3 py-1.5 font-semibold text-slate-700">{criterio}</td>
+                  <td className="border border-slate-200 px-3 py-1.5 text-slate-600">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <Recuadro titulo="Empates extremos" color="yellow">
+          <P>Si dos o mas equipos quedan exactamente igualados en todos los criterios del 1 al 6 (una situacion muy poco frecuente), el administrador de la quiniela registra el orden oficial que determine la FIFA (por disciplina o sorteo). La tabla se actualiza automaticamente con esa decision.</P>
+        </Recuadro>
+
         <H3>Llaves</H3>
         <P>Vista de eliminacion directa: dieciseisavos, octavos, cuartos, semis, tercer puesto y final.</P>
 
@@ -346,7 +381,7 @@ export default function ManualUsuarioPage() {
         </Recuadro>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.2</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.3</p>
         </div>
       </main>
     </>
