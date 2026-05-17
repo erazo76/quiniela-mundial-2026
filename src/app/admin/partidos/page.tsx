@@ -393,18 +393,45 @@ export default function AdminPartidosPage() {
       const data = await res.json()
       if (!res.ok) {
         setMsgSync(`Error al simular: ${data.error ?? 'intenta de nuevo'}`)
-      } else if (data.procesados === 0) {
+        return
+      }
+      if (data.procesados === 0) {
         setMsgSync('Sin partidos pendientes en esta fase')
+        return
+      }
+
+      for (const p of data.partidos) {
+        handleActualizado(p.id, {
+          resultado_local:     p.resultado_local,
+          resultado_visitante: p.resultado_visitante,
+          penales_local:       p.penales_local  ?? undefined,
+          penales_visitante:   p.penales_visitante ?? undefined,
+          estado: 'finalizado',
+        })
+      }
+
+      // Verificar si quedan pendientes en la fase actual
+      const procesadosIds = new Set<string>(data.partidos.map((p: { id: string }) => p.id))
+      const quedanPendientes = partidos.some(
+        p => p.fase === faseActiva && p.estado === 'pendiente' && !procesadosIds.has(p.id)
+      )
+
+      if (quedanPendientes) {
+        setMsgSync(`${data.procesados} partido(s) simulados`)
       } else {
-        setMsgSync(`${data.procesados} partido(s) simulados en ${faseActiva}`)
-        for (const p of data.partidos) {
-          handleActualizado(p.id, {
-            resultado_local: p.resultado_local,
-            resultado_visitante: p.resultado_visitante,
-            penales_local: p.penales_local ?? undefined,
-            penales_visitante: p.penales_visitante ?? undefined,
-            estado: 'finalizado',
-          })
+        // Fase completa: refetch para obtener nombres/banderas actualizados por el resolver
+        const fresh: Partido[] = await fetch('/api/partidos?fase=all').then(r => r.json())
+        setPartidos(fresh)
+
+        const nextFase = FASES_ORDEN.find(
+          f => FASES_ORDEN.indexOf(f) > FASES_ORDEN.indexOf(faseActiva) &&
+               fresh.some(p => p.fase === f && p.estado === 'pendiente')
+        )
+        if (nextFase) {
+          setFaseActiva(nextFase)
+          setMsgSync(`${FASES_LABEL[faseActiva]} completa · Pasando a ${FASES_LABEL[nextFase]}`)
+        } else {
+          setMsgSync(`${FASES_LABEL[faseActiva]} completa · No hay más fases pendientes`)
         }
       }
     } catch {
