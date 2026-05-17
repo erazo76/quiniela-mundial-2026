@@ -29,6 +29,15 @@ export interface Prediccion {
   acertado: boolean
 }
 
+export interface Liga {
+  id: string
+  nombre_liga: string
+  codigo_invitacion: string
+  pote_virtual: number
+  cierre_inscripcion: string | null
+  created_at: string
+}
+
 export interface Usuario {
   id: string
   nombre: string

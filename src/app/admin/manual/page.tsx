@@ -110,7 +110,8 @@ export default function ManualAdminPage() {
         </ol>
 
         <Recuadro titulo="Al marcar Finalizado" color="green">
-          <P>El sistema calcula automaticamente todas las predicciones de ese partido: determina si cada prediccion fue Exacto, Ganador o Fallo, actualiza las fichas de cada jugador, aplica el bonus de racha de oro si corresponde, y activa el bono de rescate si alguien llega a 0 fichas. El mensaje de confirmacion muestra cuantas predicciones fueron procesadas.</P>
+          <P>El sistema calcula automaticamente todas las predicciones de ese partido: determina si cada prediccion fue Exacto, Ganador o Fallo, actualiza las fichas de cada jugador, aplica el bonus de racha de oro si corresponde, y activa el bono de rescate si alguien llega a 0 fichas.</P>
+          <P>Ademas, <strong>todos los jugadores que no enviaron prediccion</strong> para ese partido reciben una <strong>penalidad de −10 fichas</strong> y su racha se resetea a 0. El bono de rescate tambien aplica si la penalidad lleva a alguien a 0. El mensaje de confirmacion muestra cuantas predicciones fueron procesadas.</P>
         </Recuadro>
 
         <Recuadro titulo="Importante — accion irreversible" color="red">
@@ -163,6 +164,17 @@ export default function ManualAdminPage() {
         <H2 n={5}>Panel de ligas</H2>
         <P>Lista todas las ligas creadas, ordenadas de mas reciente a mas antigua. Cada tarjeta muestra: nombre, codigo de invitacion, numero de miembros y fecha de creacion.</P>
         <P>Pulsa en la tarjeta para expandirla y ver la lista de miembros con sus fichas, racha y estado del PIN.</P>
+
+        <H3>Cierre de inscripciones</H3>
+        <P>Cada liga puede tener una <strong>fecha limite de inscripcion</strong> (<code className="bg-slate-100 px-1 rounded text-xs">cierre_inscripcion</code>). Una vez superada esa fecha, el endpoint <code className="bg-slate-100 px-1 rounded text-xs">/api/unirse</code> rechaza cualquier intento de nuevo jugador de unirse a la liga.</P>
+        <P>Para modificar el cierre de una liga existente, usa el endpoint admin con el metodo PATCH:</P>
+        <div className="bg-slate-100 rounded-lg px-4 py-3 mb-4 font-mono text-xs text-slate-700 overflow-x-auto">
+          PATCH /api/admin/ligas<br />
+          {'{ "token": "...", "ligaId": "...", "cierreInscripcion": "2026-06-10T12:00:00Z" }'}
+        </div>
+        <Recuadro titulo="Jugadores existentes no se ven afectados" color="slate">
+          <P>El cierre de inscripciones solo bloquea <em>nuevas</em> adhesiones. Los jugadores ya registrados antes de la fecha limite pueden seguir iniciando sesion y apostando con normalidad.</P>
+        </Recuadro>
 
         {/* 6 */}
         <H2 n={6}>Gestion de miembros y PINs</H2>
@@ -238,8 +250,10 @@ export default function ManualAdminPage() {
                 ['Ganador (resultado correcto)', 'El jugador recibe 1.5× lo apostado de vuelta'],
                 ['Fallo', 'El jugador no recupera nada'],
                 ['Racha de oro (3er acierto consecutivo en adelante)', '+0.5× al multiplicador (Exacto→3.5×, Ganador→2×)'],
-                ['Bono de rescate', '300 fichas automaticas si el jugador llega a 0, una sola vez'],
+                ['Penalidad por no predecir', '−10 fichas y racha en 0 al finalizar el partido; aplica a todos los jugadores sin prediccion'],
+                ['Bono de rescate', '300 fichas automaticas si el jugador llega a 0, una sola vez; aplica tambien si la penalidad lleva a 0'],
                 ['Comision al pote', '5% de cada variacion neta de apuesta'],
+                ['Cierre de inscripciones', 'Opcional por liga; pasada la fecha configurada no se permiten nuevos jugadores (existentes no se ven afectados)'],
               ].map(([regla, valor]) => (
                 <tr key={regla} className="odd:bg-slate-50">
                   <td className="border border-slate-200 px-2 py-1.5 text-slate-700 font-medium">{regla}</td>
@@ -251,7 +265,7 @@ export default function ManualAdminPage() {
         </div>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.1</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.2</p>
         </div>
       </main>
     </>

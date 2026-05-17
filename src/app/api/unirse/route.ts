@@ -46,8 +46,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ usuario, liga })
   }
 
-  // Caso: usuario nuevo
+  // Caso: usuario nuevo — verificar que la liga aún recibe participantes
   if (nombreUsuario?.trim()) {
+    if (liga.cierre_inscripcion && new Date() > new Date(liga.cierre_inscripcion)) {
+      return NextResponse.json(
+        { error: 'Esta liga ya no acepta nuevos participantes.' },
+        { status: 403 }
+      )
+    }
+
     const { data: existente } = await supabase
       .from('usuarios')
       .select('id')

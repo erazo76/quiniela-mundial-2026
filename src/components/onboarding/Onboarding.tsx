@@ -21,7 +21,7 @@ const SLIDES: Slide[] = [
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.\n\nSi no enviás ninguna predicción, al finalizar el partido perdés 10 fichas automáticamente y tu racha se reinicia.',
   },
   {
     image: '/ui/icon-coins.png',

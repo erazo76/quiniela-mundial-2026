@@ -112,6 +112,11 @@ export default function ManualUsuarioPage() {
           <P>El nombre debe ser unico dentro de tu liga. Si otro jugador ya usa ese nombre, el sistema te pedira que elijas uno diferente.</P>
         </Recuadro>
 
+        <Recuadro titulo="Cierre de inscripciones" color="yellow">
+          <P>El organizador puede configurar una <strong>fecha limite de inscripcion</strong>. Pasada esa fecha, no es posible unirse a la liga aunque tengas el codigo de invitacion. Si ves el mensaje <em>&ldquo;Esta liga ya no acepta nuevos participantes&rdquo;</em>, contacta al organizador.</P>
+          <P>Los jugadores ya registrados antes del cierre pueden seguir iniciando sesion con normalidad.</P>
+        </Recuadro>
+
         {/* 2 */}
         <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
         <P>En tu proxima visita, el sistema reconoce tu sesion guardada automaticamente. Si la sesion expiro o accedes desde otro dispositivo:</P>
@@ -146,9 +151,14 @@ export default function ManualUsuarioPage() {
               <tr><td className="border border-slate-200 px-3 py-1.5">Apuesta minima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">10 fichas</td></tr>
               <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">Apuesta maxima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">30% de tu saldo actual</td></tr>
               <tr><td className="border border-slate-200 px-3 py-1.5">Cierre de predicciones</td><td className="border border-slate-200 px-3 py-1.5 font-bold">5 minutos antes del partido</td></tr>
+              <tr className="bg-red-50"><td className="border border-slate-200 px-3 py-1.5 text-red-700 font-medium">No predecir un partido</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-red-700">−10 fichas de penalidad + racha en 0</td></tr>
             </tbody>
           </table>
         </div>
+
+        <Recuadro titulo="Penalidad por omision" color="red">
+          <P>Si no enviaste ninguna prediccion antes del cierre de un partido, al finalizar ese partido el sistema te descuenta automaticamente <strong>10 fichas</strong> y resetea tu racha a 0. No hay excepcion: omitir un partido siempre penaliza. Si llegar a 0 fichas dispara el bono de rescate, este se aplica aunque la causa sea la penalidad.</P>
+        </Recuadro>
 
         <Recuadro titulo="Modificar una prediccion" color="slate">
           <P>Puedes cambiar tu prediccion (marcador y fichas) mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. Si subes la apuesta se descuenta la diferencia; si la bajas, se te devuelven las fichas sobrantes.</P>
@@ -336,7 +346,7 @@ export default function ManualUsuarioPage() {
         </Recuadro>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.1</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.2</p>
         </div>
       </main>
     </>

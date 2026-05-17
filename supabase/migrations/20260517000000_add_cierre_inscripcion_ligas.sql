@@ -1,0 +1,2 @@
+ALTER TABLE ligas
+  ADD COLUMN cierre_inscripcion TIMESTAMP WITH TIME ZONE;

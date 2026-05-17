@@ -6,7 +6,7 @@ function generarCodigo(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { nombreUsuario, nombreLiga, pin } = await req.json()
+  const { nombreUsuario, nombreLiga, pin, cierreInscripcion } = await req.json()
 
   if (!nombreUsuario?.trim() || !nombreLiga?.trim() || !pin || String(pin).length !== 4) {
     return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
@@ -26,9 +26,15 @@ export async function POST(req: NextRequest) {
     codigo = generarCodigo()
   }
 
+  const insertPayload: Record<string, unknown> = {
+    nombre_liga: nombreLiga.trim(),
+    codigo_invitacion: codigo,
+  }
+  if (cierreInscripcion) insertPayload.cierre_inscripcion = cierreInscripcion
+
   const { data: liga, error: ligaError } = await supabase
     .from('ligas')
-    .insert({ nombre_liga: nombreLiga.trim(), codigo_invitacion: codigo })
+    .insert(insertPayload)
     .select()
     .single()
 
