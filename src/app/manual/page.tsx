@@ -113,8 +113,8 @@ export default function ManualUsuarioPage() {
         </Recuadro>
 
         <Recuadro titulo="Cierre de inscripciones" color="yellow">
-          <P>El organizador puede configurar una <strong>fecha limite de inscripcion</strong>. Pasada esa fecha, no es posible unirse a la liga aunque tengas el codigo de invitacion. Si ves el mensaje <em>&ldquo;Esta liga ya no acepta nuevos participantes&rdquo;</em>, contacta al organizador.</P>
-          <P>Los jugadores ya registrados antes del cierre pueden seguir iniciando sesion con normalidad.</P>
+          <P>Cada liga tiene una <strong>fecha limite de inscripcion</strong> fijada automaticamente en el momento de su creacion: <strong>5 minutos antes del primer partido del Mundial</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo de invitacion.</P>
+          <P>Si ves el mensaje <em>&ldquo;Esta liga ya no acepta nuevos participantes&rdquo;</em>, el torneo ya comenzó y la inscripcion esta cerrada. Los jugadores ya registrados antes del cierre pueden seguir iniciando sesion con normalidad.</P>
         </Recuadro>
 
         {/* 2 */}
@@ -381,7 +381,7 @@ export default function ManualUsuarioPage() {
         </Recuadro>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.3</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.4</p>
         </div>
       </main>
     </>

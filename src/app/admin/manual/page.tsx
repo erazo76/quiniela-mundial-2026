@@ -196,14 +196,15 @@ export default function ManualAdminPage() {
         <P>Pulsa en la tarjeta para expandirla y ver la lista de miembros con sus fichas, racha y estado del PIN.</P>
 
         <H3>Cierre de inscripciones</H3>
-        <P>Cada liga puede tener una <strong>fecha limite de inscripcion</strong> (<code className="bg-slate-100 px-1 rounded text-xs">cierre_inscripcion</code>). Una vez superada esa fecha, el endpoint <code className="bg-slate-100 px-1 rounded text-xs">/api/unirse</code> rechaza cualquier intento de nuevo jugador de unirse a la liga.</P>
-        <P>Para modificar el cierre de una liga existente, usa el endpoint admin con el metodo PATCH:</P>
+        <P>Cada liga tiene una <strong>fecha limite de inscripcion</strong> (<code className="bg-slate-100 px-1 rounded text-xs">cierre_inscripcion</code>) fijada automaticamente al crearla: <strong>5 minutos antes del primer partido del Mundial</strong>. Una vez superada esa fecha, el sistema rechaza cualquier intento de un jugador nuevo de unirse a la liga.</P>
+        <P>Si necesitas ajustar la fecha de una liga existente (adelantarla o borrarla), usa el endpoint admin con PATCH:</P>
         <div className="bg-slate-100 rounded-lg px-4 py-3 mb-4 font-mono text-xs text-slate-700 overflow-x-auto">
           PATCH /api/admin/ligas<br />
-          {'{ "token": "...", "ligaId": "...", "cierreInscripcion": "2026-06-10T12:00:00Z" }'}
+          {'{ "token": "...", "ligaId": "...", "cierreInscripcion": "2026-06-15T17:55:00Z" }'}
         </div>
+        <P>Para eliminar el cierre y dejar la liga abierta indefinidamente, envia <code className="bg-slate-100 px-1 rounded text-xs">cierreInscripcion: null</code>.</P>
         <Recuadro titulo="Jugadores existentes no se ven afectados" color="slate">
-          <P>El cierre de inscripciones solo bloquea <em>nuevas</em> adhesiones. Los jugadores ya registrados antes de la fecha limite pueden seguir iniciando sesion y apostando con normalidad.</P>
+          <P>El cierre solo bloquea <em>nuevas</em> adhesiones. Los jugadores ya registrados antes de la fecha pueden seguir iniciando sesion y apostando con normalidad.</P>
         </Recuadro>
 
         {/* 6 */}
@@ -296,7 +297,7 @@ export default function ManualAdminPage() {
         </div>
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.3</p>
+          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de administrador — v1.4</p>
         </div>
       </main>
     </>

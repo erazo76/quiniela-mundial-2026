@@ -42,3 +42,10 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# supabase cli temp state (regenerado automaticamente)
+supabase/.temp/
+
+# imagenes generadas por scripts de simulacion
+scripts/*.png
+scripts/*.jpg
