@@ -58,7 +58,7 @@ function BannersBackground({
         style={{ animation: `bgPulse 12s ease-in-out infinite` }}
       >
         <Image
-          src="/ui/background.png"
+          src="/ui/background.jpg"
           alt=""
           fill
           className="object-cover"

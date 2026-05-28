@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Fondo global fijo — visible en todas las vistas */}
         <div className="fixed inset-0 -z-10 pointer-events-none select-none">
           <Image
-            src="/ui/background.png"
+            src="/ui/background.jpg"
             alt=""
             fill
             className="object-cover object-top"
