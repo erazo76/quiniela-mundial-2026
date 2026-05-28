@@ -1,0 +1,1 @@
+ALTER TABLE grupo_desempates ENABLE ROW LEVEL SECURITY;
