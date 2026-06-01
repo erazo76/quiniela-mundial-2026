@@ -42,6 +42,23 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
       .finally(() => setCargando(false))
   }, [usuarioId])
 
+  // Refresca partidos y predicciones cada 30s y al volver a la pestaña
+  useEffect(() => {
+    const refresh = () => {
+      if (document.hidden) return
+      fetch(`/api/partidos?usuario_id=${usuarioId}&fase=all`)
+        .then((r) => r.json())
+        .then((data) => setPartidos(data))
+        .catch(() => {})
+    }
+    document.addEventListener('visibilitychange', refresh)
+    const id = setInterval(refresh, 30_000)
+    return () => {
+      document.removeEventListener('visibilitychange', refresh)
+      clearInterval(id)
+    }
+  }, [usuarioId])
+
   // Fase más temprana con partidos pendientes
   const faseActiva = useMemo(() => {
     for (const fase of ORDEN_FASES) {
