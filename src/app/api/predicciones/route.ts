@@ -58,11 +58,13 @@ export async function POST(req: NextRequest) {
   const fichasAnterior = existente?.fichas_apostadas ?? 0
   const diferencia = fichas_apostadas - fichasAnterior
 
-  // Regla 30%: bankroll efectivo = disponibles + bloqueadas en esta apuesta
+  // Regla 30% solo aplica cuando se aumenta la apuesta (diferencia positiva = nueva o incremento)
   const fichasEfectivas = usuario.fichas + fichasAnterior
-  const maxApuesta = Math.floor(fichasEfectivas * 0.3)
-  if (fichas_apostadas > Math.max(maxApuesta, 10)) {
-    return NextResponse.json({ error: `La apuesta maxima es ${Math.max(maxApuesta, 10)} fichas (30% de tu bankroll)` }, { status: 400 })
+  if (diferencia > 0) {
+    const maxApuesta = Math.floor(fichasEfectivas * 0.3)
+    if (fichas_apostadas > Math.max(maxApuesta, 10)) {
+      return NextResponse.json({ error: `La apuesta maxima es ${Math.max(maxApuesta, 10)} fichas (30% de tu bankroll)` }, { status: 400 })
+    }
   }
 
   // Solo la diferencia incremental consume fichas disponibles

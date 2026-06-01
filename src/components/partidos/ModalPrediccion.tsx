@@ -128,11 +128,15 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
   const [golesLocal, setGolesLocal] = useState(prediccionExistente?.goles_local ?? 1)
   const [golesVisitante, setGolesVisitante] = useState(prediccionExistente?.goles_visitante ?? 0)
   const fichasEfectivas = fichas + (prediccionExistente?.fichas_apostadas ?? 0)
+  // Tope del 30% aplica solo para nuevas apuestas o incrementos
   const maxApuesta = Math.max(10, Math.floor(fichasEfectivas * 0.3))
+  // Al editar podés bajar libremente; el slider llega hasta max(apuesta actual, tope 30%)
+  const sliderMax = prediccionExistente
+    ? Math.max(prediccionExistente.fichas_apostadas, maxApuesta)
+    : maxApuesta
   const [fichasApostadas, setFichasApostadas] = useState(() => {
-    const raw = prediccionExistente?.fichas_apostadas ?? Math.min(50, maxApuesta)
-    // Snap al múltiplo de 10 inferior para que el valor inicial sea válido en el slider
-    const snapped = Math.floor(Math.min(raw, maxApuesta) / 10) * 10
+    const raw = prediccionExistente?.fichas_apostadas ?? Math.min(50, sliderMax)
+    const snapped = Math.floor(Math.min(raw, sliderMax) / 10) * 10
     return Math.max(10, snapped)
   })
   const [guardando, setGuardando] = useState(false)
@@ -256,16 +260,22 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
             <span className="text-yellow-400 text-base leading-none mt-px shrink-0">!</span>
             <div className="flex flex-col gap-0.5">
               <p className="text-xs font-black text-yellow-300 uppercase tracking-wide">
-                Límite de apuesta
+                {prediccionExistente ? 'Editando apuesta' : 'Límite de apuesta'}
               </p>
               <p className="text-[11px] text-yellow-200/70 leading-snug">
-                Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
-                <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
-                (30% de tus {fichasEfectivas.toLocaleString()} fichas).
-                {prediccionExistente && (
-                  <span className="block mt-0.5 text-yellow-200/50">
-                    Editando predicción existente — tus fichas apostadas se devuelven al actualizar.
-                  </span>
+                {prediccionExistente ? (
+                  <>
+                    Podés <span className="font-bold text-yellow-300">reducir libremente</span> (mín. 10) y recuperar fichas.
+                    {' '}Para <span className="font-bold text-yellow-300">aumentar</span>, el tope es{' '}
+                    <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
+                    (30% de tus {fichasEfectivas.toLocaleString()} fichas disponibles).
+                  </>
+                ) : (
+                  <>
+                    Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
+                    <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
+                    (30% de tus {fichasEfectivas.toLocaleString()} fichas).
+                  </>
                 )}
               </p>
             </div>
@@ -278,7 +288,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
           <input
             type="range"
             min={10}
-            max={maxApuesta}
+            max={sliderMax}
             step={10}
             value={fichasApostadas}
             onChange={(e) => setFichasApostadas(Number(e.target.value))}
@@ -286,7 +296,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
           />
           <div className="flex justify-between text-xs text-slate-600">
             <span>Mín: 10</span>
-            <span>Máx: {maxApuesta.toLocaleString()} fichas</span>
+            <span>Máx: {sliderMax.toLocaleString()} fichas</span>
           </div>
         </div>
 
