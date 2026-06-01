@@ -134,16 +134,11 @@ function MatchSlot({ partido }: { partido: Partido }) {
   const lWin = hasResult && partido.resultado_local! > partido.resultado_visitante!
   const vWin = hasResult && partido.resultado_visitante! > partido.resultado_local!
 
-  function Row({ nombre, bandera, goles, win, showPBadge }: {
-    nombre: string; bandera: string | null; goles: number | null; win: boolean; showPBadge?: boolean
+  function Row({ nombre, bandera, goles, win }: {
+    nombre: string; bandera: string | null; goles: number | null; win: boolean
   }) {
     return (
-      <div className={`relative flex items-center gap-1.5 px-2 py-[5px] ${win ? 'bg-green-500/10' : ''}`}>
-        {showPBadge && (
-          <span className="absolute bottom-0.5 right-0.5 flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-500 text-black text-[8px] font-black leading-none z-10">
-            p
-          </span>
-        )}
+      <div className={`flex items-center gap-1.5 px-2 py-[5px] ${win ? 'bg-green-500/10' : ''}`}>
         {bandera
           ? <img src={bandera} alt="" className="w-5 h-3.5 object-cover rounded-sm shrink-0" />
           : <div className="w-5 h-3.5 bg-slate-700/60 rounded-sm shrink-0" />
@@ -161,10 +156,18 @@ function MatchSlot({ partido }: { partido: Partido }) {
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden w-[172px] shrink-0">
-      <Row nombre={partido.equipo_local}     bandera={partido.bandera_local}     goles={partido.resultado_local}     win={lWin} showPBadge={esPenales && lWin} />
-      <div className="h-px bg-slate-800" />
-      <Row nombre={partido.equipo_visitante} bandera={partido.bandera_visitante} goles={partido.resultado_visitante} win={vWin} showPBadge={esPenales && vWin} />
+    <div className="relative w-[172px] shrink-0">
+      {/* Badge (p) en esquina sup-der de la card, superpuesto sobre el borde */}
+      {esPenales && (
+        <span className="absolute -top-2 -right-2 flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-black text-[8px] font-black leading-none z-20 border-2 border-slate-950">
+          p
+        </span>
+      )}
+      <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
+        <Row nombre={partido.equipo_local}     bandera={partido.bandera_local}     goles={partido.resultado_local}     win={lWin} />
+        <div className="h-px bg-slate-800" />
+        <Row nombre={partido.equipo_visitante} bandera={partido.bandera_visitante} goles={partido.resultado_visitante} win={vWin} />
+      </div>
     </div>
   )
 }
