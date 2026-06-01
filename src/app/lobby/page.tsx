@@ -61,6 +61,24 @@ function LobbyContent() {
     }
   }, [session, loading, router, searchParams])
 
+  // Refresca fichas cada 30s y al volver a la pestaña (sin polling intensivo)
+  useEffect(() => {
+    if (!session) return
+    const refresh = () => {
+      if (document.hidden) return
+      fetch(`/api/usuario?id=${session.usuarioId}`)
+        .then((r) => r.json())
+        .then((data) => { if (data?.fichas != null) setFichas(data.fichas) })
+        .catch(() => {})
+    }
+    document.addEventListener('visibilitychange', refresh)
+    const id = setInterval(refresh, 30_000)
+    return () => {
+      document.removeEventListener('visibilitychange', refresh)
+      clearInterval(id)
+    }
+  }, [session])
+
   if (loading || !session) return null
 
   return (
