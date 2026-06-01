@@ -4,6 +4,7 @@ import { Partido } from '@/types'
 
 interface Props {
   partido: Partido
+  ligaTipo?: 'vip' | 'junior'
   onClick: () => void
 }
 
@@ -74,7 +75,7 @@ function cardBorder(tipoAcierto: string | null, acertado: boolean) {
   return 'border-slate-800'
 }
 
-export function TarjetaPartido({ partido, onClick }: Props) {
+export function TarjetaPartido({ partido, ligaTipo, onClick }: Props) {
   const pred = partido.prediccion
   const puedePredicir = canPredict(partido)
   const badge = pred ? badgeResultado(pred.tipo_acierto, pred.acertado) : null
@@ -153,9 +154,11 @@ export function TarjetaPartido({ partido, onClick }: Props) {
             <span className="text-white font-bold text-sm">
               {pred.goles_local} - {pred.goles_visitante}
             </span>
-            <span className="text-yellow-400 text-xs font-semibold">
-              {pred.fichas_apostadas} fichas
-            </span>
+            {ligaTipo !== 'junior' && (
+              <span className="text-yellow-400 text-xs font-semibold">
+                {pred.fichas_apostadas} fichas
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {badge ? (

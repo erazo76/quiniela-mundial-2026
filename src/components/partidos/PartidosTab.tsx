@@ -194,6 +194,7 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
                 )}
                 <TarjetaPartido
                   partido={partido}
+                  ligaTipo={ligaTipo}
                   onClick={() => handlePartidoClick(partido)}
                 />
               </div>
