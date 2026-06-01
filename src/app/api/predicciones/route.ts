@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     const { error: errorUpsert } = await supabase
       .from('predicciones')
       .upsert(
-        { usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas: 1 },
+        { usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas: 10 },
         { onConflict: 'usuario_id,partido_id' }
       )
     if (errorUpsert) return NextResponse.json({ error: errorUpsert.message }, { status: 500 })
