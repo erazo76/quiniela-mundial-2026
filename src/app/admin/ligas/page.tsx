@@ -24,6 +24,7 @@ interface Liga {
   id: string
   nombre_liga: string
   codigo_invitacion: string
+  tipo: 'vip' | 'junior'
   created_at: string
   miembros: Miembro[]
   pote_virtual?: number
@@ -32,9 +33,11 @@ interface Liga {
 function FilaMiembro({
   miembro,
   token,
+  esJunior,
 }: {
   miembro: Miembro
   token: string
+  esJunior: boolean
 }) {
   const [reseteando, setReseteando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -66,7 +69,7 @@ function FilaMiembro({
         <div className="min-w-0">
           <p className="text-sm font-semibold text-white truncate">{miembro.nombre}</p>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs text-slate-400">{miembro.fichas} fichas</span>
+            <span className="text-xs text-slate-400">{miembro.fichas} {esJunior ? 'pts' : 'fichas'}</span>
             {miembro.racha >= 3 && (
               <span className="text-xs text-amber-400">🔥 {miembro.racha}</span>
             )}
@@ -157,7 +160,16 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
           className="flex-1 flex items-center justify-between px-4 py-4 hover:bg-slate-800/40 transition-colors text-left"
         >
           <div>
-            <p className="text-base font-bold text-white">{liga.nombre_liga}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-bold text-white">{liga.nombre_liga}</p>
+              <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                liga.tipo === 'junior'
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+              }`}>
+                {liga.tipo === 'junior' ? 'JUNIOR' : 'MASTER'}
+              </span>
+            </div>
             <div className="flex items-center gap-3 mt-0.5">
               <span className="text-sm font-mono font-bold text-green-400 tracking-widest">
                 {liga.codigo_invitacion}
@@ -255,7 +267,7 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
             <p className="text-xs text-slate-600 text-center py-4">Sin miembros aún</p>
           ) : (
             liga.miembros.map((m) => (
-              <FilaMiembro key={m.id} miembro={m} token={token} />
+              <FilaMiembro key={m.id} miembro={m} token={token} esJunior={liga.tipo === 'junior'} />
             ))
           )}
         </div>
