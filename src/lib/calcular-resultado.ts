@@ -81,10 +81,15 @@ export async function procesarResultadoPartido(
     )
 
     const usuario = usuariosMap.get(pred.usuario_id)
+    const esJunior = usuario ? ligaTipoMap.get(usuario.liga_id) === 'junior' : false
 
-    // Racha de oro: +0.5× a partir del 3er acierto consecutivo
-    const enRacha = acertado && (usuario?.racha ?? 0) >= 2
-    const ganancia = Math.floor(pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador))
+    // Racha de oro: +0.5× a partir del 3er acierto consecutivo (solo MASTER)
+    const enRacha = !esJunior && acertado && (usuario?.racha ?? 0) >= 2
+    const gananciaVip = Math.floor(pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador))
+    // JUNIOR: puntos fijos (3/2/0); MASTER: fichas × multiplicador
+    const gananciaFichas = esJunior
+      ? (tipo === 'exacto' ? 3 : tipo === 'ganador' ? 2 : 0)
+      : gananciaVip
 
     updatesPred.push({
       id: pred.id,
@@ -93,29 +98,26 @@ export async function procesarResultadoPartido(
       goles_local: pred.goles_local,
       goles_visitante: pred.goles_visitante,
       fichas_apostadas: pred.fichas_apostadas,
-      ganancia_fichas: ganancia,
+      ganancia_fichas: gananciaFichas,
       tipo_acierto: tipo,
       acertado,
     })
 
     if (usuario) {
-      const esJunior = ligaTipoMap.get(usuario.liga_id) === 'junior'
-
       if (esJunior) {
         // JUNIOR: sumar puntos (3/2/0), sin racha ni bono
-        const puntos = tipo === 'exacto' ? 3 : tipo === 'ganador' ? 2 : 0
-        usuario.fichas += puntos
-        if (puntos > 0) {
+        usuario.fichas += gananciaFichas
+        if (gananciaFichas > 0) {
           historial.push({
             usuario_id: pred.usuario_id,
             tipo,
-            cantidad: puntos,
+            cantidad: gananciaFichas,
             descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
           })
         }
       } else {
-        // VIP: fichas con multiplicador, racha y bono
-        usuario.fichas += ganancia
+        // MASTER: fichas con multiplicador, racha y bono
+        usuario.fichas += gananciaVip
         usuario.racha = acertado ? usuario.racha + 1 : 0
 
         if (usuario.fichas <= 0 && !usuario.bono_usado) {
@@ -129,11 +131,11 @@ export async function procesarResultadoPartido(
           })
         }
 
-        if (ganancia > 0) {
+        if (gananciaVip > 0) {
           historial.push({
             usuario_id: pred.usuario_id,
             tipo,
-            cantidad: ganancia,
+            cantidad: gananciaVip,
             descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
           })
         }
