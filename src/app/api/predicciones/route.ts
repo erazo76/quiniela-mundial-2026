@@ -47,16 +47,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
   }
 
-  const maxApuesta = Math.floor(usuario.fichas * 0.3)
-  if (fichas_apostadas > Math.max(maxApuesta, 10)) {
-    return NextResponse.json({ error: `La apuesta maxima es ${Math.max(maxApuesta, 10)} fichas (30% de tu bankroll)` }, { status: 400 })
-  }
-
-  if (fichas_apostadas > usuario.fichas) {
-    return NextResponse.json({ error: 'No tienes fichas suficientes' }, { status: 400 })
-  }
-
-  // Verificar si ya existe prediccion
+  // Verificar si ya existe prediccion (antes de validar fichas para considerar la apuesta en curso)
   const { data: existente } = await supabase
     .from('predicciones')
     .select('id, fichas_apostadas')
@@ -67,6 +58,14 @@ export async function POST(req: NextRequest) {
   const fichasAnterior = existente?.fichas_apostadas ?? 0
   const diferencia = fichas_apostadas - fichasAnterior
 
+  // Regla 30%: bankroll efectivo = disponibles + bloqueadas en esta apuesta
+  const fichasEfectivas = usuario.fichas + fichasAnterior
+  const maxApuesta = Math.floor(fichasEfectivas * 0.3)
+  if (fichas_apostadas > Math.max(maxApuesta, 10)) {
+    return NextResponse.json({ error: `La apuesta maxima es ${Math.max(maxApuesta, 10)} fichas (30% de tu bankroll)` }, { status: 400 })
+  }
+
+  // Solo la diferencia incremental consume fichas disponibles
   if (diferencia > usuario.fichas) {
     return NextResponse.json({ error: 'No tienes fichas suficientes para esta modificación' }, { status: 400 })
   }
