@@ -211,7 +211,7 @@ function ManualVIP() {
       </div>
 
       <H2 n={7}>Bono de rescate</H2>
-      <P>Si tus fichas llegan a <strong>0</strong>, recibes automaticamente <strong>300 fichas</strong> de regalo. Solo ocurre una vez por jugador durante todo el torneo.</P>
+      <P>Si tus fichas llegan a <strong>0</strong>, recibes automaticamente <strong>100 fichas</strong> de regalo. Solo ocurre una vez por jugador durante todo el torneo.</P>
 
       <H2 n={8}>Tablero de partidos</H2>
       <P>La pestana <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronologica), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminacion directa).</P>

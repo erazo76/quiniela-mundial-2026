@@ -235,7 +235,7 @@ export function PerfilTab({ session, fichas, ligaTipo, onLogout, onVerTutorial }
         >
           <div>
             <p className="text-sm font-bold text-white">Bono de rescate</p>
-            <p className="text-xs text-slate-500">300 fichas si llegas a 0</p>
+            <p className="text-xs text-slate-500">100 fichas si llegas a 0</p>
           </div>
           <span
             className={`text-xs font-bold px-3 py-1 rounded-full ${

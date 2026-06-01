@@ -45,7 +45,7 @@ const SLIDES_VIP: Slide[] = [
     image: '/ui/icon-gift.png',
     titulo: 'Extras y bonos',
     descripcion:
-      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
+      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegas a 0 fichas, recibes 100 de regalo una sola vez (bono de rescate).',
   },
   {
     image: '/ui/icon-exclamation.png',

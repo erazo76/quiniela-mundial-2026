@@ -121,12 +121,12 @@ export async function procesarResultadoPartido(
         usuario.racha = acertado ? usuario.racha + 1 : 0
 
         if (usuario.fichas <= 0 && !usuario.bono_usado) {
-          usuario.fichas += 300
+          usuario.fichas += 100
           usuario.bono_usado = true
           historial.push({
             usuario_id: pred.usuario_id,
             tipo: 'bono_rescate',
-            cantidad: 300,
+            cantidad: 100,
             descripcion: 'Bono de rescate (fichas a 0)',
           })
         }
@@ -169,12 +169,12 @@ export async function procesarResultadoPartido(
 
     // Bono de rescate también aplica si la penalidad lleva a 0
     if (usuario.fichas <= 0 && !usuario.bono_usado) {
-      usuario.fichas += 300
+      usuario.fichas += 100
       usuario.bono_usado = true
       historial.push({
         usuario_id: u.id,
         tipo: 'bono_rescate',
-        cantidad: 300,
+        cantidad: 100,
         descripcion: 'Bono de rescate (fichas a 0)',
       })
     }
