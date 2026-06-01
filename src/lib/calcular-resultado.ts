@@ -127,13 +127,14 @@ export async function procesarResultadoPartido(
     if (predMap.has(u.id)) continue // predijo — ya procesado arriba
 
     const usuario = usuariosMap.get(u.id)!
-    usuario.fichas -= PENALIDAD_OMISION
+    const penalidad = Math.min(PENALIDAD_OMISION, Math.max(0, usuario.fichas))
+    usuario.fichas = Math.max(0, usuario.fichas - PENALIDAD_OMISION)
     usuario.racha = 0 // omitir un partido rompe la racha
 
     historial.push({
       usuario_id: u.id,
       tipo: 'penalidad_omision',
-      cantidad: PENALIDAD_OMISION,
+      cantidad: penalidad,
       descripcion: `${equipoLocal} vs ${equipoVisitante} · Sin predicción`,
     })
 
