@@ -66,7 +66,7 @@ const SLIDES_JUNIOR: Slide[] = [
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresás el marcador que esperás. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo elegís el marcador y enviás tu predicción.',
+      'Antes de cada partido ingresás el marcador que esperás. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo elegís el marcador y confirmás.\n\n💡 Podés adelantarte y completar todas las predicciones de la fase de una sola vez — no es necesario esperar partido por partido.',
   },
   {
     image: '/ui/icon-multiplier.png',
