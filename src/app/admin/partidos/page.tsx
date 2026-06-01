@@ -637,9 +637,9 @@ export default function AdminPartidosPage() {
   const conteoFinalizado = partidos.filter((p) => p.estado === 'finalizado').length
 
   return (
-    <main className="min-h-screen text-white">
+    <main className="h-screen flex flex-col overflow-hidden text-white bg-slate-950">
       {/* Header */}
-      <header className="border-b border-slate-800">
+      <header className="border-b border-slate-800 shrink-0">
         <div className="flex items-center justify-between px-5 py-4">
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-widest">Admin</p>
@@ -688,7 +688,7 @@ export default function AdminPartidosPage() {
       </header>
 
       {/* Nav */}
-      <nav className="flex gap-1 px-4 py-3 border-b border-slate-800">
+      <nav className="flex gap-1 px-4 py-3 border-b border-slate-800 shrink-0">
         <Link
           href="/admin/partidos"
           className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide bg-green-500 text-black"
@@ -711,7 +711,7 @@ export default function AdminPartidosPage() {
       </nav>
 
       {/* Tabs de fase */}
-      <div className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-slate-800" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-slate-800 shrink-0" style={{ scrollbarWidth: 'none' }}>
         {FASES_ORDEN.map((fase) => {
           const count = partidos.filter((p) => p.fase === fase && p.estado !== 'finalizado').length
           return (
@@ -765,7 +765,8 @@ export default function AdminPartidosPage() {
         </div>
       )}
 
-      {/* Lista de partidos */}
+      {/* Lista de partidos — área con scroll */}
+      <div className="flex-1 overflow-y-auto">
       <div className="px-4 py-4 flex flex-col gap-3 max-w-2xl mx-auto">
         {cargando ? (
           Array.from({ length: 4 }).map((_, i) => (
@@ -794,6 +795,7 @@ export default function AdminPartidosPage() {
           token={token}
         />
       )}
+      </div>{/* fin scroll container */}
     </main>
   )
 }
