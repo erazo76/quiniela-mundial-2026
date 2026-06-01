@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   const { data: liga } = await supabase
     .from('ligas')
-    .select('id, nombre_liga, codigo_invitacion')
+    .select('id, nombre_liga, codigo_invitacion, tipo')
     .eq('codigo_invitacion', codigo.toUpperCase().trim())
     .maybeSingle()
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     .order('nombre')
 
   return NextResponse.json({
-    liga: { id: liga.id, nombre_liga: liga.nombre_liga, codigo_invitacion: liga.codigo_invitacion },
+    liga: { id: liga.id, nombre_liga: liga.nombre_liga, codigo_invitacion: liga.codigo_invitacion, tipo: liga.tipo ?? 'vip' },
     miembros: (miembros ?? []).map((m) => ({
       id: m.id,
       nombre: m.nombre,

@@ -50,6 +50,7 @@ export default function CrearLigaPage() {
   const [nombre, setNombre] = useState('')
   const [nombreLiga, setNombreLiga] = useState('')
   const [pin, setPin] = useState('')
+  const [tipo, setTipo] = useState<'vip' | 'junior'>('vip')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { login } = useSession()
@@ -65,7 +66,7 @@ export default function CrearLigaPage() {
       const res = await fetch('/api/ligas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombreUsuario: nombre, nombreLiga, pin }),
+        body: JSON.stringify({ nombreUsuario: nombre, nombreLiga, pin, tipo }),
       })
       const data = await res.json()
 
@@ -80,6 +81,7 @@ export default function CrearLigaPage() {
         ligaId: data.liga.id,
         ligaNombre: data.liga.nombre_liga,
         codigoInvitacion: data.liga.codigo_invitacion,
+        ligaTipo: data.liga.tipo ?? 'vip',
       })
 
       router.push('/lobby?onboarding=1')
@@ -137,6 +139,34 @@ export default function CrearLigaPage() {
               required
               className="w-full px-4 py-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:border-green-500 transition-colors text-base"
             />
+          </div>
+
+          {/* Tipo de liga */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Modalidad de liga
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {([['vip', 'VIP', 'Fichas y apuestas, racha de oro, bono de rescate'], ['junior', 'JUNIOR', 'Puntos por aciertos (3/2/0), sin apuestas, ranking simple']] as const).map(([val, label, desc]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setTipo(val)}
+                  className={`flex flex-col gap-1 px-3 py-3 rounded-xl border-2 text-left transition-all ${
+                    tipo === val
+                      ? val === 'vip'
+                        ? 'border-yellow-500 bg-yellow-500/10'
+                        : 'border-blue-500 bg-blue-500/10'
+                      : 'border-slate-700 bg-slate-900'
+                  }`}
+                >
+                  <span className={`text-sm font-black ${tipo === val ? (val === 'vip' ? 'text-yellow-400' : 'text-blue-400') : 'text-white'}`}>
+                    {label}
+                  </span>
+                  <span className="text-[10px] text-slate-500 leading-tight">{desc}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">

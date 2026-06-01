@@ -19,6 +19,7 @@ interface Props {
   partido: Partido
   prediccionExistente: Prediccion | null
   fichas: number
+  ligaTipo: 'vip' | 'junior'
   usuarioId: string
   onClose: () => void
   onGuardada: (fichasNuevas: number, prediccion: Prediccion) => void
@@ -124,7 +125,8 @@ function Stepper({
 }
 
 
-export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioId, onClose, onGuardada }: Props) {
+export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo, usuarioId, onClose, onGuardada }: Props) {
+  const esJunior = ligaTipo === 'junior'
   const [golesLocal, setGolesLocal] = useState(prediccionExistente?.goles_local ?? 1)
   const [golesVisitante, setGolesVisitante] = useState(prediccionExistente?.goles_visitante ?? 0)
   const fichasEfectivas = fichas + (prediccionExistente?.fichas_apostadas ?? 0)
@@ -253,68 +255,78 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
           <Stepper value={golesVisitante} onChange={setGolesVisitante} />
         </div>
 
-        {/* Fichas */}
-        <div className="flex flex-col gap-3">
-          {/* Info callout — reglas de apuesta */}
-          <div className="flex items-start gap-2.5 bg-yellow-500/10 border border-yellow-500/25 rounded-xl px-3 py-2.5">
-            <span className="text-yellow-400 text-base leading-none mt-px shrink-0">!</span>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-xs font-black text-yellow-300 uppercase tracking-wide">
-                {prediccionExistente ? 'Editando apuesta' : 'Límite de apuesta'}
-              </p>
-              <p className="text-[11px] text-yellow-200/70 leading-snug">
-                {prediccionExistente ? (
-                  <>
-                    Podés <span className="font-bold text-yellow-300">reducir libremente</span> (mín. 10) y recuperar fichas.
-                    {' '}Para <span className="font-bold text-yellow-300">aumentar</span>, el tope es{' '}
-                    <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
-                    (30% de tus {fichasEfectivas.toLocaleString()} fichas disponibles).
-                  </>
-                ) : (
-                  <>
-                    Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
-                    <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
-                    (30% de tus {fichasEfectivas.toLocaleString()} fichas).
-                  </>
-                )}
-              </p>
+        {/* Fichas (solo VIP) */}
+        {!esJunior && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-2.5 bg-yellow-500/10 border border-yellow-500/25 rounded-xl px-3 py-2.5">
+              <span className="text-yellow-400 text-base leading-none mt-px shrink-0">!</span>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-xs font-black text-yellow-300 uppercase tracking-wide">
+                  {prediccionExistente ? 'Editando apuesta' : 'Límite de apuesta'}
+                </p>
+                <p className="text-[11px] text-yellow-200/70 leading-snug">
+                  {prediccionExistente ? (
+                    <>
+                      Podés <span className="font-bold text-yellow-300">reducir libremente</span> (mín. 10) y recuperar fichas.
+                      {' '}Para <span className="font-bold text-yellow-300">aumentar</span>, el tope es{' '}
+                      <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
+                      (30% de tus {fichasEfectivas.toLocaleString()} fichas disponibles).
+                    </>
+                  ) : (
+                    <>
+                      Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
+                      <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
+                      (30% de tus {fichasEfectivas.toLocaleString()} fichas).
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-400">Fichas a apostar</span>
+              <span className="text-yellow-400 font-bold text-sm tabular-nums">{fichasApostadas.toLocaleString()}</span>
+            </div>
+            <input
+              type="range"
+              min={10}
+              max={sliderMax}
+              step={10}
+              value={fichasApostadas}
+              onChange={(e) => setFichasApostadas(Number(e.target.value))}
+              className="w-full accent-green-400"
+            />
+            <div className="flex justify-between text-xs text-slate-600">
+              <span>Mín: 10</span>
+              <span>Máx: {sliderMax.toLocaleString()} fichas</span>
             </div>
           </div>
+        )}
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Fichas a apostar</span>
-            <span className="text-yellow-400 font-bold text-sm tabular-nums">{fichasApostadas.toLocaleString()}</span>
-          </div>
-          <input
-            type="range"
-            min={10}
-            max={sliderMax}
-            step={10}
-            value={fichasApostadas}
-            onChange={(e) => setFichasApostadas(Number(e.target.value))}
-            className="w-full accent-green-400"
-          />
-          <div className="flex justify-between text-xs text-slate-600">
-            <span>Mín: 10</span>
-            <span>Máx: {sliderMax.toLocaleString()} fichas</span>
-          </div>
-        </div>
-
-        {/* Ganancias potenciales */}
+        {/* Puntos potenciales (JUNIOR) / Ganancias potenciales (VIP) */}
         <div className="bg-slate-900 rounded-2xl p-4 flex flex-col gap-2">
           <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-1">
-            Ganancias potenciales
+            {esJunior ? 'Puntos potenciales' : 'Ganancias potenciales'}
           </p>
           <div className="flex justify-between">
             <span className="text-xs text-slate-400">
               Resultado exacto {esEmpate ? '(empate)' : ''}
             </span>
-            <span className="text-green-400 font-bold text-sm">+{gananciaExacto} fichas</span>
+            <span className="text-green-400 font-bold text-sm">
+              {esJunior ? '+3 pts' : `+${gananciaExacto} fichas`}
+            </span>
           </div>
           {!esEmpate && (
             <div className="flex justify-between">
               <span className="text-xs text-slate-400">Ganador correcto</span>
-              <span className="text-yellow-400 font-bold text-sm">+{gananciaGanador} fichas</span>
+              <span className="text-yellow-400 font-bold text-sm">
+                {esJunior ? '+2 pts' : `+${gananciaGanador} fichas`}
+              </span>
+            </div>
+          )}
+          {esJunior && (
+            <div className="flex justify-between">
+              <span className="text-xs text-slate-400">Fallo</span>
+              <span className="text-slate-500 font-bold text-sm">0 pts</span>
             </div>
           )}
         </div>

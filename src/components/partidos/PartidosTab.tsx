@@ -23,10 +23,11 @@ const LABEL_FASE: Record<string, string> = {
 interface Props {
   usuarioId: string
   fichas: number
+  ligaTipo: 'vip' | 'junior'
   onFichasChange: (nuevas: number) => void
 }
 
-export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
+export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Props) {
   const [partidos, setPartidos] = useState<Partido[]>([])
   const [cargando, setCargando] = useState(true)
   const [grupoActivo, setGrupoActivo] = useState('A')
@@ -207,6 +208,7 @@ export function PartidosTab({ usuarioId, fichas, onFichasChange }: Props) {
           partido={partidoSeleccionado}
           prediccionExistente={partidoSeleccionado.prediccion ?? null}
           fichas={fichas}
+          ligaTipo={ligaTipo}
           usuarioId={usuarioId}
           onClose={() => setPartidoSeleccionado(null)}
           onGuardada={handlePrediccionGuardada}

@@ -45,6 +45,10 @@ export async function procesarResultadoPartido(
   if (errUsers) return { procesadas: 0, error: errUsers.message }
   if (!todosUsuarios?.length) return { procesadas: 0 }
 
+  // Fetch liga tipos para diferenciar VIP vs JUNIOR
+  const { data: ligas } = await supabase.from('ligas').select('id, tipo')
+  const ligaTipoMap = new Map((ligas ?? []).map((l) => [l.id, l.tipo as string]))
+
   const predMap = new Map((predicciones ?? []).map((p) => [p.usuario_id, p]))
   const usuariosMap = new Map(todosUsuarios.map((u) => [u.id, { ...u }]))
 
@@ -95,28 +99,44 @@ export async function procesarResultadoPartido(
     })
 
     if (usuario) {
-      usuario.fichas += ganancia
-      usuario.racha = acertado ? usuario.racha + 1 : 0
+      const esJunior = ligaTipoMap.get(usuario.liga_id) === 'junior'
 
-      // Bono de rescate: una sola vez si llega a 0
-      if (usuario.fichas <= 0 && !usuario.bono_usado) {
-        usuario.fichas += 300
-        usuario.bono_usado = true
-        historial.push({
-          usuario_id: pred.usuario_id,
-          tipo: 'bono_rescate',
-          cantidad: 300,
-          descripcion: 'Bono de rescate (fichas a 0)',
-        })
-      }
+      if (esJunior) {
+        // JUNIOR: sumar puntos (3/2/0), sin racha ni bono
+        const puntos = tipo === 'exacto' ? 3 : tipo === 'ganador' ? 2 : 0
+        usuario.fichas += puntos
+        if (puntos > 0) {
+          historial.push({
+            usuario_id: pred.usuario_id,
+            tipo,
+            cantidad: puntos,
+            descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
+          })
+        }
+      } else {
+        // VIP: fichas con multiplicador, racha y bono
+        usuario.fichas += ganancia
+        usuario.racha = acertado ? usuario.racha + 1 : 0
 
-      if (ganancia > 0) {
-        historial.push({
-          usuario_id: pred.usuario_id,
-          tipo,
-          cantidad: ganancia,
-          descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
-        })
+        if (usuario.fichas <= 0 && !usuario.bono_usado) {
+          usuario.fichas += 300
+          usuario.bono_usado = true
+          historial.push({
+            usuario_id: pred.usuario_id,
+            tipo: 'bono_rescate',
+            cantidad: 300,
+            descripcion: 'Bono de rescate (fichas a 0)',
+          })
+        }
+
+        if (ganancia > 0) {
+          historial.push({
+            usuario_id: pred.usuario_id,
+            tipo,
+            cantidad: ganancia,
+            descripcion: `${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante}`,
+          })
+        }
       }
     }
   }
@@ -127,6 +147,13 @@ export async function procesarResultadoPartido(
     if (predMap.has(u.id)) continue // predijo — ya procesado arriba
 
     const usuario = usuariosMap.get(u.id)!
+    const esJunior = ligaTipoMap.get(usuario.liga_id) === 'junior'
+
+    if (esJunior) {
+      // JUNIOR: sin penalidad por omisión, simplemente suma 0
+      continue
+    }
+
     const penalidad = Math.min(PENALIDAD_OMISION, Math.max(0, usuario.fichas))
     usuario.fichas = Math.max(0, usuario.fichas - PENALIDAD_OMISION)
     usuario.racha = 0 // omitir un partido rompe la racha

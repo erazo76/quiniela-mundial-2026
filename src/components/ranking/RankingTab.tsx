@@ -38,6 +38,7 @@ interface EntradaRanking {
 interface Props {
   ligaId: string
   usuarioId: string
+  ligaTipo: 'vip' | 'junior'
 }
 
 function FireBadge({ racha }: { racha: number }) {
@@ -101,7 +102,7 @@ function SeccionPote({ pote, ranking }: { pote: number; ranking: EntradaRanking[
   )
 }
 
-function FilaPodio({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }) {
+function FilaPodio({ entrada, esYo, esJunior }: { entrada: EntradaRanking; esYo: boolean; esJunior: boolean }) {
   const idx = entrada.posicion - 1
   return (
     <div
@@ -121,14 +122,15 @@ function FilaPodio({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
       </p>
       <p className={`text-xl font-black ${COLORES_FICHAS[idx]}`}>
         {entrada.fichas.toLocaleString()}
+        <span className="text-xs font-normal ml-1">{esJunior ? 'pts' : ''}</span>
       </p>
       <p className="text-xs text-slate-600">{entrada.predicciones_total} predicciones</p>
-      {entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
+      {!esJunior && entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
     </div>
   )
 }
 
-function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }) {
+function FilaLista({ entrada, esYo, esJunior }: { entrada: EntradaRanking; esYo: boolean; esJunior: boolean }) {
   const esEspectador = entrada.es_espectador
   return (
     <div
@@ -161,15 +163,16 @@ function FilaLista({ entrada, esYo }: { entrada: EntradaRanking; esYo: boolean }
           }
         </p>
       </div>
-      {!esEspectador && entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
+      {!esJunior && !esEspectador && entrada.racha >= 3 && <FireBadge racha={entrada.racha} />}
       <span className={`font-black text-sm ${esEspectador ? 'text-slate-500' : 'text-yellow-400'}`}>
-        {entrada.fichas.toLocaleString()}
+        {entrada.fichas.toLocaleString()}{esJunior && !esEspectador ? ' pts' : ''}
       </span>
     </div>
   )
 }
 
-export function RankingTab({ ligaId, usuarioId }: Props) {
+export function RankingTab({ ligaId, usuarioId, ligaTipo }: Props) {
+  const esJunior = ligaTipo === 'junior'
   const [ranking, setRanking] = useState<EntradaRanking[]>([])
   const [pote, setPote] = useState(0)
   const [cargando, setCargando] = useState(true)
@@ -208,10 +211,31 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
     )
   }
 
+  // Detectar empates en el podio (JUNIOR) para mostrar nota
+  const hayEmpatesPodio = esJunior && activos.length >= 2 && (
+    (activos[0]?.fichas === activos[1]?.fichas) ||
+    (activos[1]?.fichas === activos[2]?.fichas)
+  )
+
   return (
     <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 flex flex-col gap-4">
-      {/* Pote */}
-      <SeccionPote pote={pote} ranking={ranking} />
+      {/* Pote (solo VIP) */}
+      {!esJunior && <SeccionPote pote={pote} ranking={ranking} />}
+
+      {/* Nota JUNIOR */}
+      {esJunior && (
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl px-4 py-3 flex flex-col gap-1">
+          <p className="text-xs font-black text-blue-300 uppercase tracking-wide">Liga JUNIOR · Ranking por puntos</p>
+          <p className="text-[11px] text-blue-200/70 leading-snug">
+            Exacto = 3 pts · Ganador/empate correcto = 2 pts · Fallo = 0 pts
+          </p>
+          {hayEmpatesPodio && (
+            <p className="text-[11px] text-blue-200/50 leading-snug mt-0.5">
+              Hay empate en el podio — cualquier premio acordado se dividirá entre quienes compartan esa posición.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Clasificacion */}
       <div className="flex items-center justify-between">
@@ -236,7 +260,7 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
           }`}
         >
           {podio.map((entrada) => (
-            <FilaPodio key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} />
+            <FilaPodio key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} esJunior={esJunior} />
           ))}
         </div>
       )}
@@ -245,7 +269,7 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
       {resto.length > 0 && (
         <div className="flex flex-col gap-2">
           {resto.map((entrada) => (
-            <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} />
+            <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} esJunior={esJunior} />
           ))}
         </div>
       )}
@@ -261,7 +285,7 @@ export function RankingTab({ ligaId, usuarioId }: Props) {
             <div className="flex-1 h-px bg-slate-800" />
           </div>
           {espectadores.map((entrada) => (
-            <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} />
+            <FilaLista key={entrada.id} entrada={entrada} esYo={entrada.id === usuarioId} esJunior={esJunior} />
           ))}
         </div>
       )}

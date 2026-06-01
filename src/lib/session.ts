@@ -4,6 +4,7 @@ export interface Session {
   ligaId: string
   ligaNombre: string
   codigoInvitacion: string
+  ligaTipo: 'vip' | 'junior'
 }
 
 const KEY = 'qm2026_session'

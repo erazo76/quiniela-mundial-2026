@@ -47,6 +47,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
   }
 
+  // Determinar tipo de liga
+  const { data: ligaData } = await supabase
+    .from('ligas')
+    .select('tipo, pote_virtual')
+    .eq('id', usuario.liga_id)
+    .single()
+  const esJunior = ligaData?.tipo === 'junior'
+
+  // ── Modo JUNIOR: sin fichas, solo guardamos la predicción con fichas_apostadas=1 ──
+  if (esJunior) {
+    const { error: errorUpsert } = await supabase
+      .from('predicciones')
+      .upsert(
+        { usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas: 1 },
+        { onConflict: 'usuario_id,partido_id' }
+      )
+    if (errorUpsert) return NextResponse.json({ error: errorUpsert.message }, { status: 500 })
+    return NextResponse.json({ ok: true, fichas: usuario.fichas })
+  }
+
+  // ── Modo VIP: lógica de fichas completa ─────────────────────────────────────
   // Verificar si ya existe prediccion (antes de validar fichas para considerar la apuesta en curso)
   const { data: existente } = await supabase
     .from('predicciones')
@@ -108,20 +129,11 @@ export async function POST(req: NextRequest) {
     })
 
     // Acumular 5% de la apuesta neta al pote de la liga
-    if (usuario.liga_id) {
-      const COMISION = 0.05
-      const poteDelta = Math.round(diferencia * COMISION)
-      if (poteDelta !== 0) {
-        const { data: liga } = await supabase
-          .from('ligas')
-          .select('pote_virtual')
-          .eq('id', usuario.liga_id)
-          .single()
-        if (liga) {
-          const nuevoPote = Math.max(0, (liga.pote_virtual ?? 0) + poteDelta)
-          await supabase.from('ligas').update({ pote_virtual: nuevoPote }).eq('id', usuario.liga_id)
-        }
-      }
+    const COMISION = 0.05
+    const poteDelta = Math.round(diferencia * COMISION)
+    if (poteDelta !== 0) {
+      const nuevoPote = Math.max(0, (ligaData?.pote_virtual ?? 0) + poteDelta)
+      await supabase.from('ligas').update({ pote_virtual: nuevoPote }).eq('id', usuario.liga_id)
     }
   }
 

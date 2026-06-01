@@ -69,9 +69,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const fichasIniciales = liga.tipo === 'junior' ? 0 : 1000
     const { data: usuario, error } = await supabase
       .from('usuarios')
-      .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin) })
+      .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin), fichas: fichasIniciales })
       .select()
       .single()
 

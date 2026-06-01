@@ -30,13 +30,16 @@ export async function POST(req: NextRequest) {
     .from('usuarios')
     .select('id, nombre, liga_id')
 
+  const { data: ligas } = await supabase.from('ligas').select('id, tipo')
+  const ligaTipoMap = new Map((ligas ?? []).map((l) => [l.id, l.tipo as string]))
+
   if (usuarios?.length) {
     await supabase.from('usuarios').upsert(
       usuarios.map((u) => ({
         id: u.id,
         nombre: u.nombre,
         liga_id: u.liga_id,
-        fichas: 1000,
+        fichas: ligaTipoMap.get(u.liga_id) === 'junior' ? 0 : 1000,
         racha: 0,
         bono_usado: false,
       }))

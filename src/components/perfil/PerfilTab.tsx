@@ -31,6 +31,7 @@ interface Stats {
 interface Props {
   session: Session
   fichas: number
+  ligaTipo: 'vip' | 'junior'
   onLogout: () => void
   onVerTutorial: () => void
 }
@@ -93,7 +94,8 @@ const TIPO_LABEL: Record<string, string> = {
   premio_pote: 'Premio pote',
 }
 
-export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
+export function PerfilTab({ session, fichas, ligaTipo, onLogout, onVerTutorial }: Props) {
+  const esJunior = ligaTipo === 'junior'
   const [stats, setStats] = useState<Stats | null>(null)
   const [copiado, setCopiado] = useState(false)
   const [avatarIdx, setAvatarIdx] = useState<number>(1)
@@ -201,13 +203,15 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <Stat label="Fichas" valor={fichas.toLocaleString()} />
-        <Stat
-          label="Racha actual"
-          valor={stats?.racha ?? 0}
-          sub={stats && stats.racha >= 3 ? 'Racha de oro' : undefined}
-        />
+      <div className={`grid gap-3 ${esJunior ? 'grid-cols-2' : 'grid-cols-2'}`}>
+        <Stat label={esJunior ? 'Puntos' : 'Fichas'} valor={fichas.toLocaleString()} />
+        {!esJunior && (
+          <Stat
+            label="Racha actual"
+            valor={stats?.racha ?? 0}
+            sub={stats && stats.racha >= 3 ? 'Racha de oro' : undefined}
+          />
+        )}
         <Stat label="Predicciones" valor={stats?.predicciones_total ?? 0} />
         <Stat
           label="Acertadas"
@@ -220,28 +224,30 @@ export function PerfilTab({ session, fichas, onLogout, onVerTutorial }: Props) {
         />
       </div>
 
-      {/* Bono de rescate */}
-      <div
-        className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${
-          stats?.bono_usado
-            ? 'border-slate-800 bg-slate-900'
-            : 'border-green-500/30 bg-green-500/5'
-        }`}
-      >
-        <div>
-          <p className="text-sm font-bold text-white">Bono de rescate</p>
-          <p className="text-xs text-slate-500">300 fichas si llegas a 0</p>
-        </div>
-        <span
-          className={`text-xs font-bold px-3 py-1 rounded-full ${
+      {/* Bono de rescate (solo VIP) */}
+      {!esJunior && (
+        <div
+          className={`flex items-center justify-between rounded-2xl border px-4 py-3 ${
             stats?.bono_usado
-              ? 'bg-slate-800 text-slate-500'
-              : 'bg-green-500/20 text-green-400'
+              ? 'border-slate-800 bg-slate-900'
+              : 'border-green-500/30 bg-green-500/5'
           }`}
         >
-          {stats?.bono_usado ? 'Usado' : 'Disponible'}
-        </span>
-      </div>
+          <div>
+            <p className="text-sm font-bold text-white">Bono de rescate</p>
+            <p className="text-xs text-slate-500">300 fichas si llegás a 0</p>
+          </div>
+          <span
+            className={`text-xs font-bold px-3 py-1 rounded-full ${
+              stats?.bono_usado
+                ? 'bg-slate-800 text-slate-500'
+                : 'bg-green-500/20 text-green-400'
+            }`}
+          >
+            {stats?.bono_usado ? 'Usado' : 'Disponible'}
+          </span>
+        </div>
+      )}
 
       {/* Invitar amigos */}
       <div className="flex flex-col gap-3">

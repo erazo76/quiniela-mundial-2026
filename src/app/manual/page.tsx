@@ -1,6 +1,7 @@
+'use client'
+import { useEffect, useState } from 'react'
 import { PrintButton } from '@/components/manual/PrintButton'
-
-export const metadata = { title: 'Manual de usuario — Quiniela Mundial 2026' }
+import { getSession } from '@/lib/session'
 
 function H2({ n, children }: { n: number; children: React.ReactNode }) {
   return (
@@ -9,19 +10,15 @@ function H2({ n, children }: { n: number; children: React.ReactNode }) {
     </h2>
   )
 }
-
 function H3({ children }: { children: React.ReactNode }) {
   return <h3 className="text-base font-bold text-slate-700 mt-5 mb-2">{children}</h3>
 }
-
 function P({ children }: { children: React.ReactNode }) {
   return <p className="text-sm text-slate-600 leading-relaxed mb-2">{children}</p>
 }
-
 function Li({ children }: { children: React.ReactNode }) {
   return <li className="text-sm text-slate-600 leading-relaxed">{children}</li>
 }
-
 function Pill({ children, color = 'slate' }: { children: React.ReactNode; color?: string }) {
   const colors: Record<string, string> = {
     green: 'bg-green-100 text-green-800 border border-green-300',
@@ -33,13 +30,13 @@ function Pill({ children, color = 'slate' }: { children: React.ReactNode; color?
   }
   return <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded ${colors[color]}`}>{children}</span>
 }
-
 function Recuadro({ titulo, children, color = 'slate' }: { titulo: string; children: React.ReactNode; color?: string }) {
   const colors: Record<string, string> = {
     green: 'border-green-400 bg-green-50',
     yellow: 'border-yellow-400 bg-yellow-50',
     red: 'border-red-400 bg-red-50',
     amber: 'border-amber-400 bg-amber-50',
+    blue: 'border-blue-400 bg-blue-50',
     slate: 'border-slate-400 bg-slate-50',
   }
   return (
@@ -50,7 +47,370 @@ function Recuadro({ titulo, children, color = 'slate' }: { titulo: string; child
   )
 }
 
+function ManualVIP() {
+  return (
+    <>
+      <div className="text-center mb-10 print:mb-6">
+        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de usuario · Liga VIP</p>
+        <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
+        <p className="text-slate-500 text-sm mt-2">Todo lo que necesitas saber para jugar y ganar fichas</p>
+        <div className="mt-4 h-0.5 bg-slate-200 rounded" />
+      </div>
+
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
+        <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
+        <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
+          <li>Crear o unirte a una liga</li>
+          <li>Iniciar sesion (volver a entrar)</li>
+          <li>Hacer una prediccion</li>
+          <li>Como se calculan las ganancias</li>
+          <li>Racha de oro</li>
+          <li>El pote de la liga</li>
+          <li>Bono de rescate</li>
+          <li>Tablero de partidos</li>
+          <li>Ranking</li>
+          <li>Tu perfil</li>
+          <li>Efectos visuales y de audio</li>
+        </ol>
+      </div>
+
+      <H2 n={1}>Crear o unirte a una liga</H2>
+      <P>Al entrar por primera vez debes elegir si crear una liga nueva o unirte a una existente. En ambos casos recibes <strong>1000 fichas</strong> de inicio.</P>
+      <H3>Crear una liga nueva</H3>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa <strong>Crear liga</strong>.</li>
+        <li>Elige la modalidad <strong>VIP</strong>.</li>
+        <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
+        <li>Elige un PIN de 4 digitos.</li>
+        <li>Se genera un codigo de invitacion de 6 caracteres. Compartelo con tus amigos.</li>
+      </ol>
+      <H3>Unirse a una liga existente</H3>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa <strong>Unirme a una liga</strong>.</li>
+        <li>Introduce el codigo de invitacion.</li>
+        <li>Escribe tu nombre de jugador y elige tu PIN.</li>
+      </ol>
+      <Recuadro titulo="Cierre de inscripciones" color="yellow">
+        <P>La inscripcion cierra automaticamente <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo.</P>
+      </Recuadro>
+
+      <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
+      <P>La sesion se guarda automaticamente. Si expiro o accedes desde otro dispositivo, introduce el codigo de tu liga, tu nombre y tu PIN.</P>
+      <Recuadro titulo="Si olvidaste tu PIN" color="yellow">
+        <P>Contacta al administrador de tu liga para que lo resetee.</P>
+      </Recuadro>
+
+      <H2 n={3}>Hacer una prediccion</H2>
+      <P>En la pestana <strong>Partidos</strong> encontraras los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa el partido que quieres predecir.</li>
+        <li>Introduce el marcador esperado.</li>
+        <li>Elige cuantas fichas apostar y confirma.</li>
+      </ol>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Regla</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="border border-slate-200 px-3 py-1.5">Apuesta minima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">10 fichas</td></tr>
+            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">Apuesta maxima al crear</td><td className="border border-slate-200 px-3 py-1.5 font-bold">30% de tu saldo actual</td></tr>
+            <tr><td className="border border-slate-200 px-3 py-1.5">Cierre de predicciones</td><td className="border border-slate-200 px-3 py-1.5 font-bold">5 minutos antes del partido</td></tr>
+            <tr className="bg-red-50"><td className="border border-slate-200 px-3 py-1.5 text-red-700 font-medium">No predecir un partido</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-red-700">−10 fichas + racha en 0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <Recuadro titulo="Modificar una prediccion" color="slate">
+        <P>Podés reducir fichas libremente (devolucion inmediata). Para aumentar, aplica el limite del 30%. Solo mientras el partido este <Pill>Pendiente</Pill> y falten mas de 5 minutos.</P>
+      </Recuadro>
+
+      <H2 n={4}>Como se calculan las ganancias</H2>
+      <P>Las fichas apostadas se descuentan al apostar. Al finalizar el partido, el sistema acredita las ganancias automaticamente.</P>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Recibes</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Ganancia neta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bg-yellow-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-yellow-700">Exacto</td>
+              <td className="border border-slate-200 px-3 py-2">Marcador exacto</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold">3× lo apostado</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold text-yellow-700">+2× la apuesta</td>
+            </tr>
+            <tr className="bg-green-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">Ganador</td>
+              <td className="border border-slate-200 px-3 py-2">Acertaste quien gana o empate</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold">1.5× lo apostado</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">+0.5× la apuesta</td>
+            </tr>
+            <tr className="bg-red-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-red-700">Fallo</td>
+              <td className="border border-slate-200 px-3 py-2">El resultado no coincide</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold">0</td>
+              <td className="border border-slate-200 px-3 py-2 font-bold text-red-700">−1× la apuesta</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <H2 n={5}>Racha de oro</H2>
+      <P>A partir del <strong>3er acierto consecutivo</strong> tus multiplicadores suben +0.5× automaticamente.</P>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Sin racha</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Con racha de oro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bg-yellow-50">
+              <td className="border border-slate-200 px-3 py-1.5 font-bold text-yellow-700">Exacto</td>
+              <td className="border border-slate-200 px-3 py-1.5">3× lo apostado</td>
+              <td className="border border-slate-200 px-3 py-1.5 font-bold text-yellow-700">3.5× lo apostado</td>
+            </tr>
+            <tr className="bg-green-50">
+              <td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">Ganador</td>
+              <td className="border border-slate-200 px-3 py-1.5">1.5× lo apostado</td>
+              <td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">2× lo apostado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
+        <Li>Cualquier <strong>Fallo</strong> rompe la racha y vuelves a 0.</Li>
+        <Li>La racha de oro se indica con un icono de fuego en el ranking.</Li>
+      </ul>
+
+      <H2 n={6}>El pote de la liga</H2>
+      <P>El <strong>5%</strong> de cada apuesta neta se acumula en el pote virtual de la liga. Al final del torneo se distribuye:</P>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Premio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="border border-slate-200 px-3 py-1.5">1er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">60% del pote</td></tr>
+            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">2do lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">25% del pote</td></tr>
+            <tr><td className="border border-slate-200 px-3 py-1.5">3er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">15% del pote</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <H2 n={7}>Bono de rescate</H2>
+      <P>Si tus fichas llegan a <strong>0</strong>, recibes automaticamente <strong>300 fichas</strong> de regalo. Solo ocurre una vez por jugador durante todo el torneo.</P>
+
+      <H2 n={8}>Tablero de partidos</H2>
+      <P>La pestana <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronologica), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminacion directa).</P>
+
+      <H2 n={9}>Ranking</H2>
+      <P>Muestra la clasificacion ordenada por fichas. En la parte superior verás el pote acumulado y su distribucion proyectada. Las rachas activas se indican junto al nombre.</P>
+
+      <H2 n={10}>Tu perfil</H2>
+      <P>Estadisticas (fichas, racha, predicciones, % de acierto), estado del bono de rescate, historial de movimientos e invitacion para amigos.</P>
+
+      <H2 n={11}>Efectos visuales y de audio</H2>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Evento</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Efecto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ['Abrir resultado Exacto', 'Fanfarria de ganador'],
+              ['Abrir resultado Ganador', 'Sonido de gol / crowd'],
+              ['Abrir resultado Fallo', 'Sonido decepcionante'],
+              ['Confirmar una apuesta', 'Sonido de moneda'],
+              ['Tarjeta Exacto', 'Borde amarillo dorado'],
+              ['Tarjeta Ganador', 'Borde verde'],
+              ['Tarjeta Fallo', 'Borde rojo'],
+            ].map(([evento, efecto]) => (
+              <tr key={evento} className="odd:bg-slate-50">
+                <td className="border border-slate-200 px-3 py-1.5 text-slate-700">{evento}</td>
+                <td className="border border-slate-200 px-3 py-1.5 text-slate-600">{efecto}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+function ManualJUNIOR() {
+  return (
+    <>
+      <div className="text-center mb-10 print:mb-6">
+        <p className="text-xs uppercase tracking-widest text-blue-500 mb-1">Manual de usuario · Liga JUNIOR</p>
+        <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
+        <p className="text-slate-500 text-sm mt-2">Predice, acumula puntos y llegá primero al final del Mundial</p>
+        <div className="mt-4 h-0.5 bg-blue-200 rounded" />
+      </div>
+
+      <Recuadro titulo="Modalidad JUNIOR" color="blue">
+        <P>La liga JUNIOR no usa fichas ni apuestas. Solo predecís el marcador de cada partido y sumás puntos según el acierto. Sin penalidades, sin racha, sin pote — solo puntos acumulados.</P>
+      </Recuadro>
+
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
+        <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
+        <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
+          <li>Crear o unirte a una liga JUNIOR</li>
+          <li>Iniciar sesion (volver a entrar)</li>
+          <li>Hacer una prediccion</li>
+          <li>Como se suman los puntos</li>
+          <li>Tablero de partidos</li>
+          <li>Ranking y premio</li>
+          <li>Tu perfil</li>
+        </ol>
+      </div>
+
+      <H2 n={1}>Crear o unirte a una liga JUNIOR</H2>
+      <P>Al entrar por primera vez elegis si crear una liga nueva o unirte a una existente. En ambos casos empezas con <strong>0 puntos</strong>.</P>
+      <H3>Crear una liga nueva</H3>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa <strong>Crear liga</strong>.</li>
+        <li>Seleccioná la modalidad <strong>JUNIOR</strong>.</li>
+        <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
+        <li>Elegí un PIN de 4 digitos — lo usarás cada vez que entres.</li>
+        <li>Se genera un codigo de invitacion de 6 caracteres. Compartilo con todos.</li>
+      </ol>
+      <H3>Unirse a una liga existente</H3>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa <strong>Unirme a una liga</strong>.</li>
+        <li>Introduce el codigo de invitacion.</li>
+        <li>Escribe tu nombre de jugador y elegí tu PIN.</li>
+      </ol>
+      <Recuadro titulo="Cierre de inscripciones" color="yellow">
+        <P>La inscripcion cierra <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo.</P>
+      </Recuadro>
+
+      <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
+      <P>La sesion se guarda automaticamente. Si expiro o accedes desde otro dispositivo, introduce el codigo de tu liga, tu nombre y tu PIN.</P>
+      <Recuadro titulo="Si olvidaste tu PIN" color="yellow">
+        <P>Contacta al administrador de tu liga para que lo resetee.</P>
+      </Recuadro>
+
+      <H2 n={3}>Hacer una prediccion</H2>
+      <P>En la pestana <strong>Partidos</strong> encontraras todos los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
+      <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
+        <li>Pulsa el partido que quieres predecir.</li>
+        <li>Introduce el marcador que esperas (goles local y visitante).</li>
+        <li>Confirma tu prediccion. No hay fichas que apostar.</li>
+      </ol>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Regla</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="border border-slate-200 px-3 py-1.5">Cierre de predicciones</td><td className="border border-slate-200 px-3 py-1.5 font-bold">5 minutos antes del partido</td></tr>
+            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">No predecir un partido</td><td className="border border-slate-200 px-3 py-1.5 font-bold">0 puntos (sin penalidad)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <Recuadro titulo="Modificar una prediccion" color="slate">
+        <P>Podes cambiar el marcador mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. No hay fichas involucradas.</P>
+      </Recuadro>
+
+      <H2 n={4}>Como se suman los puntos</H2>
+      <P>Al finalizar cada partido el sistema calcula tu acierto y suma los puntos automaticamente.</P>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="bg-yellow-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-yellow-700">Exacto</td>
+              <td className="border border-slate-200 px-3 py-2">Marcador exacto (ej. 2-1 = 2-1)</td>
+              <td className="border border-slate-200 px-3 py-2 font-black text-yellow-700">+3 pts</td>
+            </tr>
+            <tr className="bg-green-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">Ganador / Empate</td>
+              <td className="border border-slate-200 px-3 py-2">Acertaste quien gana o si hay empate</td>
+              <td className="border border-slate-200 px-3 py-2 font-black text-green-700">+2 pts</td>
+            </tr>
+            <tr className="bg-red-50">
+              <td className="border border-slate-200 px-3 py-2 font-bold text-red-700">Fallo</td>
+              <td className="border border-slate-200 px-3 py-2">El resultado no coincide</td>
+              <td className="border border-slate-200 px-3 py-2 font-black text-slate-500">0 pts</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <Recuadro titulo="Ejemplo" color="green">
+        <ul className="space-y-1">
+          <Li>Predeciste 2-1, resultado 2-1 → <strong>+3 puntos</strong> (exacto)</Li>
+          <Li>Predeciste 2-0, resultado 3-1 → <strong>+2 puntos</strong> (ganador correcto)</Li>
+          <Li>Predeciste 1-0, resultado 0-1 → <strong>0 puntos</strong> (fallo)</Li>
+        </ul>
+      </Recuadro>
+      <Recuadro titulo="Sin penalidad por no predecir" color="slate">
+        <P>En la liga JUNIOR, si no enviaste ninguna prediccion antes del cierre de un partido, simplemente no sumas puntos ese partido. No hay descuento ni penalidad.</P>
+      </Recuadro>
+
+      <H2 n={5}>Tablero de partidos</H2>
+      <P>La pestana <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronologica con tus predicciones), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminacion directa).</P>
+      <P>La tabla de grupos sigue los <strong>criterios oficiales de la FIFA</strong>: puntos, diferencia de goles, goles a favor, luego criterios de enfrentamiento directo (H2H).</P>
+
+      <H2 n={6}>Ranking y premio</H2>
+      <P>El ranking muestra a todos los jugadores ordenados por puntos acumulados de mayor a menor. Los puntos se suman durante todo el torneo — fase de grupos, octavos, cuartos, semis y final.</P>
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full text-xs border-collapse border border-slate-200 rounded">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Premio (si lo hay)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="border border-slate-200 px-3 py-1.5">1er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">60% del premio acordado</td></tr>
+            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">2do lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">25% del premio acordado</td></tr>
+            <tr><td className="border border-slate-200 px-3 py-1.5">3er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">15% del premio acordado</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <Recuadro titulo="Empate en el podio" color="blue">
+        <P>Si dos o mas jugadores comparten la misma cantidad de puntos en el 1er, 2do o 3er lugar, cualquier premio acordado <strong>se dividira en partes iguales</strong> entre quienes compartan esa posicion.</P>
+      </Recuadro>
+
+      <H2 n={7}>Tu perfil</H2>
+      <P>Muestra tus puntos acumulados, total de predicciones, porcentaje de acierto, codigo de invitacion para compartir con amigos y el historial de puntos ganados.</P>
+    </>
+  )
+}
+
 export default function ManualUsuarioPage() {
+  const [ligaTipo, setLigaTipo] = useState<'vip' | 'junior'>('vip')
+
+  useEffect(() => {
+    const session = getSession()
+    if (session?.ligaTipo) setLigaTipo(session.ligaTipo)
+  }, [])
+
   return (
     <>
       <PrintButton />
@@ -62,326 +422,12 @@ export default function ManualUsuarioPage() {
           }
         `}</style>
 
-        {/* Portada */}
-        <div className="text-center mb-10 print:mb-6">
-          <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de usuario</p>
-          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
-          <p className="text-slate-500 text-sm mt-2">Todo lo que necesitas saber para jugar y ganar fichas</p>
-          <div className="mt-4 h-0.5 bg-slate-200 rounded" />
-        </div>
-
-        {/* Indice */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
-          <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
-            <li>Crear o unirte a una liga</li>
-            <li>Iniciar sesion (volver a entrar)</li>
-            <li>Hacer una prediccion</li>
-            <li>Como se calculan las ganancias</li>
-            <li>Racha de oro</li>
-            <li>El pote de la liga</li>
-            <li>Bono de rescate</li>
-            <li>Tablero de partidos</li>
-            <li>Ranking</li>
-            <li>Tu perfil</li>
-            <li>Efectos visuales y de audio</li>
-          </ol>
-        </div>
-
-        {/* 1 */}
-        <H2 n={1}>Crear o unirte a una liga</H2>
-        <P>Al entrar por primera vez a la aplicacion debes elegir si crear una liga nueva o unirte a una existente. En ambos casos recibes <strong>1000 fichas</strong> de inicio.</P>
-
-        <H3>Crear una liga nueva</H3>
-        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-          <li>Pulsa <strong>Crear liga</strong>.</li>
-          <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
-          <li>Elige un PIN de 4 digitos — lo usarás cada vez que inicies sesion.</li>
-          <li>Se genera automaticamente un codigo de invitacion de 6 caracteres (ej. <code className="bg-slate-100 px-1 rounded font-mono text-xs">XK29A1</code>). Compartelo con tus amigos.</li>
-        </ol>
-
-        <H3>Unirse a una liga existente</H3>
-        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-          <li>Pulsa <strong>Unirme a una liga</strong> o visita <strong>/unirme</strong>.</li>
-          <li>Introduce el codigo de invitacion que te compartio el organizador.</li>
-          <li>Escribe tu nombre de jugador (debe ser unico dentro de tu liga).</li>
-          <li>Elige tu PIN de 4 digitos y confirma.</li>
-        </ol>
-
-        <Recuadro titulo="Nombre de jugador" color="slate">
-          <P>El nombre debe ser unico dentro de tu liga. Si otro jugador ya usa ese nombre, el sistema te pedira que elijas uno diferente.</P>
-        </Recuadro>
-
-        <Recuadro titulo="Cierre de inscripciones" color="yellow">
-          <P>Cada liga tiene una <strong>fecha limite de inscripcion</strong> fijada automaticamente en el momento de su creacion: <strong>5 minutos antes del primer partido del Mundial</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo de invitacion.</P>
-          <P>Si ves el mensaje <em>&ldquo;Esta liga ya no acepta nuevos participantes&rdquo;</em>, el torneo ya comenzó y la inscripcion esta cerrada. Los jugadores ya registrados antes del cierre pueden seguir iniciando sesion con normalidad.</P>
-        </Recuadro>
-
-        {/* 2 */}
-        <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
-        <P>En tu proxima visita, el sistema reconoce tu sesion guardada automaticamente. Si la sesion expiro o accedes desde otro dispositivo:</P>
-        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-          <li>Introduce el codigo de invitacion de tu liga.</li>
-          <li>Escribe tu nombre exacto.</li>
-          <li>Ingresa tu PIN de 4 digitos.</li>
-        </ol>
-        <Recuadro titulo="Si olvidaste tu PIN" color="yellow">
-          <P>Contacta al administrador de tu liga para que lo resetee. El siguiente inicio de sesion te permitira asignar un nuevo PIN.</P>
-        </Recuadro>
-
-        {/* 3 */}
-        <H2 n={3}>Hacer una prediccion</H2>
-        <P>En la pestana <strong>Partidos</strong> encontraras todos los partidos disponibles. Los partidos con estado <Pill>Pendiente</Pill> aceptan predicciones.</P>
-
-        <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
-          <li>Pulsa <strong>Apostar</strong> en el partido que quieres predecir.</li>
-          <li>Introduce el marcador que esperas (goles local y visitante).</li>
-          <li>Elige cuantas fichas apostar y confirma.</li>
-        </ol>
-
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Regla</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td className="border border-slate-200 px-3 py-1.5">Apuesta minima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">10 fichas</td></tr>
-              <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">Apuesta maxima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">30% de tu saldo actual</td></tr>
-              <tr><td className="border border-slate-200 px-3 py-1.5">Cierre de predicciones</td><td className="border border-slate-200 px-3 py-1.5 font-bold">5 minutos antes del partido</td></tr>
-              <tr className="bg-red-50"><td className="border border-slate-200 px-3 py-1.5 text-red-700 font-medium">No predecir un partido</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-red-700">−10 fichas de penalidad + racha en 0</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <Recuadro titulo="Penalidad por omision" color="red">
-          <P>Si no enviaste ninguna prediccion antes del cierre de un partido, al finalizar ese partido el sistema te descuenta automaticamente <strong>10 fichas</strong> y resetea tu racha a 0. No hay excepcion: omitir un partido siempre penaliza. Si llegar a 0 fichas dispara el bono de rescate, este se aplica aunque la causa sea la penalidad.</P>
-        </Recuadro>
-
-        <Recuadro titulo="Modificar una prediccion" color="slate">
-          <P>Puedes cambiar tu prediccion (marcador y fichas) mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. Si subes la apuesta se descuenta la diferencia; si la bajas, se te devuelven las fichas sobrantes.</P>
-        </Recuadro>
-
-        <Recuadro titulo="Una vez iniciado el partido" color="red">
-          <P>No se aceptan predicciones ni modificaciones cuando el partido esta <Pill color="green">En vivo</Pill> o <Pill color="blue">Finalizado</Pill>.</P>
-        </Recuadro>
-
-        {/* 4 */}
-        <H2 n={4}>Como se calculan las ganancias</H2>
-        <P>Las fichas apostadas se descuentan de tu saldo en el momento de apostar. Cuando el administrador marca el partido como finalizado, el sistema calcula el resultado de cada prediccion y acredita las ganancias automaticamente.</P>
-
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condicion</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Recibes de vuelta</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Ganancia neta</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-yellow-50">
-                <td className="border border-slate-200 px-3 py-2 font-bold text-yellow-700">Exacto</td>
-                <td className="border border-slate-200 px-3 py-2">Marcador exacto (ej. 2-1 = 2-1)</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold">3× lo apostado</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold text-yellow-700">+2× la apuesta</td>
-              </tr>
-              <tr className="bg-green-50">
-                <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">Ganador</td>
-                <td className="border border-slate-200 px-3 py-2">Acertaste quien gana o si hay empate</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold">1.5× lo apostado</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">+0.5× la apuesta</td>
-              </tr>
-              <tr className="bg-red-50">
-                <td className="border border-slate-200 px-3 py-2 font-bold text-red-700">Fallo</td>
-                <td className="border border-slate-200 px-3 py-2">El resultado no coincide</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold">0</td>
-                <td className="border border-slate-200 px-3 py-2 font-bold text-red-700">-1× la apuesta</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <Recuadro titulo="Ejemplo con 100 fichas apostadas" color="green">
-          <ul className="space-y-1">
-            <Li><strong>Exacto</strong>: recibes 300 fichas → ganancia neta +200 fichas</Li>
-            <Li><strong>Ganador</strong>: recibes 150 fichas → ganancia neta +50 fichas</Li>
-            <Li><strong>Fallo</strong>: recibes 0 fichas → perdida de 100 fichas</Li>
-          </ul>
-        </Recuadro>
-
-        {/* 5 */}
-        <H2 n={5}>Racha de oro</H2>
-        <P>La racha de oro es un bonus por consistencia. A partir del <strong>tercer acierto consecutivo</strong> (sin fallos de por medio), el multiplicador de tus ganancias sube automaticamente.</P>
-
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Sin racha</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Con racha de oro</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-yellow-50">
-                <td className="border border-slate-200 px-3 py-1.5 font-bold text-yellow-700">Exacto</td>
-                <td className="border border-slate-200 px-3 py-1.5">3× lo apostado</td>
-                <td className="border border-slate-200 px-3 py-1.5 font-bold text-yellow-700">3.5× lo apostado</td>
-              </tr>
-              <tr className="bg-green-50">
-                <td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">Ganador</td>
-                <td className="border border-slate-200 px-3 py-1.5">1.5× lo apostado</td>
-                <td className="border border-slate-200 px-3 py-1.5 font-bold text-green-700">2× lo apostado</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
-          <Li>Cuenta tanto Exacto como Ganador para la racha.</Li>
-          <Li>Cualquier <strong>Fallo</strong> rompe la racha y vuelves a 0.</Li>
-          <Li>Tu racha actual se muestra en la pestana <strong>Perfil</strong> y en el <strong>Ranking</strong>.</Li>
-          <Li>La racha de oro se indica con un indicador de fuego junto a tu nombre en el ranking.</Li>
-        </ul>
-
-        <Recuadro titulo="Ejemplo de racha" color="amber">
-          <P>Llevas 3 aciertos seguidos. Apuestas 100 fichas en el siguiente partido y aciertas el ganador: recibes 200 fichas (2× con racha) en lugar de 150 (1.5× sin racha).</P>
-        </Recuadro>
-
-        {/* 6 */}
-        <H2 n={6}>El pote de la liga</H2>
-        <P>El <strong>5%</strong> de cada apuesta neta se acumula automaticamente en el pote virtual de la liga. Este pote crece durante todo el torneo y puedes verlo en la pestana <strong>Ranking</strong>.</P>
-        <P>Al final del torneo, el administrador distribuye el pote entre los tres primeros del ranking:</P>
-
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Premio</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td className="border border-slate-200 px-3 py-1.5">1er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">60% del pote</td></tr>
-              <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">2do lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">25% del pote</td></tr>
-              <tr><td className="border border-slate-200 px-3 py-1.5">3er lugar</td><td className="border border-slate-200 px-3 py-1.5 font-bold">15% del pote</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* 7 */}
-        <H2 n={7}>Bono de rescate</H2>
-        <P>Si tus fichas llegan a <strong>0</strong> tras calcularse el resultado de un partido, el sistema te otorga automaticamente un bono de rescate de <strong>300 fichas</strong>.</P>
-        <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
-          <Li>El bono se activa solo una vez por jugador durante todo el torneo.</Li>
-          <Li>Se aplica automaticamente — no necesitas hacer nada.</Li>
-          <Li>Puedes ver su estado (Disponible / Usado) en la pestana <strong>Perfil</strong>.</Li>
-        </ul>
-
-        {/* 8 */}
-        <H2 n={8}>Tablero de partidos</H2>
-        <P>La pestana <strong>Tablero</strong> tiene tres vistas:</P>
-        <H3>Partidos</H3>
-        <P>Lista cronologica de todos los partidos con su estado, resultado (si ya finalizo) y tu prediccion. Los badges de color indican el resultado de tu apuesta:</P>
-        <ul className="list-none space-y-1 mb-3 ml-2">
-          <Li><Pill color="yellow">EXACTO</Pill> — marcador exacto (borde amarillo en la tarjeta)</Li>
-          <Li><Pill color="green">GANADOR</Pill> — ganador acertado (borde verde)</Li>
-          <Li><Pill color="red">FALLO</Pill> — no acertaste (borde rojo)</Li>
-        </ul>
-        <H3>Grupos</H3>
-        <P>Vista de tabla por grupo (A al L) con la clasificacion de cada grupo. Las columnas son: PJ (partidos jugados), G (ganados), E (empatados), P (perdidos), DG (diferencia de goles) y Pts (puntos).</P>
-        <P>Los dos primeros de cada grupo clasifican a la siguiente fase (indicados con un punto verde). El orden dentro de la tabla sigue los <strong>criterios oficiales de desempate de la FIFA</strong>:</P>
-
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-2 py-1.5 text-center font-bold text-slate-500 w-8">#</th>
-                <th className="border border-slate-200 px-3 py-1.5 text-left font-bold text-slate-700">Criterio</th>
-                <th className="border border-slate-200 px-3 py-1.5 text-left font-bold text-slate-700">Descripcion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['1', 'Puntos', 'Mayor cantidad de puntos acumulados en todos los partidos del grupo'],
-                ['2', 'Diferencia de goles', 'Mayor diferencia entre goles a favor y en contra (global)'],
-                ['3', 'Goles a favor', 'Mayor cantidad de goles marcados en todos los partidos del grupo'],
-                ['4', 'Puntos H2H', 'Mayor puntos obtenidos solo en los partidos entre los equipos empatados'],
-                ['5', 'Diferencia de goles H2H', 'Mayor diferencia de goles solo en esos enfrentamientos directos'],
-                ['6', 'Goles a favor H2H', 'Mayor cantidad de goles marcados en esos enfrentamientos directos'],
-                ['7-8', 'Decision del organizador', 'Si persiste el empate tras los 6 criterios anteriores, el administrador define el orden manualmente'],
-              ].map(([num, criterio, desc]) => (
-                <tr key={num} className="odd:bg-slate-50">
-                  <td className="border border-slate-200 px-2 py-1.5 text-center font-black text-slate-400">{num}</td>
-                  <td className="border border-slate-200 px-3 py-1.5 font-semibold text-slate-700">{criterio}</td>
-                  <td className="border border-slate-200 px-3 py-1.5 text-slate-600">{desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <Recuadro titulo="Empates extremos" color="yellow">
-          <P>Si dos o mas equipos quedan exactamente igualados en todos los criterios del 1 al 6 (una situacion muy poco frecuente), el administrador de la quiniela registra el orden oficial que determine la FIFA (por disciplina o sorteo). La tabla se actualiza automaticamente con esa decision.</P>
-        </Recuadro>
-
-        <H3>Llaves</H3>
-        <P>Vista de eliminacion directa: dieciseisavos, octavos, cuartos, semis, tercer puesto y final.</P>
-
-        {/* 9 */}
-        <H2 n={9}>Ranking</H2>
-        <P>Muestra la clasificacion de todos los jugadores de tu liga ordenados por fichas de mayor a menor. En la parte superior verás el pote acumulado y como quedaria distribuido con los jugadores actuales en las primeras posiciones.</P>
-        <P>Tu posicion en el ranking aparece resaltada. Las rachas activas de 3 o mas aciertos se indican junto al nombre del jugador.</P>
-
-        {/* 10 */}
-        <H2 n={10}>Tu perfil</H2>
-        <H3>Avatar</H3>
-        <P>Pulsa tu avatar para abrír el selector y elegir entre los disponibles. El avatar se guarda en tu navegador.</P>
-        <H3>Estadisticas</H3>
-        <P>Fichas actuales, racha de aciertos, total de predicciones y porcentaje de acierto.</P>
-        <H3>Historial de movimientos</H3>
-        <P>Pulsa <strong>Movimientos</strong> para expandir el historial de tus ultimos cambios de fichas: apuestas, ganancias, devoluciones, premios del pote y bono de rescate. Navega con los botones Anterior / Siguiente (5 registros por pagina).</P>
-        <H3>Invitar amigos</H3>
-        <P>Tu codigo de invitacion aparece en la seccion <strong>Invitar amigos</strong>. Puedes copiarlo al portapapeles o compartirlo por WhatsApp.</P>
-
-        {/* 11 */}
-        <H2 n={11}>Efectos visuales y de audio</H2>
-        <div className="overflow-x-auto mb-4">
-          <table className="w-full text-xs border-collapse border border-slate-200 rounded">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Evento</th>
-                <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Efecto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['Abrir resultado Exacto', 'Fanfarria de ganador'],
-                ['Abrir resultado Ganador', 'Sonido de gol / crowd'],
-                ['Abrir resultado Fallo', 'Sonido decepcionante'],
-                ['Confirmar una apuesta', 'Sonido de moneda'],
-                ['Tarjeta con resultado Exacto', 'Borde amarillo dorado'],
-                ['Tarjeta con resultado Ganador', 'Borde verde'],
-                ['Tarjeta con resultado Fallo', 'Borde rojo'],
-              ].map(([evento, efecto]) => (
-                <tr key={evento} className="odd:bg-slate-50">
-                  <td className="border border-slate-200 px-3 py-1.5 text-slate-700">{evento}</td>
-                  <td className="border border-slate-200 px-3 py-1.5 text-slate-600">{efecto}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Recuadro titulo="Nota sobre el audio" color="slate">
-          <P>Los sonidos se reproducen al abrir el detalle de un partido ya finalizado, no en tiempo real. Asegurate de tener el volumen activado en tu dispositivo.</P>
-        </Recuadro>
+        {ligaTipo === 'junior' ? <ManualJUNIOR /> : <ManualVIP />}
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-400">Quiniela Mundial 2026 — Manual de usuario — v1.4</p>
+          <p className="text-xs text-slate-400">
+            Quiniela Mundial 2026 — Manual {ligaTipo === 'junior' ? 'JUNIOR' : 'VIP'} — v1.0
+          </p>
         </div>
       </main>
     </>

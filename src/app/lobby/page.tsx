@@ -83,7 +83,7 @@ function LobbyContent() {
 
   return (
     <main className="min-h-screen flex flex-col overflow-hidden max-h-screen">
-      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
+      {showOnboarding && <Onboarding ligaTipo={session.ligaTipo ?? 'vip'} onClose={() => setShowOnboarding(false)} />}
 
       {/* Franja FIFA 2026 en la parte superior */}
       <WcStripe height={3} />
@@ -129,17 +129,19 @@ function LobbyContent() {
           <PartidosTab
             usuarioId={session.usuarioId}
             fichas={fichas}
+            ligaTipo={session.ligaTipo ?? 'vip'}
             onFichasChange={setFichas}
           />
         )}
         {activeTab === 'tablero' && <TableroTab />}
         {activeTab === 'ranking' && (
-          <RankingTab ligaId={session.ligaId} usuarioId={session.usuarioId} />
+          <RankingTab ligaId={session.ligaId} usuarioId={session.usuarioId} ligaTipo={session.ligaTipo ?? 'vip'} />
         )}
         {activeTab === 'perfil' && (
           <PerfilTab
             session={session}
             fichas={fichas}
+            ligaTipo={session.ligaTipo ?? 'vip'}
             onLogout={() => { logout(); router.push('/') }}
             onVerTutorial={() => setShowOnboarding(true)}
           />

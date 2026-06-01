@@ -6,11 +6,13 @@ function generarCodigo(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { nombreUsuario, nombreLiga, pin, cierreInscripcion } = await req.json()
+  const { nombreUsuario, nombreLiga, pin, cierreInscripcion, tipo } = await req.json()
 
   if (!nombreUsuario?.trim() || !nombreLiga?.trim() || !pin || String(pin).length !== 4) {
     return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
   }
+
+  const ligaTipo: 'vip' | 'junior' = tipo === 'junior' ? 'junior' : 'vip'
 
   const supabase = createAdminClient()
 
@@ -45,6 +47,7 @@ export async function POST(req: NextRequest) {
   const insertPayload: Record<string, unknown> = {
     nombre_liga: nombreLiga.trim(),
     codigo_invitacion: codigo,
+    tipo: ligaTipo,
   }
   if (cierreCalculado) insertPayload.cierre_inscripcion = cierreCalculado
 
@@ -58,9 +61,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al crear la liga' }, { status: 500 })
   }
 
+  const fichasIniciales = ligaTipo === 'junior' ? 0 : 1000
   const { data: usuario, error: usuarioError } = await supabase
     .from('usuarios')
-    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin) })
+    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin), fichas: fichasIniciales })
     .select()
     .single()
 

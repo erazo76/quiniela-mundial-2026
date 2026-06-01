@@ -10,7 +10,7 @@ interface Slide {
   descripcion: string
 }
 
-const SLIDES: Slide[] = [
+const SLIDES_VIP: Slide[] = [
   {
     image: '/ui/icon-trophy-nav.png',
     titulo: '¡Bienvenido a la Quiniela!',
@@ -27,25 +27,58 @@ const SLIDES: Slide[] = [
     image: '/ui/icon-coins.png',
     titulo: 'Las fichas',
     descripcion:
-      'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
+      'Empezás con 1000 fichas. Antes de cada partido elegís cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
   },
   {
     image: '/ui/icon-multiplier.png',
     titulo: 'Los multiplicadores',
     descripcion:
-      'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
+      'Marcador exacto → ganás 3× lo apostado\nAcertás ganador o empate → ganás 1.5×\nFallás → perdés lo apostado',
   },
   {
     image: '/ui/icon-coins5.png',
     titulo: 'El pote virtual',
     descripcion:
-      'El pote es la suma de todas las fichas de tu liga. Al final del Mundial, quien tenga más fichas gana. El premio real (si lo hay) se coordina fuera de la app.',
+      'El 5% de cada apuesta va al pote de la liga. Al final del Mundial, el 1° lugar se lleva el 60%, el 2° el 25% y el 3° el 15%. El premio real (si lo hay) se coordina fuera de la app.',
   },
   {
     image: '/ui/icon-gift.png',
     titulo: 'Extras y bonos',
     descripcion:
-      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
+      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegás a 0 fichas, recibís 300 de regalo una sola vez (bono de rescate).',
+  },
+  {
+    image: '/ui/icon-exclamation.png',
+    titulo: 'Aviso importante',
+    descripcion:
+      'Esta app es exclusivamente recreativa entre amigos. No se realizan transacciones con dinero real dentro de la plataforma. Cualquier premio en efectivo es responsabilidad exclusiva de los usuarios.',
+  },
+]
+
+const SLIDES_JUNIOR: Slide[] = [
+  {
+    image: '/ui/icon-trophy-nav.png',
+    titulo: '¡Bienvenido a la Quiniela!',
+    descripcion:
+      'Predice los resultados de los partidos del Mundial 2026. En esta liga JUNIOR acumulás puntos por tus aciertos. Quien termina con más puntos gana.',
+  },
+  {
+    image: '/ui/icon-star2.png',
+    titulo: 'Cómo predecir',
+    descripcion:
+      'Antes de cada partido ingresás el marcador que esperás. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo elegís el marcador y enviás tu predicción.',
+  },
+  {
+    image: '/ui/icon-multiplier.png',
+    titulo: 'Cómo se suman los puntos',
+    descripcion:
+      'Marcador exacto → +3 puntos\nAcertás ganador o empate correcto → +2 puntos\nFallás → 0 puntos\n\nNo se pierden puntos por no predecir — simplemente no sumás nada ese partido.',
+  },
+  {
+    image: '/ui/icon-compete.png',
+    titulo: 'El ranking',
+    descripcion:
+      'Los puntos se acumulan partido a partido a lo largo de todo el Mundial. Al final, el ranking muestra quién sumó más.\n\nSi hay empate en el podio, el premio acordado se divide entre quienes compartan esa posición.',
   },
   {
     image: '/ui/icon-exclamation.png',
@@ -56,10 +89,12 @@ const SLIDES: Slide[] = [
 ]
 
 interface OnboardingProps {
+  ligaTipo: 'vip' | 'junior'
   onClose: () => void
 }
 
-export function Onboarding({ onClose }: OnboardingProps) {
+export function Onboarding({ ligaTipo, onClose }: OnboardingProps) {
+  const SLIDES = ligaTipo === 'junior' ? SLIDES_JUNIOR : SLIDES_VIP
   const [slide, setSlide] = useState(0)
   const [direction, setDirection] = useState(1)
   const isLast = slide === SLIDES.length - 1
