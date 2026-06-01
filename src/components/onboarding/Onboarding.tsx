@@ -21,19 +21,19 @@ const SLIDES_VIP: Slide[] = [
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.\n\nSi no enviás ninguna predicción, al finalizar el partido perdés 10 fichas automáticamente y tu racha se reinicia.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.\n\nSi no envías ninguna predicción, al finalizar el partido pierdes 10 fichas automáticamente y tu racha se reinicia.',
   },
   {
     image: '/ui/icon-coins.png',
     titulo: 'Las fichas',
     descripcion:
-      'Empezás con 1000 fichas. Antes de cada partido elegís cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
+      'Empiezas con 1000 fichas. Antes de cada partido eliges cuántas apostar: mínimo 10, máximo el 30% de tu saldo actual.',
   },
   {
     image: '/ui/icon-multiplier.png',
     titulo: 'Los multiplicadores',
     descripcion:
-      'Marcador exacto → ganás 3× lo apostado\nAcertás ganador o empate → ganás 1.5×\nFallás → perdés lo apostado',
+      'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
   },
   {
     image: '/ui/icon-coins5.png',
@@ -45,7 +45,7 @@ const SLIDES_VIP: Slide[] = [
     image: '/ui/icon-gift.png',
     titulo: 'Extras y bonos',
     descripcion:
-      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegás a 0 fichas, recibís 300 de regalo una sola vez (bono de rescate).',
+      '3 aciertos seguidos activan la Racha de oro: tus multiplicadores suben +0.5× mientras la mantengas (exacto → 3.5×, ganador → 2×).\nSi llegas a 0 fichas, recibes 300 de regalo una sola vez (bono de rescate).',
   },
   {
     image: '/ui/icon-exclamation.png',
@@ -66,13 +66,13 @@ const SLIDES_JUNIOR: Slide[] = [
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresás el marcador que esperás. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo elegís el marcador y confirmás.\n\n💡 Podés adelantarte y completar todas las predicciones de la fase de una sola vez — no es necesario esperar partido por partido.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo eliges el marcador y confirmas.\n\n💡 Puedes adelantarte y completar todas las predicciones de la fase de una sola vez — no es necesario esperar partido por partido.',
   },
   {
     image: '/ui/icon-multiplier.png',
     titulo: 'Cómo se suman los puntos',
     descripcion:
-      'Marcador exacto → +3 puntos\nAcertás ganador o empate correcto → +2 puntos\nFallás → 0 puntos\n\nNo se pierden puntos por no predecir — simplemente no sumás nada ese partido.',
+      'Marcador exacto → +3 puntos\nAciertas ganador o empate correcto → +2 puntos\nFallas → 0 puntos\n\nNo se pierden puntos por no predecir — simplemente no sumas nada ese partido.',
   },
   {
     image: '/ui/icon-compete.png',

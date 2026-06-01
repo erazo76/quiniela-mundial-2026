@@ -369,14 +369,14 @@ export default function UnirmePage() {
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl px-4 py-3 flex items-center gap-3">
                     <Image src="/ui/icon-star.png" alt="puntos" width={36} height={36} unoptimized />
                     <p className="text-sm text-blue-300 leading-snug">
-                      Empezás con <strong>0 puntos</strong> — sumá 3 por exacto, 2 por ganador o empate correcto
+                      Empiezas con <strong>0 puntos</strong> — suma 3 por exacto, 2 por ganador o empate correcto
                     </p>
                   </div>
                 ) : (
                   <div className="bg-green-500/10 border border-green-500/20 rounded-2xl px-4 py-3 flex items-center gap-3">
                     <Image src="/ui/icon-coins.png" alt="fichas" width={36} height={36} unoptimized />
                     <p className="text-sm text-green-300 leading-snug">
-                      Empezás con <strong>1000 fichas</strong> para apostar desde el primer partido
+                      Empiezas con <strong>1000 fichas</strong> para apostar desde el primer partido
                     </p>
                   </div>
                 )}

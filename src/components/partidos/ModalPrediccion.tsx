@@ -267,14 +267,14 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
                 <p className="text-[11px] text-yellow-200/70 leading-snug">
                   {prediccionExistente ? (
                     <>
-                      Podés <span className="font-bold text-yellow-300">reducir libremente</span> (mín. 10) y recuperar fichas.
+                      Puedes <span className="font-bold text-yellow-300">reducir libremente</span> (mín. 10) y recuperar fichas.
                       {' '}Para <span className="font-bold text-yellow-300">aumentar</span>, el tope es{' '}
                       <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
                       (30% de tus {fichasEfectivas.toLocaleString()} fichas disponibles).
                     </>
                   ) : (
                     <>
-                      Podés apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
+                      Puedes apostar entre <span className="font-bold text-yellow-300">10</span> y{' '}
                       <span className="font-bold text-yellow-300">{maxApuesta} fichas</span>{' '}
                       (30% de tus {fichasEfectivas.toLocaleString()} fichas).
                     </>

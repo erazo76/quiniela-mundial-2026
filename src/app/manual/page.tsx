@@ -124,7 +124,7 @@ function ManualVIP() {
         </table>
       </div>
       <Recuadro titulo="Modificar una prediccion" color="slate">
-        <P>Podés reducir fichas libremente (devolucion inmediata). Para aumentar, aplica el limite del 30%. Solo mientras el partido este <Pill>Pendiente</Pill> y falten mas de 5 minutos.</P>
+        <P>Puedes reducir fichas libremente (devolución inmediata). Para aumentar, aplica el límite del 30%. Solo mientras el partido esté <Pill>Pendiente</Pill> y falten más de 5 minutos.</P>
       </Recuadro>
 
       <H2 n={4}>Como se calculan las ganancias</H2>
@@ -264,7 +264,7 @@ function ManualJUNIOR() {
       </div>
 
       <Recuadro titulo="Modalidad JUNIOR" color="blue">
-        <P>La liga JUNIOR no usa fichas ni apuestas. Solo predecís el marcador de cada partido y sumás puntos según el acierto. Sin penalidades, sin racha, sin pote — solo puntos acumulados.</P>
+        <P>La liga JUNIOR no usa fichas ni apuestas. Solo predices el marcador de cada partido y sumas puntos según el acierto. Sin penalidades, sin racha, sin pote — solo puntos acumulados.</P>
       </Recuadro>
 
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8 print:mb-4">
@@ -287,14 +287,14 @@ function ManualJUNIOR() {
         <li>Pulsa <strong>Crear liga</strong>.</li>
         <li>Seleccioná la modalidad <strong>JUNIOR</strong>.</li>
         <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
-        <li>Elegí un PIN de 4 digitos — lo usarás cada vez que entres.</li>
-        <li>Se genera un codigo de invitacion de 6 caracteres. Compartilo con todos.</li>
+        <li>Elige un PIN de 4 dígitos — lo necesitarás cada vez que entres.</li>
+        <li>Se genera un código de invitación de 6 caracteres. Compártelo con todos.</li>
       </ol>
       <H3>Unirse a una liga existente</H3>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa <strong>Unirme a una liga</strong>.</li>
         <li>Introduce el codigo de invitacion.</li>
-        <li>Escribe tu nombre de jugador y elegí tu PIN.</li>
+        <li>Escribe tu nombre de jugador y elige tu PIN.</li>
       </ol>
       <Recuadro titulo="Cierre de inscripciones" color="yellow">
         <P>La inscripcion cierra <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo.</P>
