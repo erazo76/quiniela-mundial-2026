@@ -129,9 +129,12 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, usuarioI
   const [golesVisitante, setGolesVisitante] = useState(prediccionExistente?.goles_visitante ?? 0)
   const fichasEfectivas = fichas + (prediccionExistente?.fichas_apostadas ?? 0)
   const maxApuesta = Math.max(10, Math.floor(fichasEfectivas * 0.3))
-  const [fichasApostadas, setFichasApostadas] = useState(
-    Math.min(prediccionExistente?.fichas_apostadas ?? Math.min(50, maxApuesta), maxApuesta)
-  )
+  const [fichasApostadas, setFichasApostadas] = useState(() => {
+    const raw = prediccionExistente?.fichas_apostadas ?? Math.min(50, maxApuesta)
+    // Snap al múltiplo de 10 inferior para que el valor inicial sea válido en el slider
+    const snapped = Math.floor(Math.min(raw, maxApuesta) / 10) * 10
+    return Math.max(10, snapped)
+  })
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [infoEquipos, setInfoEquipos] = useState<Record<string, InfoEquipo> | null>(null)
