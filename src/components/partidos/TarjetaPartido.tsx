@@ -169,10 +169,16 @@ export function TarjetaPartido({ partido, ligaTipo, onClick }: Props) {
               <Image src="/ui/icon-edit.png" alt="Editar" width={18} height={18} unoptimized className="opacity-50" />
             ) : null}
             {badge?.label === 'EXACTO' && (
-              <span className="text-yellow-300 text-xs font-bold">+{pred.ganancia_fichas}</span>
+              <span className="text-yellow-300 text-xs font-bold">
+                +{ligaTipo === 'junior' ? 3 : pred.ganancia_fichas}
+                {ligaTipo === 'junior' ? ' pts' : ''}
+              </span>
             )}
             {badge?.label === 'GANADOR' && (
-              <span className="text-green-300 text-xs font-bold">+{pred.ganancia_fichas}</span>
+              <span className="text-green-300 text-xs font-bold">
+                +{ligaTipo === 'junior' ? 2 : pred.ganancia_fichas}
+                {ligaTipo === 'junior' ? ' pts' : ''}
+              </span>
             )}
           </div>
         </div>
