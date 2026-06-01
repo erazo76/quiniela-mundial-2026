@@ -1,7 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { avatarSrc, getAvatarIndex } from '@/lib/avatar'
+import { createClient } from '@/lib/supabase/client'
 
 const COMISION = 0.05
 const DISTRIBUCION = [
@@ -176,6 +177,17 @@ export function RankingTab({ ligaId, usuarioId, ligaTipo }: Props) {
   const [ranking, setRanking] = useState<EntradaRanking[]>([])
   const [pote, setPote] = useState(0)
   const [cargando, setCargando] = useState(true)
+  const supabaseRef = useRef(createClient())
+
+  const fetchRanking = () => {
+    fetch(`/api/ranking?liga_id=${ligaId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setRanking(Array.isArray(data.ranking) ? data.ranking : [])
+        setPote(data.pote ?? 0)
+      })
+      .catch(() => {})
+  }
 
   useEffect(() => {
     setCargando(true)
@@ -186,6 +198,19 @@ export function RankingTab({ ligaId, usuarioId, ligaTipo }: Props) {
         setPote(data.pote ?? 0)
       })
       .finally(() => setCargando(false))
+  }, [ligaId])
+
+  // Realtime: refresca ranking cuando cambian fichas/puntos de usuarios de esta liga
+  useEffect(() => {
+    const supabase = supabaseRef.current
+    const channel = supabase
+      .channel(`ranking-${ligaId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'usuarios', filter: `liga_id=eq.${ligaId}`
+      }, fetchRanking)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ligaId])
 
   const activos      = ranking.filter(e => !e.es_espectador)

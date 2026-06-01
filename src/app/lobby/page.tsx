@@ -1,8 +1,9 @@
 'use client'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from '@/context/SessionContext'
+import { createClient } from '@/lib/supabase/client'
 import { getOnboardingVisto } from '@/lib/session'
 import { avatarSrc, getAvatarIndex } from '@/lib/avatar'
 import { WcStripe } from '@/components/WcStripe'
@@ -61,20 +62,41 @@ function LobbyContent() {
     }
   }, [session, loading, router, searchParams])
 
-  // Refresca fichas cada 30s y al volver a la pestaña (sin polling intensivo)
+  // Realtime WebSocket: actualiza fichas al instante cuando el servidor las modifica.
+  // Fallback: polling cada 60s y al volver a la pestaña (por si Realtime no está habilitado).
+  const supabaseRef = useRef(createClient())
   useEffect(() => {
     if (!session) return
-    const refresh = () => {
+    const supabase = supabaseRef.current
+
+    const fetchFichas = () => {
       if (document.hidden) return
       fetch(`/api/usuario?id=${session.usuarioId}`)
         .then((r) => r.json())
         .then((data) => { if (data?.fichas != null) setFichas(data.fichas) })
         .catch(() => {})
     }
-    document.addEventListener('visibilitychange', refresh)
-    const id = setInterval(refresh, 30_000)
+
+    // Suscripción Realtime a cambios en la fila del usuario
+    const channel = supabase
+      .channel(`fichas-${session.usuarioId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'usuarios', filter: `id=eq.${session.usuarioId}` },
+        (payload) => {
+          const nuevas = (payload.new as { fichas?: number }).fichas
+          if (nuevas != null) setFichas(nuevas)
+        }
+      )
+      .subscribe()
+
+    // Fallback polling (60s) por si Realtime no está habilitado en el proyecto
+    document.addEventListener('visibilitychange', fetchFichas)
+    const id = setInterval(fetchFichas, 60_000)
+
     return () => {
-      document.removeEventListener('visibilitychange', refresh)
+      supabase.removeChannel(channel)
+      document.removeEventListener('visibilitychange', fetchFichas)
       clearInterval(id)
     }
   }, [session])

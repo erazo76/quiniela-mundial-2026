@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect, Fragment, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, Fragment, type CSSProperties } from 'react'
 import { Partido } from '@/types'
 import { calcularGrupo, DesempatesGrupo } from '@/lib/grupos'
+import { createClient } from '@/lib/supabase/client'
 
 function shortName(name: string) {
   const abbr: Record<string, string> = {
@@ -397,13 +398,29 @@ export function TableroTab() {
   const [partidos, setPartidos] = useState<Partido[]>([])
   const [desempatesAll, setDesempatesAll] = useState<Record<string, DesempatesGrupo>>({})
   const [loading, setLoading] = useState(true)
+  const supabaseRef = useRef(createClient())
+
+  const fetchAll = () => {
+    Promise.all([
+      fetch('/api/partidos?fase=all').then(r => r.json()),
+      fetch('/api/desempates').then(r => r.json()),
+    ]).then(([data, desempates]: [Partido[], { grupo: string; equipo: string; orden: number }[]]) => {
+      setPartidos(data)
+      const map: Record<string, DesempatesGrupo> = {}
+      for (const row of desempates) {
+        if (!map[row.grupo]) map[row.grupo] = {}
+        map[row.grupo][row.equipo] = row.orden
+      }
+      setDesempatesAll(map)
+    }).catch(() => {})
+  }
 
   useEffect(() => {
     Promise.all([
       fetch('/api/partidos?fase=all').then(r => r.json()),
       fetch('/api/desempates').then(r => r.json()),
-    ]).then(([partidos, desempates]: [Partido[], { grupo: string; equipo: string; orden: number }[]]) => {
-      setPartidos(partidos)
+    ]).then(([data, desempates]: [Partido[], { grupo: string; equipo: string; orden: number }[]]) => {
+      setPartidos(data)
       const map: Record<string, DesempatesGrupo> = {}
       for (const row of desempates) {
         if (!map[row.grupo]) map[row.grupo] = {}
@@ -411,6 +428,17 @@ export function TableroTab() {
       }
       setDesempatesAll(map)
     }).catch(() => {}).finally(() => setLoading(false))
+  }, [])
+
+  // Realtime: refresca el tablero cuando cambian los partidos
+  useEffect(() => {
+    const supabase = supabaseRef.current
+    const channel = supabase
+      .channel('tablero-partidos')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'partidos' }, fetchAll)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Partido, Prediccion } from '@/types'
 import { TarjetaPartido } from './TarjetaPartido'
 import { ModalPrediccion } from './ModalPrediccion'
+import { createClient } from '@/lib/supabase/client'
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
@@ -45,6 +46,17 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
   const tabsRef = useRef<HTMLDivElement>(null)
   const faseTabsRef = useRef<HTMLDivElement>(null)
 
+  const supabaseRef = useRef(createClient())
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const fetchPartidos = useCallback(() => {
+    fetch(`/api/partidos?usuario_id=${usuarioId}&fase=all`)
+      .then((r) => r.json())
+      .then((data) => setPartidos(data))
+      .catch(() => {})
+  }, [usuarioId])
+
+  // Carga inicial
   useEffect(() => {
     setCargando(true)
     fetch(`/api/partidos?usuario_id=${usuarioId}&fase=all`)
@@ -53,22 +65,34 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
       .finally(() => setCargando(false))
   }, [usuarioId])
 
-  // Refresca partidos y predicciones cada 10s y al volver a la pestaña
+  // Realtime WebSocket: dispara refetch cuando cambian partidos o predicciones.
+  // Debounce de 600ms para agrupar actualizaciones masivas (ej: simulación de lote).
+  // Fallback: polling cada 60s y al volver a la pestaña.
   useEffect(() => {
-    const refresh = () => {
-      if (document.hidden) return
-      fetch(`/api/partidos?usuario_id=${usuarioId}&fase=all`)
-        .then((r) => r.json())
-        .then((data) => setPartidos(data))
-        .catch(() => {})
+    const supabase = supabaseRef.current
+
+    const debouncedFetch = () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(fetchPartidos, 600)
     }
-    document.addEventListener('visibilitychange', refresh)
-    const id = setInterval(refresh, 10_000)
+
+    const channel = supabase
+      .channel(`partidos-${usuarioId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'partidos' }, debouncedFetch)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'predicciones', filter: `usuario_id=eq.${usuarioId}` }, debouncedFetch)
+      .subscribe()
+
+    const onVisible = () => { if (!document.hidden) fetchPartidos() }
+    document.addEventListener('visibilitychange', onVisible)
+    const id = setInterval(() => { if (!document.hidden) fetchPartidos() }, 60_000)
+
     return () => {
-      document.removeEventListener('visibilitychange', refresh)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      supabase.removeChannel(channel)
+      document.removeEventListener('visibilitychange', onVisible)
       clearInterval(id)
     }
-  }, [usuarioId])
+  }, [usuarioId, fetchPartidos])
 
   // Fase más temprana con partidos pendientes (la "activa" por defecto)
   const faseActiva = useMemo(() => {
