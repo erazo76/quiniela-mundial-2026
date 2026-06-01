@@ -51,7 +51,7 @@ function ManualVIP() {
   return (
     <>
       <div className="text-center mb-10 print:mb-6">
-        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de usuario · Liga VIP</p>
+        <p className="text-xs uppercase tracking-widest text-slate-400 mb-1">Manual de usuario · Liga MASTER</p>
         <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
         <p className="text-slate-500 text-sm mt-2">Todo lo que necesitas saber para jugar y ganar fichas</p>
         <div className="mt-4 h-0.5 bg-slate-200 rounded" />
@@ -79,7 +79,7 @@ function ManualVIP() {
       <H3>Crear una liga nueva</H3>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa <strong>Crear liga</strong>.</li>
-        <li>Elige la modalidad <strong>VIP</strong>.</li>
+        <li>Elige la modalidad <strong>MASTER</strong>.</li>
         <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
         <li>Elige un PIN de 4 digitos.</li>
         <li>Se genera un codigo de invitacion de 6 caracteres. Compartelo con tus amigos.</li>
@@ -426,7 +426,7 @@ export default function ManualUsuarioPage() {
 
         <div className="mt-12 print:mt-6 pt-6 border-t border-slate-200 text-center">
           <p className="text-xs text-slate-400">
-            Quiniela Mundial 2026 — Manual {ligaTipo === 'junior' ? 'JUNIOR' : 'VIP'} — v1.0
+            Quiniela Mundial 2026 — Manual {ligaTipo === 'junior' ? 'JUNIOR' : 'MASTER'} — v1.0
           </p>
         </div>
       </main>

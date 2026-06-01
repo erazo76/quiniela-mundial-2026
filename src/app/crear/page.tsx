@@ -147,7 +147,7 @@ export default function CrearLigaPage() {
               Modalidad de liga
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {([['vip', 'VIP', 'Fichas y apuestas, racha de oro, bono de rescate'], ['junior', 'JUNIOR', 'Puntos por aciertos (3/2/0), sin apuestas, ranking simple']] as const).map(([val, label, desc]) => (
+              {([['vip', 'MASTER', 'Fichas y apuestas, racha de oro, bono de rescate'], ['junior', 'JUNIOR', 'Puntos por aciertos (3/2/0), sin apuestas, ranking simple']] as const).map(([val, label, desc]) => (
                 <button
                   key={val}
                   type="button"

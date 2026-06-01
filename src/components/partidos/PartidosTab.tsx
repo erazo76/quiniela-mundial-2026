@@ -4,13 +4,22 @@ import Image from 'next/image'
 import { Partido, Prediccion } from '@/types'
 import { TarjetaPartido } from './TarjetaPartido'
 import { ModalPrediccion } from './ModalPrediccion'
-import { WcStripe } from '@/components/WcStripe'
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
 const ORDEN_FASES = ['grupos', 'dieciseisavos', 'octavos', 'cuartos', 'semis', 'final']
 
 const LABEL_FASE: Record<string, string> = {
+  grupos:        'Grupos',
+  dieciseisavos: 'Ronda 32',
+  octavos:       'Octavos',
+  cuartos:       'Cuartos',
+  semis:         'Semis',
+  final:         'Final',
+  tercer_puesto: '3er Puesto',
+}
+
+const LABEL_FASE_LARGO: Record<string, string> = {
   grupos:        'Fase de Grupos',
   dieciseisavos: 'Ronda de 32',
   octavos:       'Octavos de Final',
@@ -31,8 +40,10 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
   const [partidos, setPartidos] = useState<Partido[]>([])
   const [cargando, setCargando] = useState(true)
   const [grupoActivo, setGrupoActivo] = useState('A')
+  const [faseVista, setFaseVista] = useState<string | null>(null) // null = sigue faseActiva
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<Partido | null>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
+  const faseTabsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setCargando(true)
@@ -42,7 +53,7 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
       .finally(() => setCargando(false))
   }, [usuarioId])
 
-  // Refresca partidos y predicciones cada 30s y al volver a la pestaña
+  // Refresca partidos y predicciones cada 10s y al volver a la pestaña
   useEffect(() => {
     const refresh = () => {
       if (document.hidden) return
@@ -52,29 +63,44 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
         .catch(() => {})
     }
     document.addEventListener('visibilitychange', refresh)
-    const id = setInterval(refresh, 30_000)
+    const id = setInterval(refresh, 10_000)
     return () => {
       document.removeEventListener('visibilitychange', refresh)
       clearInterval(id)
     }
   }, [usuarioId])
 
-  // Fase más temprana con partidos pendientes
+  // Fase más temprana con partidos pendientes (la "activa" por defecto)
   const faseActiva = useMemo(() => {
     for (const fase of ORDEN_FASES) {
-      const hayPendientes = partidos.some(
-        (p) => p.fase === fase && p.estado === 'pendiente'
-      )
-      if (hayPendientes) return fase
+      if (partidos.some((p) => p.fase === fase && p.estado === 'pendiente')) return fase
     }
-    // Si no hay pendientes en ninguna fase, mostrar la última fase con partidos
     for (let i = ORDEN_FASES.length - 1; i >= 0; i--) {
       if (partidos.some((p) => p.fase === ORDEN_FASES[i])) return ORDEN_FASES[i]
     }
     return 'grupos'
   }, [partidos])
 
-  const esGrupos = faseActiva === 'grupos'
+  // Fases que tienen al menos un partido cargado
+  const fasesConPartidos = useMemo(
+    () => ORDEN_FASES.filter((f) => partidos.some((p) => p.fase === f)),
+    [partidos]
+  )
+
+  // La fase que se muestra: la que eligió el usuario o la activa por defecto
+  const faseEfectiva = faseVista ?? faseActiva
+  const esGrupos = faseEfectiva === 'grupos'
+
+  function seleccionarFase(fase: string) {
+    setFaseVista(fase === faseActiva ? null : fase)
+    // Scroll el tab seleccionado al centro
+    const container = faseTabsRef.current
+    const btn = container?.querySelector(`[data-fase="${fase}"]`) as HTMLElement
+    if (container && btn) {
+      const offset = btn.offsetLeft - container.clientWidth / 2 + btn.clientWidth / 2
+      container.scrollTo({ left: offset, behavior: 'smooth' })
+    }
+  }
 
   function handleGrupoClick(grupo: string) {
     setGrupoActivo(grupo)
@@ -104,21 +130,21 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
     setPartidoSeleccionado(null)
   }
 
-  // Partidos a mostrar según la fase activa
-  const partidosFaseActiva = useMemo(() => {
+  // Partidos a mostrar según la fase efectiva
+  const partidosMostrados = useMemo(() => {
     if (esGrupos) return partidos.filter((p) => p.grupo === grupoActivo)
-    const principales = partidos.filter((p) => p.fase === faseActiva)
-    // En la final también mostramos el partido por 3er puesto
-    const extras = faseActiva === 'final'
+    const principales = partidos.filter((p) => p.fase === faseEfectiva)
+    const extras = faseEfectiva === 'final'
       ? partidos.filter((p) => p.fase === 'tercer_puesto')
       : []
     return [...principales, ...extras].sort((a, b) =>
       a.fecha_hora.localeCompare(b.fecha_hora)
     )
-  }, [partidos, faseActiva, esGrupos, grupoActivo])
+  }, [partidos, faseEfectiva, esGrupos, grupoActivo])
 
+  // Conteo de partidos sin predicción en la fase efectiva (solo pendientes)
   const conteoSinPrediccion = useMemo(() => {
-    const fases = esGrupos ? ['grupos'] : [faseActiva, ...(faseActiva === 'final' ? ['tercer_puesto'] : [])]
+    const fases = esGrupos ? ['grupos'] : [faseEfectiva, ...(faseEfectiva === 'final' ? ['tercer_puesto'] : [])]
     return partidos.filter(
       (p) =>
         fases.includes(p.fase) &&
@@ -126,13 +152,51 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
         p.estado === 'pendiente' &&
         new Date() < new Date(new Date(p.fecha_hora).getTime() - 5 * 60 * 1000)
     ).length
-  }, [partidos, faseActiva, esGrupos])
+  }, [partidos, faseEfectiva, esGrupos])
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Resumen */}
+
+      {/* Tabs de navegación de fases */}
+      {fasesConPartidos.length > 1 && (
+        <div
+          ref={faseTabsRef}
+          className="flex gap-1.5 px-4 pt-3 pb-2 overflow-x-auto shrink-0"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {fasesConPartidos.map((fase) => {
+            const estaActiva = fase === faseActiva
+            const estaSeleccionada = fase === faseEfectiva
+            const todoFinalizado = partidos
+              .filter((p) => p.fase === fase)
+              .every((p) => p.estado === 'finalizado')
+            return (
+              <button
+                key={fase}
+                data-fase={fase}
+                onClick={() => seleccionarFase(fase)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-colors ${
+                  estaSeleccionada
+                    ? 'bg-green-500 text-black'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {LABEL_FASE[fase]}
+                {estaActiva && !todoFinalizado && !estaSeleccionada && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+                )}
+                {todoFinalizado && !estaSeleccionada && (
+                  <span className="text-[9px] text-slate-600">✓</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Banner partidos sin predicción */}
       {conteoSinPrediccion > 0 && (
-        <div className="mx-4 mt-4 rounded-2xl border border-yellow-500/40 bg-yellow-500/20 px-4 py-4 flex items-center justify-between gap-3">
+        <div className="mx-4 mt-1 rounded-2xl border border-yellow-500/40 bg-yellow-500/20 px-4 py-3 flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-bold text-white uppercase tracking-widest">
               Partidos sin predicción
@@ -147,7 +211,7 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
         /* ── Tabs de grupos ── */
         <div
           ref={tabsRef}
-          className="flex gap-2 px-4 py-4 overflow-x-auto scrollbar-none"
+          className="flex gap-2 px-4 py-3 overflow-x-auto shrink-0"
           style={{ scrollbarWidth: 'none' }}
         >
           {GRUPOS.map((g) => {
@@ -176,37 +240,34 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
         </div>
       ) : (
         /* ── Header de fase knockout ── */
-        <div className="px-4 py-3 border-b border-slate-800 shrink-0">
-          <p className="text-[10px] font-black text-green-400 uppercase tracking-widest mb-0.5">
-            Fase activa
-          </p>
-          <h2 className="text-base font-black text-white">
-            {LABEL_FASE[faseActiva]}
+        <div className="px-4 py-2 shrink-0">
+          <h2 className="text-sm font-black text-white">
+            {LABEL_FASE_LARGO[faseEfectiva]}
           </h2>
         </div>
       )}
 
       {/* Partidos */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-3 pt-2">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-3 pt-1">
         {cargando ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-36 bg-slate-900 rounded-2xl animate-pulse" />
           ))
-        ) : partidosFaseActiva.length === 0 ? (
+        ) : partidosMostrados.length === 0 ? (
           <p className="text-slate-600 text-center py-8 text-sm">No hay partidos en esta fase</p>
         ) : (
           <>
-            {!esGrupos && faseActiva === 'final' &&
+            {!esGrupos && faseEfectiva === 'final' &&
               partidos.filter((p) => p.fase === 'tercer_puesto').length > 0 && (
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 mt-1">
-                {LABEL_FASE['final']}
+                {LABEL_FASE_LARGO['final']}
               </p>
             )}
-            {partidosFaseActiva.map((partido) => (
+            {partidosMostrados.map((partido) => (
               <div key={partido.id}>
-                {!esGrupos && faseActiva === 'final' && partido.fase === 'tercer_puesto' && (
+                {!esGrupos && faseEfectiva === 'final' && partido.fase === 'tercer_puesto' && (
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 mt-3 mb-1">
-                    {LABEL_FASE['tercer_puesto']}
+                    {LABEL_FASE_LARGO['tercer_puesto']}
                   </p>
                 )}
                 <TarjetaPartido
