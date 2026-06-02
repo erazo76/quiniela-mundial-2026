@@ -150,6 +150,7 @@ function LobbyContent() {
         {activeTab === 'partidos' && (
           <PartidosTab
             usuarioId={session.usuarioId}
+            ligaId={session.ligaId}
             fichas={fichas}
             ligaTipo={session.ligaTipo ?? 'vip'}
             onFichasChange={setFichas}

@@ -32,12 +32,13 @@ const LABEL_FASE_LARGO: Record<string, string> = {
 
 interface Props {
   usuarioId: string
+  ligaId: string
   fichas: number
   ligaTipo: 'vip' | 'junior'
   onFichasChange: (nuevas: number) => void
 }
 
-export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Props) {
+export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChange }: Props) {
   const [partidos, setPartidos] = useState<Partido[]>([])
   const [cargando, setCargando] = useState(true)
   const [grupoActivo, setGrupoActivo] = useState('A')
@@ -297,6 +298,8 @@ export function PartidosTab({ usuarioId, fichas, ligaTipo, onFichasChange }: Pro
                 <TarjetaPartido
                   partido={partido}
                   ligaTipo={ligaTipo}
+                  ligaId={ligaId}
+                  usuarioId={usuarioId}
                   onClick={() => handlePartidoClick(partido)}
                 />
               </div>
