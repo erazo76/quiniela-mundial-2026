@@ -21,7 +21,7 @@ const SLIDES_VIP: Slide[] = [
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.\n\nSi no envías ninguna predicción, al finalizar el partido pierdes 10 fichas automáticamente y tu racha se reinicia.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio. No puedes cambiarlas después.\n\nSi no envías ninguna predicción, al finalizar el partido pierdes 10 fichas automáticamente y tu racha se reinicia.\n\nApenas envíes tu predicción, podrás ver las predicciones y las fichas apostadas del resto del grupo en ese partido. Antes de predecir, las de los demás permanecen ocultas.',
   },
   {
     image: '/ui/icon-coins.png',
@@ -60,13 +60,13 @@ const SLIDES_JUNIOR: Slide[] = [
     image: '/ui/icon-trophy-nav.png',
     titulo: '¡Bienvenido a la Quiniela!',
     descripcion:
-      'Predice los resultados de los partidos del Mundial 2026. En esta liga JUNIOR acumulás puntos por tus aciertos. Quien termina con más puntos gana.',
+      'Predice los resultados de los partidos del Mundial 2026. En esta liga JUNIOR acumulas puntos por tus aciertos. Quien termina con más puntos gana.',
   },
   {
     image: '/ui/icon-star2.png',
     titulo: 'Cómo predecir',
     descripcion:
-      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo eliges el marcador y confirmas.\n\n💡 Puedes adelantarte y completar todas las predicciones de la fase de una sola vez — no es necesario esperar partido por partido.',
+      'Antes de cada partido ingresas el marcador que esperas. Las predicciones se cierran 5 minutos antes del inicio.\n\nNo hay fichas ni apuestas: solo eliges el marcador y confirmas.\n\nApenas envíes tu predicción, podrás ver las predicciones del resto del grupo en ese partido. Antes de predecir, las de los demás permanecen ocultas.\n\n💡 Puedes adelantarte y completar todas las predicciones de la fase de una sola vez — no es necesario esperar partido por partido.',
   },
   {
     image: '/ui/icon-multiplier.png',

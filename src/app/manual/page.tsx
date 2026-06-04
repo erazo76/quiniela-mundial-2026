@@ -126,6 +126,9 @@ function ManualVIP() {
       <Recuadro titulo="Modificar una prediccion" color="slate">
         <P>Puedes reducir fichas libremente (devolución inmediata). Para aumentar, aplica el límite del 30%. Solo mientras el partido esté <Pill>Pendiente</Pill> y falten más de 5 minutos.</P>
       </Recuadro>
+      <Recuadro titulo="Predicciones del grupo (transparencia)" color="blue">
+        <P>Una vez que envíes tu predicción, podrás ver las predicciones y las fichas apostadas del resto del grupo en ese partido, en tiempo real. Antes de predecir, las predicciones de los demás permanecen ocultas para que nadie pueda copiar.</P>
+      </Recuadro>
 
       <H2 n={4}>Como se calculan las ganancias</H2>
       <P>Las fichas apostadas se descuentan al apostar. Al finalizar el partido, el sistema acredita las ganancias automaticamente.</P>
@@ -259,7 +262,7 @@ function ManualJUNIOR() {
       <div className="text-center mb-10 print:mb-6">
         <p className="text-xs uppercase tracking-widest text-blue-500 mb-1">Manual de usuario · Liga JUNIOR</p>
         <h1 className="text-3xl font-black text-slate-900 uppercase tracking-wide">Quiniela Mundial 2026</h1>
-        <p className="text-slate-500 text-sm mt-2">Predice, acumula puntos y llegá primero al final del Mundial</p>
+        <p className="text-slate-500 text-sm mt-2">Predice, acumula puntos y llega primero al final del Mundial</p>
         <div className="mt-4 h-0.5 bg-blue-200 rounded" />
       </div>
 
@@ -281,11 +284,11 @@ function ManualJUNIOR() {
       </div>
 
       <H2 n={1}>Crear o unirte a una liga JUNIOR</H2>
-      <P>Al entrar por primera vez elegis si crear una liga nueva o unirte a una existente. En ambos casos empezas con <strong>0 puntos</strong>.</P>
+      <P>Al entrar por primera vez eliges si crear una liga nueva o unirte a una existente. En ambos casos empiezas con <strong>0 puntos</strong>.</P>
       <H3>Crear una liga nueva</H3>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa <strong>Crear liga</strong>.</li>
-        <li>Seleccioná la modalidad <strong>JUNIOR</strong>.</li>
+        <li>Selecciona la modalidad <strong>JUNIOR</strong>.</li>
         <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
         <li>Elige un PIN de 4 dígitos — lo necesitarás cada vez que entres.</li>
         <li>Se genera un código de invitación de 6 caracteres. Compártelo con todos.</li>
@@ -328,7 +331,10 @@ function ManualJUNIOR() {
         </table>
       </div>
       <Recuadro titulo="Modificar una prediccion" color="slate">
-        <P>Podes cambiar el marcador mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. No hay fichas involucradas.</P>
+        <P>Puedes cambiar el marcador mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. No hay fichas involucradas.</P>
+      </Recuadro>
+      <Recuadro titulo="Predicciones del grupo (transparencia)" color="blue">
+        <P>Una vez que envíes tu predicción, podrás ver las predicciones del resto del grupo en ese partido, en tiempo real. Antes de predecir, las de los demás permanecen ocultas para que nadie pueda copiar.</P>
       </Recuadro>
 
       <H2 n={4}>Como se suman los puntos</H2>

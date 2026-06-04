@@ -111,17 +111,28 @@ function PrediccionesPanel({
   finalizado: boolean
 }) {
   const [predicciones, setPredicciones] = useState<PrediccionParticipante[] | null>(null)
+  const [bloqueado, setBloqueado] = useState(false)
+  const [total, setTotal] = useState(0)
   const [cargando, setCargando] = useState(false)
   const [abierto, setAbierto] = useState(false)
 
   function toggle(e: React.MouseEvent) {
     e.stopPropagation()
-    if (!abierto && predicciones === null) {
+    // Refresca al abrir para reflejar predicciones recién hechas (carga on-demand).
+    if (!abierto) {
       setCargando(true)
-      fetch(`/api/predicciones-partido?partido_id=${partidoId}&liga_id=${ligaId}`)
+      fetch(`/api/predicciones-partido?partido_id=${partidoId}&liga_id=${ligaId}&usuario_id=${usuarioId}`)
         .then((r) => r.json())
-        .then((data) => setPredicciones(Array.isArray(data) ? data : []))
-        .catch(() => setPredicciones([]))
+        .then((data) => {
+          setPredicciones(Array.isArray(data?.predicciones) ? data.predicciones : [])
+          setBloqueado(!!data?.bloqueado)
+          setTotal(typeof data?.total === 'number' ? data.total : 0)
+        })
+        .catch(() => {
+          setPredicciones([])
+          setBloqueado(false)
+          setTotal(0)
+        })
         .finally(() => setCargando(false))
     }
     setAbierto((v) => !v)
@@ -149,6 +160,15 @@ function PrediccionesPanel({
                 <div key={i} className="h-8 bg-slate-800 rounded-xl animate-pulse" />
               ))}
             </div>
+          ) : bloqueado ? (
+            <p className="text-[11px] text-slate-500 text-center py-2 px-2 leading-relaxed">
+              🔒 Predice este partido para ver las predicciones del grupo
+              {total > 0 && (
+                <span className="block text-slate-600 mt-0.5">
+                  {total} {total === 1 ? 'participante ya predijo' : 'participantes ya predijeron'}
+                </span>
+              )}
+            </p>
           ) : !predicciones?.length ? (
             <p className="text-[11px] text-slate-600 text-center py-2">
               Ningún participante predijo este partido
@@ -222,7 +242,9 @@ export function TarjetaPartido({ partido, ligaTipo, ligaId, usuarioId, onClick }
   const puedePredicir = canPredict(partido)
   const badge = pred ? badgeResultado(pred.tipo_acierto, pred.acertado) : null
   const borderCls = pred ? cardBorder(pred.tipo_acierto, pred.acertado) : 'border-slate-800 hover:border-slate-600'
-  const mostrarTransparencia = !puedePredicir
+  // Transparencia total: las predicciones del grupo se ven en todo momento, desde
+  // que se hace cada predicción (no solo al cerrar/finalizar el partido).
+  const mostrarTransparencia = true
 
   return (
     <div className={`w-full bg-slate-900 border ${borderCls} rounded-2xl overflow-hidden transition-colors`}>

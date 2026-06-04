@@ -132,7 +132,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
   const fichasEfectivas = fichas + (prediccionExistente?.fichas_apostadas ?? 0)
   // Tope del 30% aplica solo para nuevas apuestas o incrementos
   const maxApuesta = Math.max(10, Math.floor(fichasEfectivas * 0.3))
-  // Al editar podés bajar libremente; el slider llega hasta max(apuesta actual, tope 30%)
+  // Al editar puedes bajar libremente; el slider llega hasta max(apuesta actual, tope 30%)
   const sliderMax = prediccionExistente
     ? Math.max(prediccionExistente.fichas_apostadas, maxApuesta)
     : maxApuesta

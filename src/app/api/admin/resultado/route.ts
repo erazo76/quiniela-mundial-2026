@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   // En eliminatoria con empate en regulación: necesita penales o ganador_manual
   if (estado === 'finalizado' && esEliminatoria && esEmpateRegulacion && !tenePenales && !ganador_manual) {
     return NextResponse.json(
-      { error: 'Partido empatado en eliminatoria: ingresá los goles en penales' },
+      { error: 'Partido empatado en eliminatoria: ingresa los goles en penales' },
       { status: 400 }
     )
   }

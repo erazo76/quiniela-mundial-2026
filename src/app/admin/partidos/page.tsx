@@ -194,7 +194,7 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
           {necesitaPenales && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-amber-400 font-semibold">
-                Empate en regulación — ingresá los goles en penales
+                Empate en regulación — ingresa los goles en penales
               </p>
               <div className="flex items-center gap-2">
                 <input
