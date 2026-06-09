@@ -218,9 +218,12 @@ function ManualVIP() {
 
       <H2 n={8}>Tablero de partidos</H2>
       <P>La pestaña <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronológica), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminación directa).</P>
+      <Recuadro titulo="Columnas de la tabla de grupos" color="slate">
+        <P><strong>PJ</strong> partidos jugados · <strong>G</strong> ganados · <strong>E</strong> empatados · <strong>P</strong> perdidos · <strong>DG</strong> diferencia de goles (a favor − en contra) · <strong>Pts</strong> puntos (3 por victoria, 1 por empate, 0 por derrota).</P>
+      </Recuadro>
 
       <H2 n={9}>Ranking</H2>
-      <P>Muestra la clasificacion ordenada por fichas. En la parte superior verás el pote acumulado y su distribución proyectada. Las rachas activas se indican junto al nombre.</P>
+      <P>Muestra la clasificación ordenada por fichas. En la parte superior verás el pote acumulado y su distribución proyectada. Las rachas activas se indican junto al nombre.</P>
 
       <H2 n={10}>Tu perfil</H2>
       <P>Estadísticas (fichas, racha, predicciones, % de acierto), estado del bono de rescate, historial de movimientos e invitación para amigos.</P>
@@ -381,6 +384,9 @@ function ManualJUNIOR() {
       <H2 n={5}>Tablero de partidos</H2>
       <P>La pestaña <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronológica con tus predicciones), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminación directa).</P>
       <P>La tabla de grupos sigue los <strong>criterios oficiales de la FIFA</strong>: puntos, diferencia de goles, goles a favor, luego criterios de enfrentamiento directo (H2H).</P>
+      <Recuadro titulo="Columnas de la tabla de grupos" color="slate">
+        <P><strong>PJ</strong> partidos jugados · <strong>G</strong> ganados · <strong>E</strong> empatados · <strong>P</strong> perdidos · <strong>DG</strong> diferencia de goles (a favor − en contra) · <strong>Pts</strong> puntos (3 por victoria, 1 por empate, 0 por derrota).</P>
+      </Recuadro>
 
       <H2 n={6}>Ranking y premio</H2>
       <P>El ranking muestra a todos los jugadores ordenados por puntos acumulados de mayor a menor. Los puntos se suman durante todo el torneo — fase de grupos, octavos, cuartos, semis y final.</P>
