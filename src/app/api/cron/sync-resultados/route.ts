@@ -12,6 +12,10 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const result = await syncResultadosFootballData(supabase)
-  return NextResponse.json({ ok: true, ...result })
+  try {
+    const result = await syncResultadosFootballData(supabase)
+    return NextResponse.json({ ok: true, ...result })
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
 }

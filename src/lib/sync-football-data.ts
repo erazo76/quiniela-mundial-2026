@@ -64,6 +64,24 @@ const FASE_MAP: Record<string, string> = {
   FINAL: 'final',
 }
 
+// fetch a football-data.org con reintentos ante fallos de red transitorios.
+// La API gratuita se cae/limita seguido desde IPs de Vercel y lanza
+// "TypeError: fetch failed"; sin esto un blip aborta toda la sincronización.
+async function fetchFootballData(
+  url: string,
+  apiKey: string,
+  intentos = 3
+): Promise<Response | null> {
+  for (let i = 0; i < intentos; i++) {
+    try {
+      return await fetch(url, { headers: { 'X-Auth-Token': apiKey }, cache: 'no-store' })
+    } catch {
+      if (i < intentos - 1) await new Promise((r) => setTimeout(r, 800 * (i + 1)))
+    }
+  }
+  return null
+}
+
 // Palabras que indican equipo TBD en la API
 const TBD_WORDS = ['yet', 'winner', 'loser', 'tbd', 'tba']
 function esTBD(nombre: string | null | undefined): boolean {
@@ -89,11 +107,11 @@ async function syncEquiposEliminatorias(
   )
 
   // Obtener partidos SCHEDULED/TIMED de eliminatorias desde la API
-  const res = await fetch(
+  const res = await fetchFootballData(
     'https://api.football-data.org/v4/competitions/WC/matches?status=SCHEDULED,TIMED',
-    { headers: { 'X-Auth-Token': apiKey }, cache: 'no-store' }
+    apiKey
   )
-  if (!res.ok) return 0
+  if (!res || !res.ok) return 0
 
   const data = await res.json()
   const partidosApi: Array<{
@@ -164,13 +182,27 @@ export async function syncResultadosFootballData(
   const apiKey = process.env.FOOTBALL_DATA_API_KEY
   if (!apiKey) return { sincronizados: 0, mensaje: 'FOOTBALL_DATA_API_KEY no configurado' }
 
-  // Actualizar equipos en rondas eliminatorias (en paralelo con la sync de resultados)
-  const equiposActualizados = await syncEquiposEliminatorias(supabase, apiKey)
+  // Actualizar equipos en rondas eliminatorias. Su fallo NO debe abortar la
+  // sincronización de resultados: lo aislamos en su propio try/catch.
+  let equiposActualizados = 0
+  try {
+    equiposActualizados = await syncEquiposEliminatorias(supabase, apiKey)
+  } catch {
+    equiposActualizados = 0
+  }
 
-  const fdRes = await fetch(
+  const fdRes = await fetchFootballData(
     'https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',
-    { headers: { 'X-Auth-Token': apiKey }, cache: 'no-store' }
+    apiKey
   )
+
+  if (!fdRes) {
+    return {
+      sincronizados: 0,
+      equiposActualizados: equiposActualizados || undefined,
+      mensaje: 'No se pudo conectar con la API tras varios intentos. Reintentar en la próxima corrida.',
+    }
+  }
 
   if (!fdRes.ok) {
     return {
