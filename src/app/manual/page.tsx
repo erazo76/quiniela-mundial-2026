@@ -61,9 +61,9 @@ function ManualVIP() {
         <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
         <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
           <li>Crear o unirte a una liga</li>
-          <li>Iniciar sesion (volver a entrar)</li>
-          <li>Hacer una prediccion</li>
-          <li>Como se calculan las ganancias</li>
+          <li>Iniciar sesión (volver a entrar)</li>
+          <li>Hacer una predicción</li>
+          <li>Cómo se calculan las ganancias</li>
           <li>Racha de oro</li>
           <li>El pote de la liga</li>
           <li>Bono de rescate</li>
@@ -81,31 +81,31 @@ function ManualVIP() {
         <li>Pulsa <strong>Crear liga</strong>.</li>
         <li>Elige la modalidad <strong>MASTER</strong>.</li>
         <li>Introduce el nombre de la liga y tu nombre de jugador.</li>
-        <li>Elige un PIN de 4 digitos.</li>
-        <li>Se genera un codigo de invitacion de 6 caracteres. Compartelo con tus amigos.</li>
+        <li>Elige un PIN de 4 dígitos.</li>
+        <li>Se genera un código de invitación de 6 caracteres. Compártelo con tus amigos.</li>
       </ol>
       <H3>Unirse a una liga existente</H3>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa <strong>Unirme a una liga</strong>.</li>
-        <li>Introduce el codigo de invitacion.</li>
+        <li>Introduce el código de invitación.</li>
         <li>Escribe tu nombre de jugador y elige tu PIN.</li>
       </ol>
       <Recuadro titulo="Cierre de inscripciones" color="yellow">
-        <P>La inscripcion cierra automaticamente <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo.</P>
+        <P>La inscripción cierra automáticamente <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el código.</P>
       </Recuadro>
 
-      <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
-      <P>La sesion se guarda automaticamente. Si expiro o accedes desde otro dispositivo, introduce el codigo de tu liga, tu nombre y tu PIN.</P>
+      <H2 n={2}>Iniciar sesión (volver a entrar)</H2>
+      <P>La sesión se guarda automáticamente. Si expiró o accedes desde otro dispositivo, introduce el código de tu liga, tu nombre y tu PIN.</P>
       <Recuadro titulo="Si olvidaste tu PIN" color="yellow">
         <P>Contacta al administrador de tu liga para que lo resetee.</P>
       </Recuadro>
 
-      <H2 n={3}>Hacer una prediccion</H2>
-      <P>En la pestana <strong>Partidos</strong> encontraras los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
+      <H2 n={3}>Hacer una predicción</H2>
+      <P>En la pestaña <strong>Partidos</strong> encontrarás los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa el partido que quieres predecir.</li>
         <li>Introduce el marcador esperado.</li>
-        <li>Elige cuantas fichas apostar y confirma.</li>
+        <li>Elige cuántas fichas apostar y confirma.</li>
       </ol>
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
@@ -116,28 +116,28 @@ function ManualVIP() {
             </tr>
           </thead>
           <tbody>
-            <tr><td className="border border-slate-200 px-3 py-1.5">Apuesta minima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">10 fichas</td></tr>
-            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">Apuesta maxima al crear</td><td className="border border-slate-200 px-3 py-1.5 font-bold">30% de tu saldo actual</td></tr>
+            <tr><td className="border border-slate-200 px-3 py-1.5">Apuesta mínima</td><td className="border border-slate-200 px-3 py-1.5 font-bold">10 fichas</td></tr>
+            <tr className="bg-slate-50"><td className="border border-slate-200 px-3 py-1.5">Apuesta máxima al crear</td><td className="border border-slate-200 px-3 py-1.5 font-bold">30% de tu saldo actual</td></tr>
             <tr><td className="border border-slate-200 px-3 py-1.5">Cierre de predicciones</td><td className="border border-slate-200 px-3 py-1.5 font-bold">5 minutos antes del partido</td></tr>
             <tr className="bg-red-50"><td className="border border-slate-200 px-3 py-1.5 text-red-700 font-medium">No predecir un partido</td><td className="border border-slate-200 px-3 py-1.5 font-bold text-red-700">−10 fichas + racha en 0</td></tr>
           </tbody>
         </table>
       </div>
-      <Recuadro titulo="Modificar una prediccion" color="slate">
+      <Recuadro titulo="Modificar una predicción" color="slate">
         <P>Puedes reducir fichas libremente (devolución inmediata). Para aumentar, aplica el límite del 30%. Solo mientras el partido esté <Pill>Pendiente</Pill> y falten más de 5 minutos.</P>
       </Recuadro>
       <Recuadro titulo="Predicciones del grupo (transparencia)" color="blue">
         <P>Una vez que envíes tu predicción, podrás ver las predicciones y las fichas apostadas del resto del grupo en ese partido, en tiempo real. Antes de predecir, las predicciones de los demás permanecen ocultas para que nadie pueda copiar.</P>
       </Recuadro>
 
-      <H2 n={4}>Como se calculan las ganancias</H2>
-      <P>Las fichas apostadas se descuentan al apostar. Al finalizar el partido, el sistema acredita las ganancias automaticamente.</P>
+      <H2 n={4}>Cómo se calculan las ganancias</H2>
+      <P>Las fichas apostadas se descuentan al apostar. Al finalizar el partido, el sistema acredita las ganancias automáticamente.</P>
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
           <thead className="bg-slate-100">
             <tr>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condición</th>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Recibes</th>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Ganancia neta</th>
             </tr>
@@ -166,7 +166,7 @@ function ManualVIP() {
       </div>
 
       <H2 n={5}>Racha de oro</H2>
-      <P>A partir del <strong>3er acierto consecutivo</strong> tus multiplicadores suben +0.5× automaticamente.</P>
+      <P>A partir del <strong>3er acierto consecutivo</strong> tus multiplicadores suben +0.5× automáticamente.</P>
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
           <thead className="bg-slate-100">
@@ -192,7 +192,7 @@ function ManualVIP() {
       </div>
       <ul className="list-disc list-inside space-y-1 mb-4 ml-2">
         <Li>Cualquier <strong>Fallo</strong> rompe la racha y vuelves a 0.</Li>
-        <Li>La racha de oro se indica con un icono de fuego en el ranking.</Li>
+        <Li>La racha de oro se indica con un ícono de fuego en el ranking.</Li>
       </ul>
 
       <H2 n={6}>El pote de la liga</H2>
@@ -201,7 +201,7 @@ function ManualVIP() {
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
           <thead className="bg-slate-100">
             <tr>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posición</th>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Premio</th>
             </tr>
           </thead>
@@ -214,16 +214,16 @@ function ManualVIP() {
       </div>
 
       <H2 n={7}>Bono de rescate</H2>
-      <P>Si tus fichas llegan a <strong>0</strong>, recibes automaticamente <strong>100 fichas</strong> de regalo. Solo ocurre una vez por jugador durante todo el torneo.</P>
+      <P>Si tus fichas llegan a <strong>0</strong>, recibes automáticamente <strong>100 fichas</strong> de regalo. Solo ocurre una vez por jugador durante todo el torneo.</P>
 
       <H2 n={8}>Tablero de partidos</H2>
-      <P>La pestana <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronologica), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminacion directa).</P>
+      <P>La pestaña <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronológica), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminación directa).</P>
 
       <H2 n={9}>Ranking</H2>
-      <P>Muestra la clasificacion ordenada por fichas. En la parte superior verás el pote acumulado y su distribucion proyectada. Las rachas activas se indican junto al nombre.</P>
+      <P>Muestra la clasificacion ordenada por fichas. En la parte superior verás el pote acumulado y su distribución proyectada. Las rachas activas se indican junto al nombre.</P>
 
       <H2 n={10}>Tu perfil</H2>
-      <P>Estadisticas (fichas, racha, predicciones, % de acierto), estado del bono de rescate, historial de movimientos e invitacion para amigos.</P>
+      <P>Estadísticas (fichas, racha, predicciones, % de acierto), estado del bono de rescate, historial de movimientos e invitación para amigos.</P>
 
       <H2 n={11}>Efectos visuales y de audio</H2>
       <div className="overflow-x-auto mb-4">
@@ -274,9 +274,9 @@ function ManualJUNIOR() {
         <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Contenido</p>
         <ol className="list-decimal list-inside space-y-1 text-sm text-slate-600">
           <li>Crear o unirte a una liga JUNIOR</li>
-          <li>Iniciar sesion (volver a entrar)</li>
-          <li>Hacer una prediccion</li>
-          <li>Como se suman los puntos</li>
+          <li>Iniciar sesión (volver a entrar)</li>
+          <li>Hacer una predicción</li>
+          <li>Cómo se suman los puntos</li>
           <li>Tablero de partidos</li>
           <li>Ranking y premio</li>
           <li>Tu perfil</li>
@@ -296,25 +296,25 @@ function ManualJUNIOR() {
       <H3>Unirse a una liga existente</H3>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa <strong>Unirme a una liga</strong>.</li>
-        <li>Introduce el codigo de invitacion.</li>
+        <li>Introduce el código de invitación.</li>
         <li>Escribe tu nombre de jugador y elige tu PIN.</li>
       </ol>
       <Recuadro titulo="Cierre de inscripciones" color="yellow">
-        <P>La inscripcion cierra <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el codigo.</P>
+        <P>La inscripción cierra <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el código.</P>
       </Recuadro>
 
-      <H2 n={2}>Iniciar sesion (volver a entrar)</H2>
-      <P>La sesion se guarda automaticamente. Si expiro o accedes desde otro dispositivo, introduce el codigo de tu liga, tu nombre y tu PIN.</P>
+      <H2 n={2}>Iniciar sesión (volver a entrar)</H2>
+      <P>La sesión se guarda automáticamente. Si expiró o accedes desde otro dispositivo, introduce el código de tu liga, tu nombre y tu PIN.</P>
       <Recuadro titulo="Si olvidaste tu PIN" color="yellow">
         <P>Contacta al administrador de tu liga para que lo resetee.</P>
       </Recuadro>
 
-      <H2 n={3}>Hacer una prediccion</H2>
-      <P>En la pestana <strong>Partidos</strong> encontraras todos los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
+      <H2 n={3}>Hacer una predicción</H2>
+      <P>En la pestaña <strong>Partidos</strong> encontrarás todos los partidos disponibles. Los <Pill>Pendiente</Pill> aceptan predicciones.</P>
       <ol className="list-decimal list-inside space-y-1.5 mb-4 ml-2 text-sm text-slate-600">
         <li>Pulsa el partido que quieres predecir.</li>
         <li>Introduce el marcador que esperas (goles local y visitante).</li>
-        <li>Confirma tu prediccion. No hay fichas que apostar.</li>
+        <li>Confirma tu predicción. No hay fichas que apostar.</li>
       </ol>
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
@@ -330,21 +330,21 @@ function ManualJUNIOR() {
           </tbody>
         </table>
       </div>
-      <Recuadro titulo="Modificar una prediccion" color="slate">
-        <P>Puedes cambiar el marcador mientras el partido siga <Pill>Pendiente</Pill> y falten mas de 5 minutos. No hay fichas involucradas.</P>
+      <Recuadro titulo="Modificar una predicción" color="slate">
+        <P>Puedes cambiar el marcador mientras el partido siga <Pill>Pendiente</Pill> y falten más de 5 minutos. No hay fichas involucradas.</P>
       </Recuadro>
       <Recuadro titulo="Predicciones del grupo (transparencia)" color="blue">
         <P>Una vez que envíes tu predicción, podrás ver las predicciones del resto del grupo en ese partido, en tiempo real. Antes de predecir, las de los demás permanecen ocultas para que nadie pueda copiar.</P>
       </Recuadro>
 
-      <H2 n={4}>Como se suman los puntos</H2>
-      <P>Al finalizar cada partido el sistema calcula tu acierto y suma los puntos automaticamente.</P>
+      <H2 n={4}>Cómo se suman los puntos</H2>
+      <P>Al finalizar cada partido el sistema calcula tu acierto y suma los puntos automáticamente.</P>
       <div className="overflow-x-auto mb-4">
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
           <thead className="bg-slate-100">
             <tr>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Resultado</th>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Condición</th>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Puntos</th>
             </tr>
           </thead>
@@ -369,17 +369,17 @@ function ManualJUNIOR() {
       </div>
       <Recuadro titulo="Ejemplo" color="green">
         <ul className="space-y-1">
-          <Li>Predeciste 2-1, resultado 2-1 → <strong>+3 puntos</strong> (exacto)</Li>
-          <Li>Predeciste 2-0, resultado 3-1 → <strong>+2 puntos</strong> (ganador correcto)</Li>
-          <Li>Predeciste 1-0, resultado 0-1 → <strong>0 puntos</strong> (fallo)</Li>
+          <Li>Predijiste 2-1, resultado 2-1 → <strong>+3 puntos</strong> (exacto)</Li>
+          <Li>Predijiste 2-0, resultado 3-1 → <strong>+2 puntos</strong> (ganador correcto)</Li>
+          <Li>Predijiste 1-0, resultado 0-1 → <strong>0 puntos</strong> (fallo)</Li>
         </ul>
       </Recuadro>
       <Recuadro titulo="Sin penalidad por no predecir" color="slate">
-        <P>En la liga JUNIOR, si no enviaste ninguna prediccion antes del cierre de un partido, simplemente no sumas puntos ese partido. No hay descuento ni penalidad.</P>
+        <P>En la liga JUNIOR, si no enviaste ninguna predicción antes del cierre de un partido, simplemente no sumas puntos ese partido. No hay descuento ni penalidad.</P>
       </Recuadro>
 
       <H2 n={5}>Tablero de partidos</H2>
-      <P>La pestana <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronologica con tus predicciones), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminacion directa).</P>
+      <P>La pestaña <strong>Tablero</strong> tiene tres vistas: Partidos (lista cronológica con tus predicciones), Grupos (tabla por grupo con criterios FIFA) y Llaves (eliminación directa).</P>
       <P>La tabla de grupos sigue los <strong>criterios oficiales de la FIFA</strong>: puntos, diferencia de goles, goles a favor, luego criterios de enfrentamiento directo (H2H).</P>
 
       <H2 n={6}>Ranking y premio</H2>
@@ -388,7 +388,7 @@ function ManualJUNIOR() {
         <table className="w-full text-xs border-collapse border border-slate-200 rounded">
           <thead className="bg-slate-100">
             <tr>
-              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posicion</th>
+              <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Posición</th>
               <th className="border border-slate-200 px-3 py-2 text-left font-bold text-slate-700">Premio (si lo hay)</th>
             </tr>
           </thead>
@@ -400,11 +400,11 @@ function ManualJUNIOR() {
         </table>
       </div>
       <Recuadro titulo="Empate en el podio" color="blue">
-        <P>Si dos o mas jugadores comparten la misma cantidad de puntos en el 1er, 2do o 3er lugar, cualquier premio acordado <strong>se dividira en partes iguales</strong> entre quienes compartan esa posicion.</P>
+        <P>Si dos o más jugadores comparten la misma cantidad de puntos en el 1er, 2do o 3er lugar, cualquier premio acordado <strong>se dividirá en partes iguales</strong> entre quienes compartan esa posición.</P>
       </Recuadro>
 
       <H2 n={7}>Tu perfil</H2>
-      <P>Muestra tus puntos acumulados, total de predicciones, porcentaje de acierto, codigo de invitacion para compartir con amigos y el historial de puntos ganados.</P>
+      <P>Muestra tus puntos acumulados, total de predicciones, porcentaje de acierto, código de invitación para compartir con amigos y el historial de puntos ganados.</P>
     </>
   )
 }
