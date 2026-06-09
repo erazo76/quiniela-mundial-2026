@@ -34,13 +34,17 @@ function FilaMiembro({
   miembro,
   token,
   esJunior,
+  onEliminado,
 }: {
   miembro: Miembro
   token: string
   esJunior: boolean
+  onEliminado: (id: string) => void
 }) {
   const [reseteando, setReseteando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
 
   async function resetearPin() {
     setReseteando(true)
@@ -57,6 +61,30 @@ function FilaMiembro({
       setMsg({ texto: 'Error de conexión', ok: false })
     } finally {
       setReseteando(false)
+    }
+  }
+
+  async function eliminarParticipante() {
+    setEliminando(true)
+    setMsg(null)
+    try {
+      const res = await fetch('/api/admin/usuarios', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, usuarioId: miembro.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMsg({ texto: data.error ?? 'Error al eliminar', ok: false })
+        setEliminando(false)
+        setConfirmandoEliminar(false)
+        return
+      }
+      onEliminado(miembro.id)
+    } catch {
+      setMsg({ texto: 'Error de conexión', ok: false })
+      setEliminando(false)
+      setConfirmandoEliminar(false)
     }
   }
 
@@ -89,20 +117,59 @@ function FilaMiembro({
             {msg.texto}
           </span>
         )}
-        <button
-          onClick={resetearPin}
-          disabled={reseteando || !miembro.tienePin}
-          title={miembro.tienePin ? 'Resetear PIN' : 'No tiene PIN configurado'}
-          className="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-300 font-semibold rounded-lg transition-colors"
-        >
-          {reseteando ? '...' : 'Reset PIN'}
-        </button>
+        {confirmandoEliminar ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-red-300">¿Eliminar?</span>
+            <button
+              onClick={() => setConfirmandoEliminar(false)}
+              disabled={eliminando}
+              className="px-2 py-1 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-40"
+            >
+              No
+            </button>
+            <button
+              onClick={eliminarParticipante}
+              disabled={eliminando}
+              className="px-2 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-40"
+            >
+              {eliminando ? '...' : 'Sí'}
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={resetearPin}
+              disabled={reseteando || !miembro.tienePin}
+              title={miembro.tienePin ? 'Resetear PIN' : 'No tiene PIN configurado'}
+              className="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed text-xs text-slate-300 font-semibold rounded-lg transition-colors"
+            >
+              {reseteando ? '...' : 'Reset PIN'}
+            </button>
+            <button
+              onClick={() => { setConfirmandoEliminar(true); setMsg(null) }}
+              title="Eliminar participante"
+              className="px-2 py-1 text-slate-600 hover:text-red-400 transition-colors"
+            >
+              🗑
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; onEliminada: (id: string) => void }) {
+function TarjetaLiga({
+  liga,
+  token,
+  onEliminada,
+  onActualizada,
+}: {
+  liga: Liga
+  token: string
+  onEliminada: (id: string) => void
+  onActualizada: (id: string, cambios: Partial<Liga>) => void
+}) {
   const [expandida, setExpandida] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
   const [eliminando, setEliminando] = useState(false)
@@ -110,6 +177,61 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
   const [distribuyendo, setDistribuyendo] = useState(false)
   const [distribucion, setDistribucion] = useState<PremioPote[] | null>(null)
   const [confirmPote, setConfirmPote] = useState(false)
+  const [editandoNombre, setEditandoNombre] = useState(false)
+  const [nuevoNombre, setNuevoNombre] = useState(liga.nombre_liga)
+  const [guardandoNombre, setGuardandoNombre] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
+  const [reseteandoLiga, setReseteandoLiga] = useState(false)
+  const [resetMsg, setResetMsg] = useState<string | null>(null)
+
+  async function guardarNombre() {
+    const limpio = nuevoNombre.trim()
+    if (!limpio || limpio === liga.nombre_liga) { setEditandoNombre(false); setNuevoNombre(liga.nombre_liga); return }
+    setGuardandoNombre(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/ligas', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, ligaId: liga.id, nombre: limpio }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al renombrar'); return }
+      onActualizada(liga.id, { nombre_liga: limpio })
+      setEditandoNombre(false)
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setGuardandoNombre(false)
+    }
+  }
+
+  async function resetearLiga() {
+    setReseteandoLiga(true)
+    setResetMsg(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/reset-liga', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, ligaId: liga.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Error al resetear'); setReseteandoLiga(false); return }
+      const fichasIniciales = liga.tipo === 'junior' ? 0 : 1000
+      onActualizada(liga.id, {
+        pote_virtual: 0,
+        miembros: liga.miembros.map((m) => ({ ...m, fichas: fichasIniciales, racha: 0, bono_usado: false })),
+      })
+      setConfirmReset(false)
+      setDistribucion(null)
+      setResetMsg('Predicciones y puntuaciones reseteadas')
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setReseteandoLiga(false)
+    }
+  }
 
   function formatFecha(iso: string) {
     return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -187,13 +309,87 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
           </span>
         </button>
         <button
+          onClick={() => { setNuevoNombre(liga.nombre_liga); setEditandoNombre(true); setError(null) }}
+          className="px-2 py-4 text-slate-600 hover:text-blue-400 transition-colors"
+          title="Editar nombre de la liga"
+        >
+          ✏️
+        </button>
+        <button
+          onClick={() => { setConfirmReset(true); setError(null); setResetMsg(null) }}
+          className="px-2 py-4 text-slate-600 hover:text-amber-400 transition-colors"
+          title="Resetear predicciones y puntuaciones"
+        >
+          ♻️
+        </button>
+        <button
           onClick={() => { setConfirmando(true); setError(null) }}
-          className="px-4 py-4 text-slate-600 hover:text-red-400 transition-colors"
+          className="px-3 py-4 text-slate-600 hover:text-red-400 transition-colors"
           title="Eliminar liga"
         >
           ✕
         </button>
       </div>
+
+      {editandoNombre && (
+        <div className="border-t border-slate-800 bg-blue-950/20 px-4 py-3 flex items-center gap-2">
+          <input
+            autoFocus
+            value={nuevoNombre}
+            onChange={(e) => setNuevoNombre(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') guardarNombre(); if (e.key === 'Escape') { setEditandoNombre(false); setNuevoNombre(liga.nombre_liga) } }}
+            disabled={guardandoNombre}
+            maxLength={60}
+            className="flex-1 bg-slate-800 border border-slate-700 focus:border-blue-500 outline-none rounded-lg px-3 py-1.5 text-sm font-semibold text-white"
+          />
+          {error && <span className="text-xs text-red-400 shrink-0">{error}</span>}
+          <button
+            onClick={() => { setEditandoNombre(false); setNuevoNombre(liga.nombre_liga); setError(null) }}
+            disabled={guardandoNombre}
+            className="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-40 shrink-0"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={guardarNombre}
+            disabled={guardandoNombre}
+            className="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-40 shrink-0"
+          >
+            {guardandoNombre ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
+      )}
+
+      {confirmReset && (
+        <div className="border-t border-slate-800 bg-amber-950/20 px-4 py-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-amber-300">
+            ¿Resetear predicciones y puntuaciones de <span className="font-bold">{liga.nombre_liga}</span>? Los partidos no se tocan.
+            {error && <span className="block text-xs text-red-400 mt-1">{error}</span>}
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => { setConfirmReset(false); setError(null) }}
+              disabled={reseteandoLiga}
+              className="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-40"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={resetearLiga}
+              disabled={reseteandoLiga}
+              className="px-3 py-1.5 text-xs font-bold text-black bg-amber-500 hover:bg-amber-400 rounded-lg transition-colors disabled:opacity-40"
+            >
+              {reseteandoLiga ? 'Reseteando...' : 'Resetear'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {resetMsg && !confirmReset && (
+        <div className="border-t border-amber-500/30 bg-amber-500/5 px-4 py-2">
+          <span className="text-xs font-semibold text-amber-400">{resetMsg}</span>
+        </div>
+      )}
 
       {confirmando && (
         <div className="border-t border-slate-800 bg-red-950/20 px-4 py-3 flex items-center justify-between gap-3">
@@ -267,7 +463,13 @@ function TarjetaLiga({ liga, token, onEliminada }: { liga: Liga; token: string; 
             <p className="text-xs text-slate-600 text-center py-4">Sin miembros aún</p>
           ) : (
             liga.miembros.map((m) => (
-              <FilaMiembro key={m.id} miembro={m} token={token} esJunior={liga.tipo === 'junior'} />
+              <FilaMiembro
+                key={m.id}
+                miembro={m}
+                token={token}
+                esJunior={liga.tipo === 'junior'}
+                onEliminado={(id) => onActualizada(liga.id, { miembros: liga.miembros.filter((x) => x.id !== id) })}
+              />
             ))
           )}
         </div>
@@ -361,6 +563,7 @@ export default function AdminLigasPage() {
               liga={liga}
               token={token}
               onEliminada={(id) => setLigas(prev => prev.filter(l => l.id !== id))}
+              onActualizada={(id, cambios) => setLigas(prev => prev.map(l => l.id === id ? { ...l, ...cambios } : l))}
             />
           ))
         )}

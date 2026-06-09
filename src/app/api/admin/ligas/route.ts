@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyAdminToken } from '@/lib/admin-auth'
 
 export async function PATCH(req: NextRequest) {
-  const { token, ligaId, cierreInscripcion } = await req.json()
+  const { token, ligaId, cierreInscripcion, nombre } = await req.json()
   if (!token || !(await verifyAdminToken(token))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
@@ -11,9 +11,22 @@ export async function PATCH(req: NextRequest) {
 
   const supabase = createAdminClient()
 
+  const cambios: Record<string, unknown> = {}
+  if (nombre !== undefined) {
+    const limpio = String(nombre).trim()
+    if (!limpio) return NextResponse.json({ error: 'El nombre no puede estar vacío' }, { status: 400 })
+    cambios.nombre_liga = limpio
+  }
+  if (cierreInscripcion !== undefined) {
+    cambios.cierre_inscripcion = cierreInscripcion ?? null
+  }
+  if (Object.keys(cambios).length === 0) {
+    return NextResponse.json({ error: 'Nada para actualizar' }, { status: 400 })
+  }
+
   const { error } = await supabase
     .from('ligas')
-    .update({ cierre_inscripcion: cierreInscripcion ?? null })
+    .update(cambios)
     .eq('id', ligaId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

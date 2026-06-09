@@ -744,8 +744,10 @@ export default function AdminPartidosPage() {
               <h2 className="text-base font-black text-white">¿Resetear todos los partidos?</h2>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Se pondrán todos los resultados en <span className="text-white font-semibold">0 - 0</span> y
-              el estado en <span className="text-white font-semibold">pendiente</span>. No se puede deshacer.
+              Se limpiarán todos los resultados y el estado pasará a{' '}
+              <span className="text-white font-semibold">pendiente</span>. Las predicciones y puntuaciones
+              de las ligas <span className="text-white font-semibold">no se tocan</span> (eso se resetea por
+              liga). No se puede deshacer.
             </p>
             <div className="flex gap-3 pt-1">
               <button

@@ -3,11 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyAdminToken } from '@/lib/admin-auth'
 
 /**
- * Resets ALL match results and returns every league to its initial state:
- * - predicciones: deleted entirely
- * - historial_fichas: deleted entirely
- * - usuarios: fichas → 1000, racha → 0, bono_usado → false
- * - ligas: pote_virtual → 0
+ * Resets ONLY the matches (partidos) — predictions, scores and leagues are left
+ * untouched (use /api/admin/reset-liga to reset predictions/scores per league):
  * - partidos: cleared results, estado → pendiente, knockout brackets → placeholders
  *
  * POST /api/admin/reset-partidos  { token }
@@ -21,35 +18,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient()
 
-  // ─── 1. Borrar predicciones e historial ───────────────────────────────────
-  await supabase.from('predicciones').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-  await supabase.from('historial_fichas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-
-  // ─── 2. Restaurar usuarios a estado inicial ────────────────────────────────
-  const { data: usuarios } = await supabase
-    .from('usuarios')
-    .select('id, nombre, liga_id')
-
-  const { data: ligas } = await supabase.from('ligas').select('id, tipo')
-  const ligaTipoMap = new Map((ligas ?? []).map((l) => [l.id, l.tipo as string]))
-
-  if (usuarios?.length) {
-    await supabase.from('usuarios').upsert(
-      usuarios.map((u) => ({
-        id: u.id,
-        nombre: u.nombre,
-        liga_id: u.liga_id,
-        fichas: ligaTipoMap.get(u.liga_id) === 'junior' ? 0 : 1000,
-        racha: 0,
-        bono_usado: false,
-      }))
-    )
-  }
-
-  // ─── 3. Resetear pote de todas las ligas ──────────────────────────────────
-  await supabase.from('ligas').update({ pote_virtual: 0 }).neq('id', '00000000-0000-0000-0000-000000000000')
-
-  // ─── 4. Resetear partidos ──────────────────────────────────────────────────
+  // ─── Resetear partidos ──────────────────────────────────────────────────
 
   await supabase
     .from('partidos')
