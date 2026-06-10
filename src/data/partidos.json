@@ -12,7 +12,7 @@
     "grupo": "A",
     "equipo_local": "Corea del Sur",
     "equipo_visitante": "República Checa",
-    "fecha_hora": "2026-06-11T21:00:00-06:00",
+    "fecha_hora": "2026-06-11T20:00:00-06:00",
     "sede": "Estadio Akron, Guadalajara"
   },
   {
@@ -20,7 +20,7 @@
     "grupo": "A",
     "equipo_local": "República Checa",
     "equipo_visitante": "Sudáfrica",
-    "fecha_hora": "2026-06-18T10:00:00-06:00",
+    "fecha_hora": "2026-06-18T12:00:00-04:00",
     "sede": "Mercedes-Benz Stadium, Atlanta"
   },
   {
@@ -34,8 +34,8 @@
   {
     "fase": "grupos",
     "grupo": "A",
-    "equipo_local": "México",
-    "equipo_visitante": "República Checa",
+    "equipo_local": "República Checa",
+    "equipo_visitante": "México",
     "fecha_hora": "2026-06-24T19:00:00-06:00",
     "sede": "Estadio Azteca, Ciudad de México"
   },
@@ -60,7 +60,7 @@
     "grupo": "B",
     "equipo_local": "Catar",
     "equipo_visitante": "Suiza",
-    "fecha_hora": "2026-06-13T13:00:00-07:00",
+    "fecha_hora": "2026-06-13T12:00:00-07:00",
     "sede": "Levi's Stadium, Santa Clara"
   },
   {
@@ -68,7 +68,7 @@
     "grupo": "B",
     "equipo_local": "Suiza",
     "equipo_visitante": "Bosnia y Herzegovina",
-    "fecha_hora": "2026-06-18T13:00:00-07:00",
+    "fecha_hora": "2026-06-18T12:00:00-07:00",
     "sede": "SoFi Stadium, Los Ángeles"
   },
   {
@@ -76,15 +76,15 @@
     "grupo": "B",
     "equipo_local": "Canadá",
     "equipo_visitante": "Catar",
-    "fecha_hora": "2026-06-18T16:00:00-07:00",
+    "fecha_hora": "2026-06-18T15:00:00-07:00",
     "sede": "BC Place, Vancouver"
   },
   {
     "fase": "grupos",
     "grupo": "B",
-    "equipo_local": "Canadá",
-    "equipo_visitante": "Suiza",
-    "fecha_hora": "2026-06-24T13:00:00-07:00",
+    "equipo_local": "Suiza",
+    "equipo_visitante": "Canadá",
+    "fecha_hora": "2026-06-24T12:00:00-07:00",
     "sede": "BC Place, Vancouver"
   },
   {
@@ -92,7 +92,7 @@
     "grupo": "B",
     "equipo_local": "Bosnia y Herzegovina",
     "equipo_visitante": "Catar",
-    "fecha_hora": "2026-06-24T13:00:00-07:00",
+    "fecha_hora": "2026-06-24T12:00:00-07:00",
     "sede": "Lumen Field, Seattle"
   },
   {
@@ -108,7 +108,7 @@
     "grupo": "C",
     "equipo_local": "Haití",
     "equipo_visitante": "Escocia",
-    "fecha_hora": "2026-06-13T15:00:00-04:00",
+    "fecha_hora": "2026-06-13T21:00:00-04:00",
     "sede": "Gillette Stadium, Boston"
   },
   {
@@ -116,7 +116,7 @@
     "grupo": "C",
     "equipo_local": "Brasil",
     "equipo_visitante": "Haití",
-    "fecha_hora": "2026-06-19T19:00:00-04:00",
+    "fecha_hora": "2026-06-19T20:30:00-04:00",
     "sede": "Lincoln Financial Field, Filadelfia"
   },
   {
@@ -124,7 +124,7 @@
     "grupo": "C",
     "equipo_local": "Escocia",
     "equipo_visitante": "Marruecos",
-    "fecha_hora": "2026-06-19T16:00:00-04:00",
+    "fecha_hora": "2026-06-19T18:00:00-04:00",
     "sede": "Gillette Stadium, Boston"
   },
   {
@@ -132,7 +132,7 @@
     "grupo": "C",
     "equipo_local": "Escocia",
     "equipo_visitante": "Brasil",
-    "fecha_hora": "2026-06-24T16:00:00-04:00",
+    "fecha_hora": "2026-06-24T18:00:00-04:00",
     "sede": "Hard Rock Stadium, Miami"
   },
   {
@@ -140,7 +140,7 @@
     "grupo": "C",
     "equipo_local": "Marruecos",
     "equipo_visitante": "Haití",
-    "fecha_hora": "2026-06-24T16:00:00-04:00",
+    "fecha_hora": "2026-06-24T18:00:00-04:00",
     "sede": "Mercedes-Benz Stadium, Atlanta"
   },
   {
@@ -156,7 +156,7 @@
     "grupo": "D",
     "equipo_local": "Australia",
     "equipo_visitante": "Turquía",
-    "fecha_hora": "2026-06-13T16:00:00-07:00",
+    "fecha_hora": "2026-06-13T21:00:00-07:00",
     "sede": "BC Place, Vancouver"
   },
   {
@@ -164,7 +164,7 @@
     "grupo": "D",
     "equipo_local": "Turquía",
     "equipo_visitante": "Paraguay",
-    "fecha_hora": "2026-06-19T18:00:00-07:00",
+    "fecha_hora": "2026-06-19T20:00:00-07:00",
     "sede": "Levi's Stadium, Santa Clara"
   },
   {
@@ -172,15 +172,15 @@
     "grupo": "D",
     "equipo_local": "Estados Unidos",
     "equipo_visitante": "Australia",
-    "fecha_hora": "2026-06-19T13:00:00-07:00",
+    "fecha_hora": "2026-06-19T12:00:00-07:00",
     "sede": "Lumen Field, Seattle"
   },
   {
     "fase": "grupos",
     "grupo": "D",
-    "equipo_local": "Estados Unidos",
-    "equipo_visitante": "Turquía",
-    "fecha_hora": "2026-06-25T14:00:00-07:00",
+    "equipo_local": "Turquía",
+    "equipo_visitante": "Estados Unidos",
+    "fecha_hora": "2026-06-25T19:00:00-07:00",
     "sede": "SoFi Stadium, Los Ángeles"
   },
   {
@@ -188,7 +188,7 @@
     "grupo": "D",
     "equipo_local": "Paraguay",
     "equipo_visitante": "Australia",
-    "fecha_hora": "2026-06-25T14:00:00-07:00",
+    "fecha_hora": "2026-06-25T19:00:00-07:00",
     "sede": "Levi's Stadium, Santa Clara"
   },
   {
@@ -204,7 +204,7 @@
     "grupo": "E",
     "equipo_local": "Costa de Marfil",
     "equipo_visitante": "Ecuador",
-    "fecha_hora": "2026-06-14T17:00:00-04:00",
+    "fecha_hora": "2026-06-14T19:00:00-04:00",
     "sede": "Lincoln Financial Field, Filadelfia"
   },
   {
@@ -212,7 +212,7 @@
     "grupo": "E",
     "equipo_local": "Alemania",
     "equipo_visitante": "Costa de Marfil",
-    "fecha_hora": "2026-06-20T14:00:00-04:00",
+    "fecha_hora": "2026-06-20T16:00:00-04:00",
     "sede": "BMO Field, Toronto"
   },
   {
@@ -220,7 +220,7 @@
     "grupo": "E",
     "equipo_local": "Ecuador",
     "equipo_visitante": "Curazao",
-    "fecha_hora": "2026-06-20T15:00:00-05:00",
+    "fecha_hora": "2026-06-20T19:00:00-05:00",
     "sede": "Arrowhead Stadium, Kansas City"
   },
   {
@@ -228,7 +228,7 @@
     "grupo": "E",
     "equipo_local": "Ecuador",
     "equipo_visitante": "Alemania",
-    "fecha_hora": "2026-06-25T15:00:00-04:00",
+    "fecha_hora": "2026-06-25T16:00:00-04:00",
     "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
   },
   {
@@ -236,7 +236,7 @@
     "grupo": "E",
     "equipo_local": "Curazao",
     "equipo_visitante": "Costa de Marfil",
-    "fecha_hora": "2026-06-25T15:00:00-04:00",
+    "fecha_hora": "2026-06-25T16:00:00-04:00",
     "sede": "Lincoln Financial Field, Filadelfia"
   },
   {
@@ -244,7 +244,7 @@
     "grupo": "F",
     "equipo_local": "Países Bajos",
     "equipo_visitante": "Japón",
-    "fecha_hora": "2026-06-14T14:00:00-05:00",
+    "fecha_hora": "2026-06-14T15:00:00-05:00",
     "sede": "AT&T Stadium, Arlington"
   },
   {
@@ -252,7 +252,7 @@
     "grupo": "F",
     "equipo_local": "Suecia",
     "equipo_visitante": "Túnez",
-    "fecha_hora": "2026-06-14T15:00:00-06:00",
+    "fecha_hora": "2026-06-14T20:00:00-06:00",
     "sede": "Estadio BBVA, Monterrey"
   },
   {
@@ -276,7 +276,7 @@
     "grupo": "F",
     "equipo_local": "Japón",
     "equipo_visitante": "Suecia",
-    "fecha_hora": "2026-06-25T14:00:00-05:00",
+    "fecha_hora": "2026-06-25T18:00:00-05:00",
     "sede": "AT&T Stadium, Arlington"
   },
   {
@@ -284,296 +284,296 @@
     "grupo": "F",
     "equipo_local": "Túnez",
     "equipo_visitante": "Países Bajos",
-    "fecha_hora": "2026-06-25T14:00:00-05:00",
+    "fecha_hora": "2026-06-25T18:00:00-05:00",
     "sede": "Arrowhead Stadium, Kansas City"
   },
   {
     "fase": "grupos",
     "grupo": "G",
+    "equipo_local": "Bélgica",
+    "equipo_visitante": "Egipto",
+    "fecha_hora": "2026-06-15T15:00:00-07:00",
+    "sede": "Lumen Field, Seattle"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "G",
+    "equipo_local": "Irán",
+    "equipo_visitante": "Nueva Zelanda",
+    "fecha_hora": "2026-06-15T21:00:00-07:00",
+    "sede": "SoFi Stadium, Los Ángeles"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "G",
+    "equipo_local": "Bélgica",
+    "equipo_visitante": "Irán",
+    "fecha_hora": "2026-06-21T12:00:00-07:00",
+    "sede": "SoFi Stadium, Los Ángeles"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "G",
+    "equipo_local": "Nueva Zelanda",
+    "equipo_visitante": "Egipto",
+    "fecha_hora": "2026-06-21T18:00:00-07:00",
+    "sede": "BC Place, Vancouver"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "G",
+    "equipo_local": "Egipto",
+    "equipo_visitante": "Irán",
+    "fecha_hora": "2026-06-26T20:00:00-07:00",
+    "sede": "Lumen Field, Seattle"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "G",
+    "equipo_local": "Nueva Zelanda",
+    "equipo_visitante": "Bélgica",
+    "fecha_hora": "2026-06-26T20:00:00-07:00",
+    "sede": "BC Place, Vancouver"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "H",
     "equipo_local": "España",
     "equipo_visitante": "Cabo Verde",
     "fecha_hora": "2026-06-15T12:00:00-04:00",
-    "sede": "Hard Rock Stadium, Miami"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "G",
-    "equipo_local": "Arabia Saudita",
-    "equipo_visitante": "Uruguay",
-    "fecha_hora": "2026-06-15T15:00:00-04:00",
     "sede": "Mercedes-Benz Stadium, Atlanta"
   },
   {
     "fase": "grupos",
-    "grupo": "G",
+    "grupo": "H",
+    "equipo_local": "Arabia Saudita",
+    "equipo_visitante": "Uruguay",
+    "fecha_hora": "2026-06-15T18:00:00-04:00",
+    "sede": "Hard Rock Stadium, Miami"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "H",
     "equipo_local": "España",
     "equipo_visitante": "Arabia Saudita",
     "fecha_hora": "2026-06-21T12:00:00-04:00",
-    "sede": "Hard Rock Stadium, Miami"
+    "sede": "Mercedes-Benz Stadium, Atlanta"
   },
   {
     "fase": "grupos",
-    "grupo": "G",
+    "grupo": "H",
     "equipo_local": "Uruguay",
     "equipo_visitante": "Cabo Verde",
-    "fecha_hora": "2026-06-21T15:00:00-04:00",
-    "sede": "Mercedes-Benz Stadium, Atlanta"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "G",
-    "equipo_local": "Uruguay",
-    "equipo_visitante": "España",
-    "fecha_hora": "2026-06-26T16:00:00-04:00",
+    "fecha_hora": "2026-06-21T18:00:00-04:00",
     "sede": "Hard Rock Stadium, Miami"
   },
   {
     "fase": "grupos",
-    "grupo": "G",
+    "grupo": "H",
     "equipo_local": "Cabo Verde",
     "equipo_visitante": "Arabia Saudita",
-    "fecha_hora": "2026-06-26T16:00:00-04:00",
-    "sede": "Mercedes-Benz Stadium, Atlanta"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Francia",
-    "equipo_visitante": "Irán",
-    "fecha_hora": "2026-06-15T18:00:00-04:00",
-    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Senegal",
-    "equipo_visitante": "Jordania",
-    "fecha_hora": "2026-06-15T21:00:00-04:00",
-    "sede": "Gillette Stadium, Boston"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Francia",
-    "equipo_visitante": "Senegal",
-    "fecha_hora": "2026-06-21T18:00:00-04:00",
-    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Jordania",
-    "equipo_visitante": "Irán",
-    "fecha_hora": "2026-06-21T21:00:00-04:00",
-    "sede": "Gillette Stadium, Boston"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Jordania",
-    "equipo_visitante": "Francia",
-    "fecha_hora": "2026-06-26T18:00:00-04:00",
-    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "H",
-    "equipo_local": "Irán",
-    "equipo_visitante": "Senegal",
-    "fecha_hora": "2026-06-26T18:00:00-04:00",
-    "sede": "Gillette Stadium, Boston"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "I",
-    "equipo_local": "Argentina",
-    "equipo_visitante": "Argelia",
-    "fecha_hora": "2026-06-16T12:00:00-05:00",
+    "fecha_hora": "2026-06-26T19:00:00-05:00",
     "sede": "NRG Stadium, Houston"
   },
   {
     "fase": "grupos",
-    "grupo": "I",
-    "equipo_local": "Austria",
-    "equipo_visitante": "Uzbekistán",
-    "fecha_hora": "2026-06-16T15:00:00-05:00",
-    "sede": "AT&T Stadium, Arlington"
+    "grupo": "H",
+    "equipo_local": "Uruguay",
+    "equipo_visitante": "España",
+    "fecha_hora": "2026-06-26T18:00:00-06:00",
+    "sede": "Estadio Akron, Guadalajara"
   },
   {
     "fase": "grupos",
     "grupo": "I",
+    "equipo_local": "Francia",
+    "equipo_visitante": "Senegal",
+    "fecha_hora": "2026-06-16T15:00:00-04:00",
+    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "I",
+    "equipo_local": "Irak",
+    "equipo_visitante": "Noruega",
+    "fecha_hora": "2026-06-16T18:00:00-04:00",
+    "sede": "Gillette Stadium, Boston"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "I",
+    "equipo_local": "Francia",
+    "equipo_visitante": "Irak",
+    "fecha_hora": "2026-06-22T17:00:00-04:00",
+    "sede": "Lincoln Financial Field, Filadelfia"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "I",
+    "equipo_local": "Noruega",
+    "equipo_visitante": "Senegal",
+    "fecha_hora": "2026-06-22T20:00:00-04:00",
+    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "I",
+    "equipo_local": "Noruega",
+    "equipo_visitante": "Francia",
+    "fecha_hora": "2026-06-26T15:00:00-04:00",
+    "sede": "Gillette Stadium, Boston"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "I",
+    "equipo_local": "Senegal",
+    "equipo_visitante": "Irak",
+    "fecha_hora": "2026-06-26T15:00:00-04:00",
+    "sede": "BMO Field, Toronto"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "J",
+    "equipo_local": "Argentina",
+    "equipo_visitante": "Argelia",
+    "fecha_hora": "2026-06-16T20:00:00-05:00",
+    "sede": "Arrowhead Stadium, Kansas City"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "J",
+    "equipo_local": "Austria",
+    "equipo_visitante": "Jordania",
+    "fecha_hora": "2026-06-16T21:00:00-07:00",
+    "sede": "Levi's Stadium, Santa Clara"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "J",
     "equipo_local": "Argentina",
     "equipo_visitante": "Austria",
     "fecha_hora": "2026-06-22T12:00:00-05:00",
-    "sede": "NRG Stadium, Houston"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "I",
-    "equipo_local": "Uzbekistán",
-    "equipo_visitante": "Argelia",
-    "fecha_hora": "2026-06-22T15:00:00-05:00",
     "sede": "AT&T Stadium, Arlington"
   },
   {
     "fase": "grupos",
-    "grupo": "I",
-    "equipo_local": "Uzbekistán",
-    "equipo_visitante": "Argentina",
-    "fecha_hora": "2026-06-27T12:00:00-05:00",
-    "sede": "NRG Stadium, Houston"
+    "grupo": "J",
+    "equipo_local": "Jordania",
+    "equipo_visitante": "Argelia",
+    "fecha_hora": "2026-06-22T20:00:00-07:00",
+    "sede": "Levi's Stadium, Santa Clara"
   },
   {
     "fase": "grupos",
-    "grupo": "I",
+    "grupo": "J",
     "equipo_local": "Argelia",
     "equipo_visitante": "Austria",
-    "fecha_hora": "2026-06-27T12:00:00-05:00",
+    "fecha_hora": "2026-06-27T21:00:00-05:00",
+    "sede": "Arrowhead Stadium, Kansas City"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "J",
+    "equipo_local": "Jordania",
+    "equipo_visitante": "Argentina",
+    "fecha_hora": "2026-06-27T21:00:00-05:00",
     "sede": "AT&T Stadium, Arlington"
   },
   {
     "fase": "grupos",
-    "grupo": "J",
-    "equipo_local": "Portugal",
-    "equipo_visitante": "Irak",
-    "fecha_hora": "2026-06-16T18:00:00-04:00",
-    "sede": "BMO Field, Toronto"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "J",
-    "equipo_local": "República Democrática del Congo",
-    "equipo_visitante": "Colombia",
-    "fecha_hora": "2026-06-16T21:00:00-04:00",
-    "sede": "Lincoln Financial Field, Filadelfia"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "J",
+    "grupo": "K",
     "equipo_local": "Portugal",
     "equipo_visitante": "República Democrática del Congo",
-    "fecha_hora": "2026-06-22T18:00:00-04:00",
-    "sede": "BMO Field, Toronto"
+    "fecha_hora": "2026-06-17T12:00:00-05:00",
+    "sede": "NRG Stadium, Houston"
   },
   {
     "fase": "grupos",
-    "grupo": "J",
+    "grupo": "K",
+    "equipo_local": "Uzbekistán",
+    "equipo_visitante": "Colombia",
+    "fecha_hora": "2026-06-17T20:00:00-06:00",
+    "sede": "Estadio Azteca, Ciudad de México"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "K",
+    "equipo_local": "Portugal",
+    "equipo_visitante": "Uzbekistán",
+    "fecha_hora": "2026-06-23T12:00:00-05:00",
+    "sede": "NRG Stadium, Houston"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "K",
     "equipo_local": "Colombia",
-    "equipo_visitante": "Irak",
-    "fecha_hora": "2026-06-22T21:00:00-04:00",
-    "sede": "Lincoln Financial Field, Filadelfia"
+    "equipo_visitante": "República Democrática del Congo",
+    "fecha_hora": "2026-06-23T20:00:00-06:00",
+    "sede": "Estadio Akron, Guadalajara"
   },
   {
     "fase": "grupos",
-    "grupo": "J",
+    "grupo": "K",
     "equipo_local": "Colombia",
     "equipo_visitante": "Portugal",
-    "fecha_hora": "2026-06-27T18:00:00-04:00",
+    "fecha_hora": "2026-06-27T19:30:00-04:00",
+    "sede": "Hard Rock Stadium, Miami"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "K",
+    "equipo_local": "República Democrática del Congo",
+    "equipo_visitante": "Uzbekistán",
+    "fecha_hora": "2026-06-27T19:30:00-04:00",
+    "sede": "Mercedes-Benz Stadium, Atlanta"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "L",
+    "equipo_local": "Inglaterra",
+    "equipo_visitante": "Croacia",
+    "fecha_hora": "2026-06-17T15:00:00-05:00",
+    "sede": "AT&T Stadium, Arlington"
+  },
+  {
+    "fase": "grupos",
+    "grupo": "L",
+    "equipo_local": "Ghana",
+    "equipo_visitante": "Panamá",
+    "fecha_hora": "2026-06-17T19:00:00-04:00",
     "sede": "BMO Field, Toronto"
   },
   {
     "fase": "grupos",
-    "grupo": "J",
-    "equipo_local": "Irak",
-    "equipo_visitante": "República Democrática del Congo",
-    "fecha_hora": "2026-06-27T18:00:00-04:00",
-    "sede": "Lincoln Financial Field, Filadelfia"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "K",
+    "grupo": "L",
     "equipo_local": "Inglaterra",
     "equipo_visitante": "Ghana",
-    "fecha_hora": "2026-06-17T12:00:00-05:00",
-    "sede": "Arrowhead Stadium, Kansas City"
+    "fecha_hora": "2026-06-23T16:00:00-04:00",
+    "sede": "Gillette Stadium, Boston"
   },
   {
     "fase": "grupos",
-    "grupo": "K",
-    "equipo_local": "Croacia",
-    "equipo_visitante": "Panamá",
-    "fecha_hora": "2026-06-17T15:00:00-05:00",
-    "sede": "Estadio Akron, Guadalajara"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "K",
-    "equipo_local": "Inglaterra",
-    "equipo_visitante": "Croacia",
-    "fecha_hora": "2026-06-23T12:00:00-05:00",
-    "sede": "Arrowhead Stadium, Kansas City"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "K",
+    "grupo": "L",
     "equipo_local": "Panamá",
-    "equipo_visitante": "Ghana",
-    "fecha_hora": "2026-06-23T15:00:00-05:00",
-    "sede": "Estadio Akron, Guadalajara"
+    "equipo_visitante": "Croacia",
+    "fecha_hora": "2026-06-23T19:00:00-04:00",
+    "sede": "BMO Field, Toronto"
   },
   {
     "fase": "grupos",
-    "grupo": "K",
+    "grupo": "L",
     "equipo_local": "Panamá",
     "equipo_visitante": "Inglaterra",
-    "fecha_hora": "2026-06-28T12:00:00-05:00",
-    "sede": "Arrowhead Stadium, Kansas City"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "K",
-    "equipo_local": "Ghana",
-    "equipo_visitante": "Croacia",
-    "fecha_hora": "2026-06-28T12:00:00-05:00",
-    "sede": "Estadio Akron, Guadalajara"
+    "fecha_hora": "2026-06-27T17:00:00-04:00",
+    "sede": "MetLife Stadium, Nueva York/Nueva Jersey"
   },
   {
     "fase": "grupos",
     "grupo": "L",
-    "equipo_local": "Bélgica",
-    "equipo_visitante": "Egipto",
-    "fecha_hora": "2026-06-17T18:00:00-07:00",
-    "sede": "Lumen Field, Seattle"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "L",
-    "equipo_local": "Nueva Zelanda",
-    "equipo_visitante": "Noruega",
-    "fecha_hora": "2026-06-17T21:00:00-07:00",
-    "sede": "BC Place, Vancouver"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "L",
-    "equipo_local": "Bélgica",
-    "equipo_visitante": "Nueva Zelanda",
-    "fecha_hora": "2026-06-23T18:00:00-07:00",
-    "sede": "Lumen Field, Seattle"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "L",
-    "equipo_local": "Noruega",
-    "equipo_visitante": "Egipto",
-    "fecha_hora": "2026-06-23T21:00:00-07:00",
-    "sede": "BC Place, Vancouver"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "L",
-    "equipo_local": "Noruega",
-    "equipo_visitante": "Bélgica",
-    "fecha_hora": "2026-06-28T18:00:00-07:00",
-    "sede": "Lumen Field, Seattle"
-  },
-  {
-    "fase": "grupos",
-    "grupo": "L",
-    "equipo_local": "Egipto",
-    "equipo_visitante": "Nueva Zelanda",
-    "fecha_hora": "2026-06-28T18:00:00-07:00",
-    "sede": "BC Place, Vancouver"
+    "equipo_local": "Croacia",
+    "equipo_visitante": "Ghana",
+    "fecha_hora": "2026-06-27T17:00:00-04:00",
+    "sede": "Lincoln Financial Field, Filadelfia"
   },
   {
     "fase": "octavos",
