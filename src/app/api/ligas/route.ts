@@ -6,7 +6,7 @@ function generarCodigo(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { nombreUsuario, nombreLiga, pin, cierreInscripcion, tipo } = await req.json()
+  const { nombreUsuario, nombreLiga, pin, tipo } = await req.json()
 
   if (!nombreUsuario?.trim() || !nombreLiga?.trim() || !pin || String(pin).length !== 4) {
     return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
@@ -28,28 +28,13 @@ export async function POST(req: NextRequest) {
     codigo = generarCodigo()
   }
 
-  // Cierre de inscripción: explícito si se pasa, sino 5 min antes del primer partido
-  let cierreCalculado: string | null = cierreInscripcion ?? null
-  if (!cierreCalculado) {
-    const { data: primerPartido } = await supabase
-      .from('partidos')
-      .select('fecha_hora')
-      .order('fecha_hora', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-    if (primerPartido?.fecha_hora) {
-      const cierre = new Date(primerPartido.fecha_hora)
-      cierre.setMinutes(cierre.getMinutes() - 5)
-      cierreCalculado = cierre.toISOString()
-    }
-  }
-
+  // La inscripción está siempre abierta: no se fija fecha de cierre al crear la liga.
+  // Los jugadores que se unen tarde simplemente no suman en los partidos ya cerrados.
   const insertPayload: Record<string, unknown> = {
     nombre_liga: nombreLiga.trim(),
     codigo_invitacion: codigo,
     tipo: ligaTipo,
   }
-  if (cierreCalculado) insertPayload.cierre_inscripcion = cierreCalculado
 
   const { data: liga, error: ligaError } = await supabase
     .from('ligas')

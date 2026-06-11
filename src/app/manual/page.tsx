@@ -90,8 +90,8 @@ function ManualVIP() {
         <li>Introduce el código de invitación.</li>
         <li>Escribe tu nombre de jugador y elige tu PIN.</li>
       </ol>
-      <Recuadro titulo="Cierre de inscripciones" color="yellow">
-        <P>La inscripción cierra automáticamente <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el código.</P>
+      <Recuadro titulo="Inscripción siempre abierta" color="yellow">
+        <P>Puedes unirte a una liga <strong>en cualquier momento</strong>, incluso con el torneo ya empezado. Ten en cuenta que las predicciones de cada partido cierran 5 minutos antes de su inicio: si te unes tarde, <strong>no podrás predecir los partidos que ya comenzaron</strong> y no sumas fichas en ellos, pero <strong>tampoco se te aplica la penalidad de −10</strong> por esos partidos previos a tu alta. Arrancas a competir desde el siguiente partido pendiente.</P>
       </Recuadro>
 
       <H2 n={2}>Iniciar sesión (volver a entrar)</H2>
@@ -302,8 +302,8 @@ function ManualJUNIOR() {
         <li>Introduce el código de invitación.</li>
         <li>Escribe tu nombre de jugador y elige tu PIN.</li>
       </ol>
-      <Recuadro titulo="Cierre de inscripciones" color="yellow">
-        <P>La inscripción cierra <strong>5 minutos antes del primer partido</strong>. Pasada esa fecha, no es posible unirse aunque tengas el código.</P>
+      <Recuadro titulo="Inscripción siempre abierta" color="yellow">
+        <P>Puedes unirte a una liga <strong>en cualquier momento</strong>, incluso con el torneo ya empezado. Las predicciones de cada partido cierran 5 minutos antes de su inicio: si te unes tarde, <strong>no podrás predecir los partidos que ya comenzaron</strong> y no sumas puntos en ellos. Empiezas a competir desde el siguiente partido pendiente, sin penalidad por los anteriores.</P>
       </Recuadro>
 
       <H2 n={2}>Iniciar sesión (volver a entrar)</H2>

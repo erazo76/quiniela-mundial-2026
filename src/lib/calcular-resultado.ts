@@ -37,10 +37,22 @@ export async function procesarResultadoPartido(
 
   if (errPred) return { procesadas: 0, error: errPred.message }
 
+  // Fecha del partido: define la fecha límite de predicción (kickoff − 5 min).
+  // Sirve para no penalizar a jugadores que se unieron cuando el partido ya
+  // estaba cerrado (nunca tuvieron oportunidad de predecir).
+  const { data: partidoMeta } = await supabase
+    .from('partidos')
+    .select('fecha_hora')
+    .eq('id', partidoId)
+    .maybeSingle()
+  const limitePrediccion = partidoMeta?.fecha_hora
+    ? new Date(new Date(partidoMeta.fecha_hora).getTime() - 5 * 60 * 1000)
+    : null
+
   // Fetch ALL users — needed to apply penalty to non-predictors
   const { data: todosUsuarios, error: errUsers } = await supabase
     .from('usuarios')
-    .select('id, nombre, liga_id, fichas, racha, bono_usado')
+    .select('id, nombre, liga_id, fichas, racha, bono_usado, created_at')
 
   if (errUsers) return { procesadas: 0, error: errUsers.message }
   if (!todosUsuarios?.length) return { procesadas: 0 }
@@ -153,6 +165,12 @@ export async function procesarResultadoPartido(
 
     if (esJunior) {
       // JUNIOR: sin penalidad por omisión, simplemente suma 0
+      continue
+    }
+
+    // Inscripción tardía: si el jugador se unió después de que cerraran las
+    // predicciones de este partido, nunca pudo predecirlo → queda en 0, sin penalidad.
+    if (limitePrediccion && usuario.created_at && new Date(usuario.created_at) >= limitePrediccion) {
       continue
     }
 

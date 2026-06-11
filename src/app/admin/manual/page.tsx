@@ -195,16 +195,11 @@ export default function ManualAdminPage() {
         <P>Lista todas las ligas creadas, ordenadas de más reciente a más antigua. Cada tarjeta muestra: nombre, código de invitación, número de miembros y fecha de creación.</P>
         <P>Pulsa en la tarjeta para expandirla y ver la lista de miembros con sus fichas, racha y estado del PIN.</P>
 
-        <H3>Cierre de inscripciones</H3>
-        <P>Cada liga tiene una <strong>fecha límite de inscripción</strong> (<code className="bg-slate-100 px-1 rounded text-xs">cierre_inscripcion</code>) fijada automáticamente al crearla: <strong>5 minutos antes del primer partido del Mundial</strong>. Una vez superada esa fecha, el sistema rechaza cualquier intento de un jugador nuevo de unirse a la liga.</P>
-        <P>Si necesitas ajustar la fecha de una liga existente (adelantarla o borrarla), usa el endpoint admin con PATCH:</P>
-        <div className="bg-slate-100 rounded-lg px-4 py-3 mb-4 font-mono text-xs text-slate-700 overflow-x-auto">
-          PATCH /api/admin/ligas<br />
-          {'{ "token": "...", "ligaId": "...", "cierreInscripcion": "2026-06-15T17:55:00Z" }'}
-        </div>
-        <P>Para eliminar el cierre y dejar la liga abierta indefinidamente, envia <code className="bg-slate-100 px-1 rounded text-xs">cierreInscripcion: null</code>.</P>
-        <Recuadro titulo="Jugadores existentes no se ven afectados" color="slate">
-          <P>El cierre solo bloquea <em>nuevas</em> adhesiones. Los jugadores ya registrados antes de la fecha pueden seguir iniciando sesión y apostando con normalidad.</P>
+        <H3>Inscripción siempre abierta</H3>
+        <P>La inscripción a las ligas <strong>no tiene fecha de cierre</strong>: cualquier jugador puede unirse en cualquier momento, incluso con el torneo ya empezado. No existe un bloqueo por &quot;primer partido&quot;.</P>
+        <P>El control real lo hace cada partido: las predicciones de un partido cierran <strong>5 minutos antes de su inicio</strong>. Un jugador que se une tarde no podrá predecir los partidos que ya cerraron, así que simplemente <strong>no suma fichas ni puntos en ellos</strong> (sin penalidad) y empieza a competir desde el siguiente partido pendiente.</P>
+        <Recuadro titulo="Sin acción de admin requerida" color="slate">
+          <P>No hay que ajustar ninguna fecha para habilitar tardíos: la inscripción está abierta por defecto. La columna <code className="bg-slate-100 px-1 rounded text-xs">cierre_inscripcion</code> quedó obsoleta y el sistema ya no la usa para bloquear adhesiones.</P>
         </Recuadro>
 
         {/* 6 */}
@@ -284,7 +279,7 @@ export default function ManualAdminPage() {
                 ['Penalidad por no predecir', '−10 fichas y racha en 0 al finalizar el partido; aplica a todos los jugadores sin predicción'],
                 ['Bono de rescate', '100 fichas automáticas si el jugador llega a 0, una sola vez; aplica también si la penalidad lleva a 0'],
                 ['Comisión al pote', '5% de cada variación neta de apuesta'],
-                ['Cierre de inscripciones', 'Opcional por liga; pasada la fecha configurada no se permiten nuevos jugadores (existentes no se ven afectados)'],
+                ['Inscripción', 'Siempre abierta; un jugador puede unirse en cualquier momento. No se penaliza por los partidos cerrados antes de su alta (quedan en 0)'],
                 ['Orden tabla de grupos', 'Criterios FIFA en orden: 1) Pts · 2) Dif goles · 3) Goles a favor · 4) Pts H2H · 5) Dif goles H2H · 6) Goles H2H · 7-8) Decisión manual del admin'],
               ].map(([regla, valor]) => (
                 <tr key={regla} className="odd:bg-slate-50">
