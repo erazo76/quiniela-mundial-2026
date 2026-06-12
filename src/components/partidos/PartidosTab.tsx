@@ -20,6 +20,12 @@ const LABEL_FASE: Record<string, string> = {
   tercer_puesto: '3er Puesto',
 }
 
+// Clave de día (YYYY-MM-DD) en horario local del dispositivo, consistente con
+// el formato de fecha/hora de las tarjetas.
+function fechaKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 const LABEL_FASE_LARGO: Record<string, string> = {
   grupos:        'Fase de Grupos',
   dieciseisavos: 'Ronda de 32',
@@ -43,6 +49,7 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
   const [cargando, setCargando] = useState(true)
   const [grupoActivo, setGrupoActivo] = useState('A')
   const [faseVista, setFaseVista] = useState<string | null>(null) // null = sigue faseActiva
+  const [fechaSeleccionada, setFechaSeleccionada] = useState<string | null>(null) // clave YYYY-MM-DD, null = día por defecto
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<Partido | null>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
   const faseTabsRef = useRef<HTMLDivElement>(null)
@@ -113,8 +120,39 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
   )
 
   // La fase que se muestra: la que eligió el usuario o la activa por defecto
+  const esTodos = faseVista === 'todos'
   const faseEfectiva = faseVista ?? faseActiva
-  const esGrupos = faseEfectiva === 'grupos'
+  const esGrupos = !esTodos && faseEfectiva === 'grupos'
+
+  // Días distintos con partidos (orden cronológico) para el selector de fecha de "Todos"
+  const fechasDisponibles = useMemo(() => {
+    const mapa = new Map<string, { key: string; fecha: string; total: number; conPrediccion: number }>()
+    for (const p of partidos) {
+      const key = fechaKey(new Date(p.fecha_hora))
+      const dia = mapa.get(key)
+      if (dia) {
+        dia.total++
+        if (p.prediccion) dia.conPrediccion++
+      } else {
+        mapa.set(key, { key, fecha: p.fecha_hora, total: 1, conPrediccion: p.prediccion ? 1 : 0 })
+      }
+    }
+    return [...mapa.values()].sort((a, b) => a.key.localeCompare(b.key))
+  }, [partidos])
+
+  // Día por defecto: hoy si tiene partidos, si no el próximo día con partidos, si no el último
+  const fechaDefault = useMemo(() => {
+    if (fechasDisponibles.length === 0) return null
+    const hoy = fechaKey(new Date())
+    if (fechasDisponibles.some((f) => f.key === hoy)) return hoy
+    const proxima = fechasDisponibles.find((f) => f.key >= hoy)
+    return (proxima ?? fechasDisponibles[fechasDisponibles.length - 1]).key
+  }, [fechasDisponibles])
+
+  // El día efectivo mostrado en "Todos": el elegido o el de por defecto
+  const fechaEfectiva = (fechaSeleccionada && fechasDisponibles.some((f) => f.key === fechaSeleccionada))
+    ? fechaSeleccionada
+    : fechaDefault
 
   function seleccionarFase(fase: string) {
     setFaseVista(fase === faseActiva ? null : fase)
@@ -127,15 +165,36 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
     }
   }
 
-  function handleGrupoClick(grupo: string) {
-    setGrupoActivo(grupo)
+  function centrarChip(selector: string) {
     const container = tabsRef.current
-    const btn = container?.querySelector(`[data-grupo="${grupo}"]`) as HTMLElement
+    const btn = container?.querySelector(selector) as HTMLElement | null
     if (container && btn) {
       const offset = btn.offsetLeft - container.clientWidth / 2 + btn.clientWidth / 2
       container.scrollTo({ left: offset, behavior: 'smooth' })
     }
   }
+
+  function handleGrupoClick(grupo: string) {
+    setGrupoActivo(grupo)
+    centrarChip(`[data-grupo="${grupo}"]`)
+  }
+
+  function activarTodos() {
+    setFechaSeleccionada(null) // vuelve al día por defecto cada vez que se entra
+    setFaseVista('todos')
+  }
+
+  function handleFechaClick(key: string) {
+    setFechaSeleccionada(key)
+    centrarChip(`[data-fecha="${key}"]`)
+  }
+
+  // Al entrar a "Todos", centra el día efectivo en el selector
+  useEffect(() => {
+    if (esTodos && fechaEfectiva) {
+      centrarChip(`[data-fecha="${fechaEfectiva}"]`)
+    }
+  }, [esTodos, fechaEfectiva])
 
   function handlePartidoClick(partido: Partido) {
     const canPredict = partido.estado === 'pendiente' &&
@@ -157,6 +216,11 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
 
   // Partidos a mostrar según la fase efectiva
   const partidosMostrados = useMemo(() => {
+    if (esTodos) {
+      return partidos
+        .filter((p) => fechaEfectiva && fechaKey(new Date(p.fecha_hora)) === fechaEfectiva)
+        .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
+    }
     if (esGrupos) return partidos.filter((p) => p.grupo === grupoActivo)
     const principales = partidos.filter((p) => p.fase === faseEfectiva)
     const extras = faseEfectiva === 'final'
@@ -165,19 +229,24 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
     return [...principales, ...extras].sort((a, b) =>
       a.fecha_hora.localeCompare(b.fecha_hora)
     )
-  }, [partidos, faseEfectiva, esGrupos, grupoActivo])
+  }, [partidos, faseEfectiva, esGrupos, esTodos, fechaEfectiva, grupoActivo])
 
-  // Conteo de partidos sin predicción en la fase efectiva (solo pendientes)
+  // Conteo de partidos sin predicción en la vista actual (solo pendientes).
+  // En "Todos" se acota al día seleccionado para reflejar lo que se muestra.
   const conteoSinPrediccion = useMemo(() => {
-    const fases = esGrupos ? ['grupos'] : [faseEfectiva, ...(faseEfectiva === 'final' ? ['tercer_puesto'] : [])]
+    const fases = esGrupos
+      ? ['grupos']
+      : [faseEfectiva, ...(faseEfectiva === 'final' ? ['tercer_puesto'] : [])]
     return partidos.filter(
       (p) =>
-        fases.includes(p.fase) &&
+        (esTodos
+          ? fechaEfectiva && fechaKey(new Date(p.fecha_hora)) === fechaEfectiva
+          : fases.includes(p.fase)) &&
         !p.prediccion &&
         p.estado === 'pendiente' &&
         new Date() < new Date(new Date(p.fecha_hora).getTime() - 5 * 60 * 1000)
     ).length
-  }, [partidos, faseEfectiva, esGrupos])
+  }, [partidos, faseEfectiva, esGrupos, esTodos, fechaEfectiva])
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
@@ -232,36 +301,78 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
         </div>
       )}
 
-      {esGrupos ? (
-        /* ── Tabs de grupos ── */
+      {esGrupos || esTodos ? (
+        /* ── Selector: chip "Todos" + grupos (fase grupos) o fechas (modo Todos) ── */
         <div
           ref={tabsRef}
           className="flex gap-2 px-4 py-3 overflow-x-auto shrink-0"
           style={{ scrollbarWidth: 'none' }}
         >
-          {GRUPOS.map((g) => {
-            const partidosDeGrupo = partidos.filter((p) => p.grupo === g)
-            const conPrediccion = partidosDeGrupo.filter((p) => p.prediccion).length
-            const totalGrupo = partidosDeGrupo.length
-            const isActive = g === grupoActivo
-            return (
-              <button
-                key={g}
-                data-grupo={g}
-                onClick={() => handleGrupoClick(g)}
-                className={`flex flex-col items-center gap-1 shrink-0 w-12 py-2 rounded-2xl border transition-colors ${
-                  isActive
-                    ? 'bg-green-500 border-green-500 text-black'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
-                }`}
-              >
-                <span className="text-sm font-black">{g}</span>
-                <span className={`text-xs ${isActive ? 'text-black/60' : 'text-slate-600'}`}>
-                  {conPrediccion}/{totalGrupo}
-                </span>
-              </button>
-            )
-          })}
+          {/* Chip "Todos" — al lado de los selectores de grupo */}
+          <button
+            onClick={activarTodos}
+            className={`flex flex-col items-center justify-center gap-1 shrink-0 px-3 py-2 rounded-2xl border transition-colors ${
+              esTodos
+                ? 'bg-green-500 border-green-500 text-black'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
+            }`}
+          >
+            <span className="text-sm font-black">Todos</span>
+            <span className={`text-[10px] uppercase tracking-wide ${esTodos ? 'text-black/60' : 'text-slate-600'}`}>
+              por día
+            </span>
+          </button>
+
+          {esTodos
+            ? /* ── Selector de fecha ── */
+              fechasDisponibles.map((f) => {
+                const d = new Date(f.fecha)
+                const isActive = f.key === fechaEfectiva
+                const weekday = d.toLocaleDateString('es', { weekday: 'short' })
+                const mes = d.toLocaleDateString('es', { month: 'short' })
+                return (
+                  <button
+                    key={f.key}
+                    data-fecha={f.key}
+                    onClick={() => handleFechaClick(f.key)}
+                    className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-2xl border transition-colors ${
+                      isActive
+                        ? 'bg-green-500 border-green-500 text-black'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold uppercase leading-none">{weekday}</span>
+                    <span className="text-sm font-black leading-none whitespace-nowrap">{d.getDate()} {mes}</span>
+                    <span className={`text-[10px] ${isActive ? 'text-black/60' : 'text-slate-600'}`}>
+                      {f.conPrediccion}/{f.total}
+                    </span>
+                  </button>
+                )
+              })
+            : /* ── Tabs de grupos ── */
+              GRUPOS.map((g) => {
+                const partidosDeGrupo = partidos.filter((p) => p.grupo === g)
+                const conPrediccion = partidosDeGrupo.filter((p) => p.prediccion).length
+                const totalGrupo = partidosDeGrupo.length
+                const isActive = g === grupoActivo
+                return (
+                  <button
+                    key={g}
+                    data-grupo={g}
+                    onClick={() => handleGrupoClick(g)}
+                    className={`flex flex-col items-center gap-1 shrink-0 w-12 py-2 rounded-2xl border transition-colors ${
+                      isActive
+                        ? 'bg-green-500 border-green-500 text-black'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
+                    }`}
+                  >
+                    <span className="text-sm font-black">{g}</span>
+                    <span className={`text-xs ${isActive ? 'text-black/60' : 'text-slate-600'}`}>
+                      {conPrediccion}/{totalGrupo}
+                    </span>
+                  </button>
+                )
+              })}
         </div>
       ) : (
         /* ── Header de fase knockout ── */
@@ -279,7 +390,9 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
             <div key={i} className="h-36 bg-slate-900 rounded-2xl animate-pulse" />
           ))
         ) : partidosMostrados.length === 0 ? (
-          <p className="text-slate-600 text-center py-8 text-sm">No hay partidos en esta fase</p>
+          <p className="text-slate-600 text-center py-8 text-sm">
+            {esTodos ? 'No hay partidos en esta fecha' : 'No hay partidos en esta fase'}
+          </p>
         ) : (
           <>
             {!esGrupos && faseEfectiva === 'final' &&
@@ -288,8 +401,13 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
                 {LABEL_FASE_LARGO['final']}
               </p>
             )}
-            {partidosMostrados.map((partido) => (
+            {partidosMostrados.map((partido, i) => (
               <div key={partido.id}>
+                {esTodos && partido.fase !== partidosMostrados[i - 1]?.fase && (
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 mt-3 mb-1">
+                    {LABEL_FASE_LARGO[partido.fase]}
+                  </p>
+                )}
                 {!esGrupos && faseEfectiva === 'final' && partido.fase === 'tercer_puesto' && (
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1 mt-3 mb-1">
                     {LABEL_FASE_LARGO['tercer_puesto']}
