@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Partido, Prediccion } from '@/types'
 import { TarjetaPartido } from './TarjetaPartido'
 import { ModalPrediccion } from './ModalPrediccion'
+import { CalendarioPartidos } from './CalendarioPartidos'
 import { createClient } from '@/lib/supabase/client'
 
 const GRUPOS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
@@ -184,18 +185,6 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
     setFaseVista('todos')
   }
 
-  function handleFechaClick(key: string) {
-    setFechaSeleccionada(key)
-    centrarChip(`[data-fecha="${key}"]`)
-  }
-
-  // Al entrar a "Todos", centra el día efectivo en el selector
-  useEffect(() => {
-    if (esTodos && fechaEfectiva) {
-      centrarChip(`[data-fecha="${fechaEfectiva}"]`)
-    }
-  }, [esTodos, fechaEfectiva])
-
   function handlePartidoClick(partido: Partido) {
     const canPredict = partido.estado === 'pendiente' &&
       new Date() < new Date(new Date(partido.fecha_hora).getTime() - 5 * 60 * 1000)
@@ -324,31 +313,12 @@ export function PartidosTab({ usuarioId, ligaId, fichas, ligaTipo, onFichasChang
           </button>
 
           {esTodos
-            ? /* ── Selector de fecha ── */
-              fechasDisponibles.map((f) => {
-                const d = new Date(f.fecha)
-                const isActive = f.key === fechaEfectiva
-                const weekday = d.toLocaleDateString('es', { weekday: 'short' })
-                const mes = d.toLocaleDateString('es', { month: 'short' })
-                return (
-                  <button
-                    key={f.key}
-                    data-fecha={f.key}
-                    onClick={() => handleFechaClick(f.key)}
-                    className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-2xl border transition-colors ${
-                      isActive
-                        ? 'bg-green-500 border-green-500 text-black'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'
-                    }`}
-                  >
-                    <span className="text-[10px] font-bold uppercase leading-none">{weekday}</span>
-                    <span className="text-sm font-black leading-none whitespace-nowrap">{d.getDate()} {mes}</span>
-                    <span className={`text-[10px] ${isActive ? 'text-black/60' : 'text-slate-600'}`}>
-                      {f.conPrediccion}/{f.total}
-                    </span>
-                  </button>
-                )
-              })
+            ? /* ── Datepicker customizado ── */
+              <CalendarioPartidos
+                dias={fechasDisponibles}
+                valor={fechaEfectiva}
+                onSelect={setFechaSeleccionada}
+              />
             : /* ── Tabs de grupos ── */
               GRUPOS.map((g) => {
                 const partidosDeGrupo = partidos.filter((p) => p.grupo === g)
