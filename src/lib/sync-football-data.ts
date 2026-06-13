@@ -181,9 +181,55 @@ async function syncEquiposEliminatorias(
   return actualizados
 }
 
+// Marca como "en_vivo" los partidos que la API reporta IN_PLAY/PAUSED.
+// Solo afecta filas en estado 'pendiente' (idempotente). El paso en_vivo →
+// finalizado ya lo cubre el flujo principal de resultados.
+async function marcarPartidosEnVivo(
+  supabase: SupabaseClient,
+  apiKey: string
+): Promise<number> {
+  const res = await fetchFootballData(
+    'https://api.football-data.org/v4/competitions/WC/matches?status=IN_PLAY,PAUSED',
+    apiKey
+  )
+  if (!res || !res.ok) return 0
+
+  const data = await res.json()
+  const partidosApi: Array<{ homeTeam: { name: string }; awayTeam: { name: string } }> =
+    data.matches ?? []
+  if (!partidosApi.length) return 0
+
+  const { data: nuestrosPartidos } = await supabase
+    .from('partidos')
+    .select('id, equipo_local, equipo_visitante')
+    .eq('estado', 'pendiente')
+
+  if (!nuestrosPartidos?.length) return 0
+
+  let marcados = 0
+  for (const partido of partidosApi) {
+    const localEs = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
+    const visitanteEs = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
+
+    const nuestro = nuestrosPartidos.find(
+      (p) => p.equipo_local === localEs && p.equipo_visitante === visitanteEs
+    )
+    if (!nuestro) continue
+
+    const { error } = await supabase
+      .from('partidos')
+      .update({ estado: 'en_vivo' })
+      .eq('id', nuestro.id)
+
+    if (!error) marcados++
+  }
+
+  return marcados
+}
+
 export async function syncResultadosFootballData(
   supabase: SupabaseClient
-): Promise<{ sincronizados: number; equiposActualizados?: number; mensaje?: string; errores?: string[] }> {
+): Promise<{ sincronizados: number; equiposActualizados?: number; enVivo?: number; mensaje?: string; errores?: string[] }> {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY
   if (!apiKey) return { sincronizados: 0, mensaje: 'FOOTBALL_DATA_API_KEY no configurado' }
 
@@ -196,6 +242,14 @@ export async function syncResultadosFootballData(
     equiposActualizados = 0
   }
 
+  // Marcar partidos en vivo. Aislado: su fallo no debe abortar los resultados.
+  let enVivo = 0
+  try {
+    enVivo = await marcarPartidosEnVivo(supabase, apiKey)
+  } catch {
+    enVivo = 0
+  }
+
   const fdRes = await fetchFootballData(
     'https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',
     apiKey
@@ -205,6 +259,7 @@ export async function syncResultadosFootballData(
     return {
       sincronizados: 0,
       equiposActualizados: equiposActualizados || undefined,
+      enVivo: enVivo || undefined,
       mensaje: 'No se pudo conectar con la API tras varios intentos. Reintentar en la próxima corrida.',
     }
   }
@@ -213,6 +268,7 @@ export async function syncResultadosFootballData(
     return {
       sincronizados: 0,
       equiposActualizados: equiposActualizados || undefined,
+      enVivo: enVivo || undefined,
       mensaje: `API no disponible (HTTP ${fdRes.status}). El Mundial 2026 aún no ha comenzado o verifica la clave API.`,
     }
   }
@@ -231,6 +287,7 @@ export async function syncResultadosFootballData(
     return {
       sincronizados: 0,
       equiposActualizados: equiposActualizados || undefined,
+      enVivo: enVivo || undefined,
       mensaje: 'Sin partidos finalizados en la API',
     }
   }
@@ -245,6 +302,7 @@ export async function syncResultadosFootballData(
     return {
       sincronizados: 0,
       equiposActualizados: equiposActualizados || undefined,
+      enVivo: enVivo || undefined,
       mensaje: 'No hay partidos pendientes',
     }
   }
@@ -312,6 +370,7 @@ export async function syncResultadosFootballData(
   return {
     sincronizados,
     equiposActualizados: equiposActualizados || undefined,
+    enVivo: enVivo || undefined,
     errores: errores.length ? errores : undefined,
   }
 }
