@@ -181,50 +181,66 @@ async function syncEquiposEliminatorias(
   return actualizados
 }
 
-// Marca como "en_vivo" los partidos que la API reporta IN_PLAY/PAUSED.
-// Solo afecta filas en estado 'pendiente' (idempotente). El paso en_vivo →
-// finalizado ya lo cubre el flujo principal de resultados.
+// Marca como "en_vivo" los partidos pendientes cuyo kickoff ya pasó, sin
+// depender del estado IN_PLAY de la API (el plan gratuito de football-data
+// tarda en reflejar IN_PLAY → un partido ya empezado se quedaba 'pendiente').
+// Como complemento se usa IN_PLAY/PAUSED de la API para cubrir partidos cuyo
+// fecha_hora en la DB no coincida con el kickoff real. El paso en_vivo →
+// finalizado ya lo cubre el flujo principal de resultados. Idempotente.
 async function marcarPartidosEnVivo(
   supabase: SupabaseClient,
   apiKey: string
 ): Promise<number> {
+  const ahora = new Date().toISOString()
+  const ids = new Set<string>()
+
+  // 1) Por horario: todo partido pendiente cuyo inicio ya pasó.
+  const { data: porHorario } = await supabase
+    .from('partidos')
+    .select('id')
+    .eq('estado', 'pendiente')
+    .lte('fecha_hora', ahora)
+
+  for (const p of porHorario ?? []) ids.add(p.id)
+
+  // 2) Complemento por API IN_PLAY/PAUSED: cubre partidos cuyo fecha_hora en
+  //    la DB no coincida con el kickoff real reportado por la API.
   const res = await fetchFootballData(
     'https://api.football-data.org/v4/competitions/WC/matches?status=IN_PLAY,PAUSED',
     apiKey
   )
-  if (!res || !res.ok) return 0
+  if (res && res.ok) {
+    const data = await res.json()
+    const partidosApi: Array<{ homeTeam: { name: string }; awayTeam: { name: string } }> =
+      data.matches ?? []
+    if (partidosApi.length) {
+      const { data: pendientes } = await supabase
+        .from('partidos')
+        .select('id, equipo_local, equipo_visitante')
+        .eq('estado', 'pendiente')
 
-  const data = await res.json()
-  const partidosApi: Array<{ homeTeam: { name: string }; awayTeam: { name: string } }> =
-    data.matches ?? []
-  if (!partidosApi.length) return 0
-
-  const { data: nuestrosPartidos } = await supabase
-    .from('partidos')
-    .select('id, equipo_local, equipo_visitante')
-    .eq('estado', 'pendiente')
-
-  if (!nuestrosPartidos?.length) return 0
-
-  let marcados = 0
-  for (const partido of partidosApi) {
-    const localEs = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
-    const visitanteEs = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
-
-    const nuestro = nuestrosPartidos.find(
-      (p) => p.equipo_local === localEs && p.equipo_visitante === visitanteEs
-    )
-    if (!nuestro) continue
-
-    const { error } = await supabase
-      .from('partidos')
-      .update({ estado: 'en_vivo' })
-      .eq('id', nuestro.id)
-
-    if (!error) marcados++
+      for (const partido of partidosApi) {
+        const localEs = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
+        const visitanteEs = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
+        const nuestro = (pendientes ?? []).find(
+          (p) => p.equipo_local === localEs && p.equipo_visitante === visitanteEs
+        )
+        if (nuestro) ids.add(nuestro.id)
+      }
+    }
   }
 
-  return marcados
+  if (!ids.size) return 0
+
+  // Escritura batch única (idempotente con el filtro estado='pendiente').
+  const { error, count } = await supabase
+    .from('partidos')
+    .update({ estado: 'en_vivo' }, { count: 'exact' })
+    .in('id', Array.from(ids))
+    .eq('estado', 'pendiente')
+
+  if (error) return 0
+  return count ?? 0
 }
 
 export async function syncResultadosFootballData(
