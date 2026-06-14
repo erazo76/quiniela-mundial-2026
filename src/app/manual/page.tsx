@@ -151,7 +151,7 @@ function ManualVIP() {
             </tr>
             <tr className="bg-green-50">
               <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">Ganador</td>
-              <td className="border border-slate-200 px-3 py-2">Acertaste quien gana o empate</td>
+              <td className="border border-slate-200 px-3 py-2">Acertaste quién gana, o que hay empate (aunque el marcador no sea exacto)</td>
               <td className="border border-slate-200 px-3 py-2 font-bold">1.5× lo apostado</td>
               <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">+0.5× la apuesta</td>
             </tr>
@@ -164,6 +164,14 @@ function ManualVIP() {
           </tbody>
         </table>
       </div>
+      <Recuadro titulo="Caso especial: predicción de empate" color="amber">
+        <P>Cuando predices un <strong>empate</strong> (mismo marcador para ambos equipos) hay dos formas de acertar:</P>
+        <ul className="list-disc list-inside space-y-1">
+          <Li><strong>Empate exacto</strong>: predijiste 1-1 y el partido termina 1-1 → cobras <strong>Exacto</strong> (3× lo apostado).</Li>
+          <Li><strong>Empate con otro marcador</strong>: predijiste 1-1 y el partido termina 0-0 o 2-2 → igual aciertas el empate y cobras <strong>Ganador</strong> (1.5× lo apostado).</Li>
+        </ul>
+        <P>Solo es <strong>Fallo</strong> si el partido <em>no</em> termina en empate (por ejemplo, predijiste 1-1 y ganó alguno de los equipos).</P>
+      </Recuadro>
 
       <H2 n={5}>Racha de oro</H2>
       <P>A partir del <strong>3er acierto consecutivo</strong> tus multiplicadores suben +0.5× automáticamente.</P>
@@ -359,7 +367,7 @@ function ManualJUNIOR() {
             </tr>
             <tr className="bg-green-50">
               <td className="border border-slate-200 px-3 py-2 font-bold text-green-700">Ganador / Empate</td>
-              <td className="border border-slate-200 px-3 py-2">Acertaste quien gana o si hay empate</td>
+              <td className="border border-slate-200 px-3 py-2">Acertaste quién gana, o que hay empate (aunque el marcador no sea exacto)</td>
               <td className="border border-slate-200 px-3 py-2 font-black text-green-700">+2 pts</td>
             </tr>
             <tr className="bg-red-50">
@@ -375,6 +383,14 @@ function ManualJUNIOR() {
           <Li>Predijiste 2-1, resultado 2-1 → <strong>+3 puntos</strong> (exacto)</Li>
           <Li>Predijiste 2-0, resultado 3-1 → <strong>+2 puntos</strong> (ganador correcto)</Li>
           <Li>Predijiste 1-0, resultado 0-1 → <strong>0 puntos</strong> (fallo)</Li>
+        </ul>
+      </Recuadro>
+      <Recuadro titulo="Caso especial: predicción de empate" color="amber">
+        <P>Cuando predices un <strong>empate</strong> (mismo marcador para ambos) hay dos formas de acertar:</P>
+        <ul className="list-disc list-inside space-y-1">
+          <Li><strong>Empate exacto</strong>: predijiste 1-1 y termina 1-1 → <strong>+3 puntos</strong>.</Li>
+          <Li><strong>Empate con otro marcador</strong>: predijiste 1-1 y termina 0-0 o 2-2 → igual aciertas el empate y sumas <strong>+2 puntos</strong>.</Li>
+          <Li>Solo es <strong>0 puntos</strong> si el partido <em>no</em> termina empatado (predijiste 1-1 y ganó alguno).</Li>
         </ul>
       </Recuadro>
       <Recuadro titulo="Sin penalidad por no predecir" color="slate">

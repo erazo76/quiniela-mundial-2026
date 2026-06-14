@@ -309,25 +309,31 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
           </p>
           <div className="flex justify-between">
             <span className="text-xs text-slate-400">
-              Resultado exacto {esEmpate ? '(empate)' : ''}
+              {esEmpate ? 'Empate exacto' : 'Resultado exacto'}
             </span>
             <span className="text-green-400 font-bold text-sm">
               {esJunior ? '+3 pts' : `+${gananciaExacto} fichas`}
             </span>
           </div>
-          {!esEmpate && (
-            <div className="flex justify-between">
-              <span className="text-xs text-slate-400">Ganador correcto</span>
-              <span className="text-yellow-400 font-bold text-sm">
-                {esJunior ? '+2 pts' : `+${gananciaGanador} fichas`}
-              </span>
-            </div>
-          )}
+          <div className="flex justify-between">
+            <span className="text-xs text-slate-400">
+              {esEmpate ? 'Empate con otro marcador' : 'Ganador correcto'}
+            </span>
+            <span className="text-yellow-400 font-bold text-sm">
+              {esJunior ? '+2 pts' : `+${gananciaGanador} fichas`}
+            </span>
+          </div>
           {esJunior && (
             <div className="flex justify-between">
               <span className="text-xs text-slate-400">Fallo</span>
               <span className="text-slate-500 font-bold text-sm">0 pts</span>
             </div>
+          )}
+          {esEmpate && (
+            <p className="text-[11px] text-slate-500 leading-snug mt-1 pt-2 border-t border-slate-800">
+              Predijiste un empate: si terminan iguales con <strong className="text-slate-400">tu marcador exacto</strong> ganas el máximo;
+              si terminan en empate pero con <strong className="text-slate-400">otro marcador</strong>, igual aciertas el empate.
+            </p>
           )}
         </div>
 

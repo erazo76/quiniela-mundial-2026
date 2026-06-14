@@ -33,7 +33,7 @@ const SLIDES_VIP: Slide[] = [
     image: '/ui/icon-multiplier.png',
     titulo: 'Los multiplicadores',
     descripcion:
-      'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado',
+      'Marcador exacto → ganas 3× lo apostado\nAciertas ganador o empate → ganas 1.5×\nFallas → pierdes lo apostado\n\nSi predices un empate: si aciertas el marcador exacto cobras 3×; si terminan empatados con otro marcador, igual aciertas el empate y cobras 1.5×.',
   },
   {
     image: '/ui/icon-coins5.png',
@@ -72,7 +72,7 @@ const SLIDES_JUNIOR: Slide[] = [
     image: '/ui/icon-multiplier.png',
     titulo: 'Cómo se suman los puntos',
     descripcion:
-      'Marcador exacto → +3 puntos\nAciertas ganador o empate correcto → +2 puntos\nFallas → 0 puntos\n\nNo se pierden puntos por no predecir — simplemente no sumas nada ese partido.',
+      'Marcador exacto → +3 puntos\nAciertas ganador o empate correcto → +2 puntos\nFallas → 0 puntos\n\nSi predices un empate: el marcador exacto suma +3; si terminan empatados con otro marcador, igual aciertas el empate y sumas +2.\n\nNo se pierden puntos por no predecir — simplemente no sumas nada ese partido.',
   },
   {
     image: '/ui/icon-compete.png',
