@@ -69,7 +69,32 @@ export async function GET(req: NextRequest) {
   const espectadores = entries.filter(e => e.es_espectador).sort((a, b) => b.fichas - a.fichas)
   const sorted = [...activos, ...espectadores]
 
-  const ranking = sorted.map((e, i) => ({ posicion: i + 1, ...e }))
+  // Medalla por puntaje (ranking denso): empate comparte ícono SOLO en oro y plata.
+  // El bronce se asigna a un único jugador (el primero del 3er grupo de puntaje).
+  const medallaPorId = new Map<string, number>()
+  {
+    let medalla = 0
+    let prevFichas: number | null = null
+    let bronceAsignado = false
+    for (const e of activos) {
+      if (prevFichas === null || e.fichas !== prevFichas) {
+        medalla += 1
+        prevFichas = e.fichas
+      }
+      if (medalla === 1 || medalla === 2) {
+        medallaPorId.set(e.id, medalla)          // oro y plata: compartido entre empatados
+      } else if (medalla === 3 && !bronceAsignado) {
+        medallaPorId.set(e.id, 3)                // bronce: solo el primero, sin compartir
+        bronceAsignado = true
+      }
+    }
+  }
+
+  const ranking = sorted.map((e, i) => ({
+    posicion: i + 1,
+    medalla: medallaPorId.get(e.id) ?? null,
+    ...e,
+  }))
 
   return NextResponse.json({ ranking, pote: liga?.pote_virtual ?? 0 })
 }

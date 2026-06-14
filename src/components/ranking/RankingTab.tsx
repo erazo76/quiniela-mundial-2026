@@ -25,6 +25,7 @@ const COLORES_FICHAS = ['text-yellow-400', 'text-slate-300', 'text-orange-400']
 
 interface EntradaRanking {
   posicion: number
+  medalla: number | null
   id: string
   nombre: string
   fichas: number
@@ -218,7 +219,7 @@ function FilaPodio({
   esJunior: boolean
   ligaId: string
 }) {
-  const idx = entrada.posicion - 1
+  const idx = (entrada.medalla ?? entrada.posicion) - 1
   const [abierto, setAbierto] = useState(false)
 
   return (
@@ -235,7 +236,7 @@ function FilaPodio({
           <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-700 bg-slate-800">
             <Image src={avatarSrc(getAvatarIndex(entrada.id, entrada.nombre))} alt={entrada.nombre} width={48} height={48} className="w-full h-full object-cover" />
           </div>
-          <Image src={MEDALLAS_IMG[idx]} alt={`${entrada.posicion}°`} width={22} height={22} unoptimized className="absolute -bottom-1 -right-1" />
+          <Image src={MEDALLAS_IMG[idx]} alt={`${entrada.medalla ?? entrada.posicion}°`} width={22} height={22} unoptimized className="absolute -bottom-1 -right-1" />
         </div>
         <p className="text-xs text-slate-400 font-semibold text-center truncate w-full">
           {entrada.nombre}
@@ -289,8 +290,8 @@ function FilaLista({
       >
         {esEspectador
           ? <span className="text-slate-600 font-bold w-5 text-center text-sm shrink-0">—</span>
-          : entrada.posicion <= 3
-          ? <Image src={MEDALLAS_IMG[entrada.posicion - 1]} alt={`${entrada.posicion}°`} width={22} height={22} unoptimized className="shrink-0" />
+          : entrada.medalla != null
+          ? <Image src={MEDALLAS_IMG[entrada.medalla - 1]} alt={`${entrada.medalla}°`} width={22} height={22} unoptimized className="shrink-0" />
           : <span className="text-slate-500 font-bold w-5 text-center text-sm shrink-0">{entrada.posicion}</span>
         }
         <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
@@ -368,8 +369,9 @@ export function RankingTab({ ligaId, usuarioId, ligaTipo }: Props) {
 
   const activos      = ranking.filter(e => !e.es_espectador)
   const espectadores = ranking.filter(e => e.es_espectador)
-  const podio = activos.slice(0, 3)
-  const resto = activos.slice(3)
+  // Podio = quienes tienen medalla (oro/plata pueden compartirse en empate)
+  const podio = activos.filter(e => e.medalla != null)
+  const resto = activos.filter(e => e.medalla == null)
 
   if (cargando) {
     return (
