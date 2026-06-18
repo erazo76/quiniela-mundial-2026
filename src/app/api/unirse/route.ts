@@ -33,6 +33,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado en esta liga' }, { status: 404 })
     }
 
+    // Bloqueado por el administrador: conserva su PIN y sus datos, pero no puede
+    // entrar hasta que el admin lo desbloquee.
+    if (usuario.bloqueado) {
+      return NextResponse.json(
+        { error: 'Tu acceso está bloqueado. Contacta al administrador de la liga.' },
+        { status: 403 }
+      )
+    }
+
     // Sin PIN aún (migración o primera vez con flujo nuevo): asignar PIN
     if (usuario.pin === null) {
       await supabase.from('usuarios').update({ pin: String(pin) }).eq('id', usuarioId)

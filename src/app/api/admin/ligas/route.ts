@@ -84,7 +84,8 @@ export async function GET(req: NextRequest) {
         fichas,
         racha,
         pin,
-        bono_usado
+        bono_usado,
+        bloqueado
       )
     `)
     .order('created_at', { ascending: false })
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
     pote_virtual: liga.pote_virtual ?? 0,
     cierre_inscripcion: liga.cierre_inscripcion ?? null,
     miembros: (liga.usuarios as Array<{
-      id: string; nombre: string; fichas: number; racha: number; pin: string | null; bono_usado: boolean
+      id: string; nombre: string; fichas: number; racha: number; pin: string | null; bono_usado: boolean; bloqueado: boolean
     }>).map((u) => ({
       id: u.id,
       nombre: u.nombre,
@@ -108,6 +109,7 @@ export async function GET(req: NextRequest) {
       racha: u.racha,
       tienePin: u.pin !== null,
       bono_usado: u.bono_usado,
+      bloqueado: u.bloqueado ?? false,
     })).sort((a, b) => b.fichas - a.fichas),
   }))
 

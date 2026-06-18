@@ -12,6 +12,7 @@ interface Miembro {
   racha: number
   tienePin: boolean
   bono_usado: boolean
+  bloqueado: boolean
 }
 
 interface PremioPote {
@@ -74,6 +75,32 @@ function FilaMiembro({
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
   const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
   const [eliminando, setEliminando] = useState(false)
+  const [bloqueado, setBloqueado] = useState(miembro.bloqueado)
+  const [bloqueando, setBloqueando] = useState(false)
+
+  async function alternarBloqueo() {
+    setBloqueando(true)
+    setMsg(null)
+    const nuevo = !bloqueado
+    try {
+      const res = await fetch('/api/admin/usuarios', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, usuarioId: miembro.id, bloqueado: nuevo }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setMsg({ texto: data.error ?? 'Error', ok: false })
+        return
+      }
+      setBloqueado(nuevo)
+      setMsg({ texto: nuevo ? 'Bloqueado' : 'Desbloqueado', ok: true })
+    } catch {
+      setMsg({ texto: 'Error de conexión', ok: false })
+    } finally {
+      setBloqueando(false)
+    }
+  }
 
   async function resetearPin() {
     setReseteando(true)
@@ -133,6 +160,9 @@ function FilaMiembro({
             {!miembro.tienePin && (
               <span className="text-xs text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md">Sin PIN</span>
             )}
+            {bloqueado && (
+              <span className="text-xs text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-md font-semibold">Bloqueado</span>
+            )}
             {miembro.bono_usado && (
               <span className="text-xs text-slate-600">bono usado</span>
             )}
@@ -166,6 +196,18 @@ function FilaMiembro({
           </div>
         ) : (
           <>
+            <button
+              onClick={alternarBloqueo}
+              disabled={bloqueando}
+              title={bloqueado ? 'Permitir el acceso de nuevo' : 'Bloquear el acceso (conserva su PIN)'}
+              className={`px-2.5 py-1 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold rounded-lg transition-colors ${
+                bloqueado
+                  ? 'bg-green-600 hover:bg-green-500 text-white'
+                  : 'bg-red-600/80 hover:bg-red-500 text-white'
+              }`}
+            >
+              {bloqueando ? '...' : bloqueado ? 'Desbloquear' : 'Bloquear'}
+            </button>
             <button
               onClick={resetearPin}
               disabled={reseteando || !miembro.tienePin}
