@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { procesarResultadoPartido } from './calcular-resultado'
+import { procesarResultadoPartido, reprocesarResultadoPartido } from './calcular-resultado'
 import { resolverTrasResultado } from './resolver-fase'
 
 const TEAM_MAP: Record<string, string> = {
@@ -243,9 +243,15 @@ async function marcarPartidosEnVivo(
   return count ?? 0
 }
 
+// Ventana para revalidar partidos ya finalizados contra la API: si la API
+// corrigió un marcador provisional (gol anulado por VAR, etc.) dentro de este
+// plazo, el cron lo detecta y re-scorea. Solo aplica a fase de grupos: en
+// eliminatorias los penales/ganador suelen cargarse a mano y no deben pisarse.
+const VENTANA_REVALIDACION_MS = 4 * 24 * 60 * 60 * 1000
+
 export async function syncResultadosFootballData(
   supabase: SupabaseClient
-): Promise<{ sincronizados: number; equiposActualizados?: number; enVivo?: number; mensaje?: string; errores?: string[] }> {
+): Promise<{ sincronizados: number; corregidos?: number; equiposActualizados?: number; enVivo?: number; mensaje?: string; errores?: string[] }> {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY
   if (!apiKey) return { sincronizados: 0, mensaje: 'FOOTBALL_DATA_API_KEY no configurado' }
 
@@ -308,13 +314,27 @@ export async function syncResultadosFootballData(
     }
   }
 
-  const { data: nuestrosPartidos, error: errDB } = await supabase
+  // Candidatos: pendientes/en_vivo (para finalizar) + finalizados RECIENTES de
+  // grupos (para revalidar por si la API corrigió un marcador provisional).
+  const desdeRevalidacion = new Date(Date.now() - VENTANA_REVALIDACION_MS).toISOString()
+
+  const { data: pendientes, error: errDB } = await supabase
     .from('partidos')
-    .select('id, equipo_local, equipo_visitante, estado')
+    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante')
     .in('estado', ['pendiente', 'en_vivo'])
 
   if (errDB) throw new Error(errDB.message)
-  if (!nuestrosPartidos?.length) {
+
+  const { data: finalizadosRecientes } = await supabase
+    .from('partidos')
+    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante')
+    .eq('estado', 'finalizado')
+    .eq('fase', 'grupos')
+    .gte('fecha_hora', desdeRevalidacion)
+
+  const nuestrosPartidos = [...(pendientes ?? []), ...(finalizadosRecientes ?? [])]
+
+  if (!nuestrosPartidos.length) {
     return {
       sincronizados: 0,
       equiposActualizados: equiposActualizados || undefined,
@@ -324,6 +344,7 @@ export async function syncResultadosFootballData(
   }
 
   let sincronizados = 0
+  let corregidos = 0
   const errores: string[] = []
 
   for (const partido of partidosApi) {
@@ -346,6 +367,53 @@ export async function syncResultadosFootballData(
     const totalLocal = ftLocal + (penLocal ?? 0)
     const totalVisitante = ftVisitante + (penVisitante ?? 0)
 
+    // ── Revalidación de un partido YA finalizado ──────────────────────────────
+    if (nuestroPartido.estado === 'finalizado') {
+      // Sin cambios respecto a lo guardado → nada que hacer.
+      if (
+        nuestroPartido.resultado_local === totalLocal &&
+        nuestroPartido.resultado_visitante === totalVisitante
+      ) {
+        continue
+      }
+
+      const updateFin: Record<string, unknown> = {
+        resultado_local: totalLocal,
+        resultado_visitante: totalVisitante,
+      }
+      if (penLocal != null) {
+        updateFin.penales_local = penLocal
+        updateFin.penales_visitante = penVisitante
+      }
+
+      const { error: errUpd } = await supabase
+        .from('partidos')
+        .update(updateFin)
+        .eq('id', nuestroPartido.id)
+      if (errUpd) {
+        errores.push(`Revalidar ${localMapeado} vs ${visitanteMapeado}: ${errUpd.message}`)
+        continue
+      }
+
+      const { error: errRe } = await reprocesarResultadoPartido(
+        supabase,
+        nuestroPartido.id,
+        totalLocal,
+        totalVisitante,
+        localMapeado,
+        visitanteMapeado
+      )
+      if (errRe) {
+        errores.push(`Reproceso ${localMapeado} vs ${visitanteMapeado}: ${errRe}`)
+        continue
+      }
+
+      await resolverTrasResultado(supabase, nuestroPartido.id)
+      corregidos++
+      continue
+    }
+
+    // ── Finalización normal (pendiente/en_vivo → finalizado) ───────────────────
     const updatePartido: Record<string, unknown> = {
       resultado_local: totalLocal,
       resultado_visitante: totalVisitante,
@@ -370,7 +438,9 @@ export async function syncResultadosFootballData(
       supabase,
       nuestroPartido.id,
       totalLocal,
-      totalVisitante
+      totalVisitante,
+      localMapeado,
+      visitanteMapeado
     )
 
     if (errCalculo) {
@@ -385,6 +455,7 @@ export async function syncResultadosFootballData(
 
   return {
     sincronizados,
+    corregidos: corregidos || undefined,
     equiposActualizados: equiposActualizados || undefined,
     enVivo: enVivo || undefined,
     errores: errores.length ? errores : undefined,

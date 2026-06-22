@@ -224,3 +224,232 @@ export async function procesarResultadoPartido(
 
   return { procesadas: (predicciones ?? []).length }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REPROCESO IDEMPOTENTE
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Recalcula un partido YA finalizado cuando su marcador cambia (p. ej. la API
+// corrigió un marcador provisional/erróneo). A diferencia de procesarResultado-
+// Partido, NO suma desde cero: ajusta las fichas de cada predictor por el DELTA
+// entre la ganancia anterior (guardada en predicciones.ganancia_fichas) y la
+// nueva. Por eso es idempotente: correrlo de nuevo con el mismo marcador no
+// cambia nada.
+//
+// Lo que NO se toca aquí (porque NO depende del marcador):
+//   - Penalidad por omisión: el conjunto de quienes no predijeron y el castigo
+//     fijo (−10) son invariantes ante un cambio de marcador.
+//   - Reset de racha por omisión: idem.
+// Solo se reprocesan las predicciones EXISTENTES del partido.
+//
+// Limitación conocida (solo MASTER): si una corrección cambia `acertado` de una
+// predicción master que tiene partidos posteriores ya scoreados, el bonus de
+// "racha de oro" (+0.5×) de esos partidos futuros no se recalcula. La racha en
+// sí se recomputa correctamente; el caso es extremadamente raro.
+export async function reprocesarResultadoPartido(
+  supabase: SupabaseClient,
+  partidoId: string,
+  resultadoLocal: number,
+  resultadoVisitante: number,
+  equipoLocal = 'Local',
+  equipoVisitante = 'Visitante'
+): Promise<{ procesadas: number; corregidas: number; error?: string }> {
+  const { data: predicciones, error: errPred } = await supabase
+    .from('predicciones')
+    .select(
+      'id, usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas, ganancia_fichas, tipo_acierto, acertado'
+    )
+    .eq('partido_id', partidoId)
+
+  if (errPred) return { procesadas: 0, corregidas: 0, error: errPred.message }
+  if (!predicciones?.length) return { procesadas: 0, corregidas: 0 }
+
+  const userIds = [...new Set(predicciones.map((p) => p.usuario_id))]
+
+  const { data: usuarios, error: errU } = await supabase
+    .from('usuarios')
+    .select('id, fichas, racha, liga_id, created_at')
+    .in('id', userIds)
+  if (errU) return { procesadas: 0, corregidas: 0, error: errU.message }
+
+  const { data: ligas } = await supabase.from('ligas').select('id, tipo')
+  const ligaTipoMap = new Map((ligas ?? []).map((l) => [l.id, l.tipo as string]))
+  const userMap = new Map((usuarios ?? []).map((u) => [u.id, { ...u }]))
+
+  // Nuevo acierto/tipo por predicción — depende solo del marcador.
+  const calc = new Map(
+    predicciones.map((p) => [
+      p.id,
+      determinarAcierto(p.goles_local, p.goles_visitante, resultadoLocal, resultadoVisitante),
+    ])
+  )
+
+  // Predictores MASTER: solo para ellos hace falta reconstruir la racha
+  // (los junior no tienen racha ni multiplicador).
+  const masterUserIds = userIds.filter((id) => {
+    const u = userMap.get(id)
+    return u && ligaTipoMap.get(u.liga_id) !== 'junior'
+  })
+
+  let rachaBeforeMap = new Map<string, number>()
+  let rachaFinalMap = new Map<string, number>()
+  if (masterUserIds.length) {
+    const overrideAcertado = new Map(
+      predicciones
+        .filter((p) => masterUserIds.includes(p.usuario_id))
+        .map((p) => [p.usuario_id, calc.get(p.id)!.acertado])
+    )
+    ;({ rachaBeforeMap, rachaFinalMap } = await replayRachaMaster(
+      supabase,
+      masterUserIds,
+      partidoId,
+      overrideAcertado
+    ))
+  }
+
+  const updatesPred: Array<Record<string, unknown>> = []
+  const historial: Array<{
+    usuario_id: string
+    tipo: string
+    cantidad: number
+    descripcion: string
+  }> = []
+
+  for (const pred of predicciones) {
+    const { tipo, acertado, multiplicador } = calc.get(pred.id)!
+    const u = userMap.get(pred.usuario_id)
+    const esJunior = u ? ligaTipoMap.get(u.liga_id) === 'junior' : false
+
+    let nuevaGanancia: number
+    if (esJunior) {
+      nuevaGanancia = tipo === 'exacto' ? 3 : tipo === 'ganador' ? 2 : 0
+    } else {
+      const rachaBefore = rachaBeforeMap.get(pred.usuario_id) ?? 0
+      const enRacha = acertado && rachaBefore >= 2
+      nuevaGanancia = Math.floor(
+        pred.fichas_apostadas * (enRacha ? multiplicador + 0.5 : multiplicador)
+      )
+    }
+
+    const delta = nuevaGanancia - (pred.ganancia_fichas ?? 0)
+
+    if (delta !== 0 || tipo !== pred.tipo_acierto || acertado !== pred.acertado) {
+      updatesPred.push({
+        id: pred.id,
+        usuario_id: pred.usuario_id,
+        partido_id: pred.partido_id,
+        goles_local: pred.goles_local,
+        goles_visitante: pred.goles_visitante,
+        fichas_apostadas: pred.fichas_apostadas,
+        ganancia_fichas: nuevaGanancia,
+        tipo_acierto: tipo,
+        acertado,
+      })
+    }
+
+    if (u && delta !== 0) {
+      u.fichas += delta
+      historial.push({
+        usuario_id: u.id,
+        tipo: 'correccion',
+        cantidad: delta,
+        descripcion: `Corrección ${equipoLocal} vs ${equipoVisitante} · ${resultadoLocal}-${resultadoVisitante} (${delta > 0 ? '+' : ''}${delta})`,
+      })
+    }
+  }
+
+  // Racha final recomputada (solo masters)
+  for (const id of masterUserIds) {
+    const u = userMap.get(id)
+    const nr = rachaFinalMap.get(id)
+    if (u && nr != null) u.racha = nr
+  }
+
+  if (updatesPred.length) {
+    const { error } = await supabase.from('predicciones').upsert(updatesPred)
+    if (error) return { procesadas: 0, corregidas: 0, error: error.message }
+  }
+
+  // Actualizar solo fichas/racha de los usuarios involucrados (set acotado).
+  const userUpdates = [...userMap.values()].map((u) => ({
+    id: u.id,
+    fichas: u.fichas,
+    racha: u.racha,
+  }))
+  if (userUpdates.length) {
+    const { error } = await supabase.from('usuarios').upsert(userUpdates)
+    if (error) return { procesadas: 0, corregidas: 0, error: error.message }
+  }
+
+  if (historial.length) {
+    await supabase.from('historial_fichas').insert(historial)
+  }
+
+  return { procesadas: predicciones.length, corregidas: updatesPred.length }
+}
+
+// Reconstruye la racha de jugadores MASTER replayando todos los partidos
+// finalizados en orden cronológico. Devuelve, por usuario, la racha JUSTO ANTES
+// del partido objetivo (para decidir el bonus de racha de oro al recalcularlo) y
+// la racha FINAL (tras aplicar el nuevo `acertado` del partido objetivo).
+async function replayRachaMaster(
+  supabase: SupabaseClient,
+  masterUserIds: string[],
+  targetPartidoId: string,
+  overrideAcertado: Map<string, boolean>
+): Promise<{ rachaBeforeMap: Map<string, number>; rachaFinalMap: Map<string, number> }> {
+  const { data: matches } = await supabase
+    .from('partidos')
+    .select('id, fecha_hora')
+    .eq('estado', 'finalizado')
+    .order('fecha_hora', { ascending: true })
+
+  const { data: preds } = await supabase
+    .from('predicciones')
+    .select('usuario_id, partido_id, acertado')
+    .in('usuario_id', masterUserIds)
+
+  const { data: usuarios } = await supabase
+    .from('usuarios')
+    .select('id, created_at')
+    .in('id', masterUserIds)
+
+  const createdMap = new Map((usuarios ?? []).map((u) => [u.id, u.created_at]))
+  const predByUserMatch = new Map(
+    (preds ?? []).map((p) => [`${p.usuario_id}:${p.partido_id}`, p.acertado as boolean])
+  )
+
+  const rachaBeforeMap = new Map<string, number>()
+  const rachaFinalMap = new Map<string, number>()
+
+  for (const uid of masterUserIds) {
+    let racha = 0
+    const created = createdMap.get(uid)
+
+    for (const m of matches ?? []) {
+      if (m.id === targetPartidoId) rachaBeforeMap.set(uid, racha)
+
+      const key = `${uid}:${m.id}`
+      let acert: boolean | undefined
+      if (m.id === targetPartidoId && overrideAcertado.has(uid)) {
+        acert = overrideAcertado.get(uid)
+      } else if (predByUserMatch.has(key)) {
+        acert = predByUserMatch.get(key)
+      }
+
+      if (acert === undefined) {
+        // Omisión: rompe la racha, salvo inscripción tardía (no pudo predecir).
+        const limite = new Date(new Date(m.fecha_hora).getTime() - 5 * 60 * 1000)
+        if (created && new Date(created) >= limite) continue
+        racha = 0
+      } else {
+        racha = acert ? racha + 1 : 0
+      }
+    }
+
+    rachaFinalMap.set(uid, racha)
+    if (!rachaBeforeMap.has(uid)) rachaBeforeMap.set(uid, racha)
+  }
+
+  return { rachaBeforeMap, rachaFinalMap }
+}
