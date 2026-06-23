@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     { data: usuarios, error: errUsuarios },
     { count: totalFinalizados },
   ] = await Promise.all([
-    supabase.from('ligas').select('pote_virtual').eq('id', ligaId).single(),
+    supabase.from('ligas').select('pote_virtual, tipo').eq('id', ligaId).single(),
     supabase.from('usuarios').select('id, nombre, fichas, racha, bono_usado').eq('liga_id', ligaId),
     supabase.from('partidos').select('id', { count: 'exact', head: true }).eq('estado', 'finalizado'),
   ])
@@ -43,10 +43,15 @@ export async function GET(req: NextRequest) {
     statsMap.set(p.usuario_id, s)
   }
 
-  // Mínimo de predicciones requeridas para no ser espectador
-  const minPredRequeridas = partidos_finalizados >= MIN_PARTIDOS_EVALUAR
+  // Mínimo de predicciones requeridas para no ser espectador.
+  // Solo aplica en MASTER: ahí el saldo de fichas puede dejar a un "sentado"
+  // (que nunca arriesga) por encima de los activos → el gate lo saca del podio.
+  // En JUNIOR el puntaje es aditivo y sin penalidad: el de baja participación
+  // se va al fondo por sí solo, así que el gate solo etiquetaría injustamente.
+  const esJunior = liga?.tipo === 'junior'
+  const minPredRequeridas = !esJunior && partidos_finalizados >= MIN_PARTIDOS_EVALUAR
     ? Math.max(1, Math.floor(partidos_finalizados * MIN_PARTICIPACION_PCT))
-    : 0 // aún no hay suficientes partidos para evaluar
+    : 0 // junior, o aún no hay suficientes partidos para evaluar
 
   const entries = usuarios.map((u) => {
     const stats = statsMap.get(u.id) ?? { total: 0, acertadas: 0 }
