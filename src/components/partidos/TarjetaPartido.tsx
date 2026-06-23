@@ -162,7 +162,7 @@ function PrediccionesPanel({
             </div>
           ) : bloqueado ? (
             <p className="text-[11px] text-slate-500 text-center py-2 px-2 leading-relaxed">
-              🔒 Predice este partido para ver las predicciones del grupo
+              🔒 Las predicciones del grupo se revelan 5 min antes del partido, cuando ya nadie puede editar
               {total > 0 && (
                 <span className="block text-slate-600 mt-0.5">
                   {total} {total === 1 ? 'participante ya predijo' : 'participantes ya predijeron'}

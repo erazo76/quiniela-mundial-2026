@@ -4,7 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export async function GET(req: NextRequest) {
   const partidoId = req.nextUrl.searchParams.get('partido_id')
   const ligaId    = req.nextUrl.searchParams.get('liga_id')
-  const usuarioId = req.nextUrl.searchParams.get('usuario_id')
   if (!partidoId || !ligaId) {
     return NextResponse.json({ error: 'partido_id y liga_id requeridos' }, { status: 400 })
   }
@@ -47,12 +46,13 @@ export async function GET(req: NextRequest) {
   if (errP) return NextResponse.json({ error: errP.message }, { status: 500 })
 
   const todas = predicciones ?? []
-  const yoPredije = !!usuarioId && todas.some((p) => p.usuario_id === usuarioId)
 
-  // Mientras la ventana siga abierta y el usuario no haya predicho, se ocultan
-  // las predicciones ajenas para evitar la copia. Una vez que predijo (o cuando
-  // cierra la ventana) hay transparencia total.
-  const bloqueado = ventanaAbierta && !yoPredije
+  // Las predicciones ajenas se revelan SOLO cuando ya nadie puede editar: al
+  // cerrarse la ventana (5 min antes del partido) o si el partido ya arrancó.
+  // No alcanza con haber predicho — eso permitía poner cualquier marcador,
+  // espiar al resto y editar antes del cierre (estrategia de copia). El reveal
+  // coincide exactamente con el cierre de edición: sobre cerrado para todos.
+  const bloqueado = ventanaAbierta
 
   const visibles = bloqueado ? [] : todas
 
