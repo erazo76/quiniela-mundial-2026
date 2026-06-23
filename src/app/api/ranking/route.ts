@@ -28,19 +28,30 @@ export async function GET(req: NextRequest) {
   const partidos_finalizados = totalFinalizados ?? 0
   const ids = usuarios.map((u) => u.id)
 
-  const { data: predicciones, error: errPred } = await supabase
-    .from('predicciones')
-    .select('usuario_id, acertado')
-    .in('usuario_id', ids)
-
-  if (errPred) return NextResponse.json({ error: errPred.message }, { status: 500 })
-
+  // Conteo de predicciones por usuario. Se pagina en lotes porque PostgREST
+  // corta en 1000 filas por defecto: en una liga grande (muchos usuarios ×
+  // muchos partidos) el total supera ese tope y la consulta global devolvía
+  // solo las primeras 1000, dejando a los usuarios de la cola en 0 predicciones
+  // (apareciendo como espectadores) pese a tener predicciones reales.
   const statsMap = new Map<string, { total: number; acertadas: number }>()
-  for (const p of predicciones ?? []) {
-    const s = statsMap.get(p.usuario_id) ?? { total: 0, acertadas: 0 }
-    s.total += 1
-    if (p.acertado) s.acertadas += 1
-    statsMap.set(p.usuario_id, s)
+  const PAGE = 1000
+  for (let from = 0; ; from += PAGE) {
+    const { data: page, error: errPred } = await supabase
+      .from('predicciones')
+      .select('usuario_id, acertado')
+      .in('usuario_id', ids)
+      .range(from, from + PAGE - 1)
+
+    if (errPred) return NextResponse.json({ error: errPred.message }, { status: 500 })
+
+    for (const p of page ?? []) {
+      const s = statsMap.get(p.usuario_id) ?? { total: 0, acertadas: 0 }
+      s.total += 1
+      if (p.acertado) s.acertadas += 1
+      statsMap.set(p.usuario_id, s)
+    }
+
+    if (!page || page.length < PAGE) break
   }
 
   // Mínimo de predicciones requeridas para no ser espectador.
