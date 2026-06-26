@@ -47,13 +47,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
   }
 
-  // Determinar tipo de liga
-  const { data: ligaData } = await supabase
+  // Determinar tipo de liga.
+  // IMPORTANTE: si esta lectura falla no podemos asumir VIP, porque un Junior
+  // caería al flujo de apuestas y se le descontarían fichas indebidamente
+  // (bug real: a un Junior se le restaron 10 fichas por un fallo transitorio aquí).
+  const { data: ligaData, error: errorLiga } = await supabase
     .from('ligas')
     .select('tipo, pote_virtual')
     .eq('id', usuario.liga_id)
     .single()
-  const esJunior = ligaData?.tipo === 'junior'
+  if (errorLiga || !ligaData) {
+    return NextResponse.json({ error: 'No se pudo verificar la liga, intenta de nuevo' }, { status: 503 })
+  }
+  const esJunior = ligaData.tipo === 'junior'
 
   // ── Modo JUNIOR: sin fichas, solo guardamos la predicción con fichas_apostadas=1 ──
   if (esJunior) {
