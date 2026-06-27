@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   // En fases eliminatorias no hay empates: la predicción debe tener un ganador.
   if (partido.fase !== 'grupos' && goles_local === goles_visitante) {
     return NextResponse.json(
-      { error: 'En fases eliminatorias debés elegir un ganador: no se permite el empate' },
+      { error: 'En fases eliminatorias debes elegir un ganador: no se permite el empate' },
       { status: 400 }
     )
   }

@@ -176,7 +176,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
 
   async function handleGuardar() {
     if (empateBloqueado) {
-      setError('En fases eliminatorias debés elegir un ganador: no se permite el empate.')
+      setError('En fases eliminatorias debes elegir un ganador: no se permite el empate.')
       return
     }
     setGuardando(true)
@@ -348,7 +348,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
           <div className="flex items-start gap-2.5 bg-red-950/50 border border-red-900/50 rounded-xl px-3 py-3">
             <span className="text-red-400 text-base leading-none mt-px shrink-0">!</span>
             <p className="text-sm text-red-300 leading-snug">
-              En fases eliminatorias no hay empates: elegí un <strong>ganador</strong> ajustando el marcador.
+              En fases eliminatorias no hay empates: elige un <strong>ganador</strong> ajustando el marcador.
             </p>
           </div>
         )}
@@ -366,7 +366,7 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
           disabled={guardando || empateBloqueado}
           className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black uppercase tracking-wide py-4 rounded-2xl transition-colors"
         >
-          {guardando ? 'Guardando...' : empateBloqueado ? 'Elegí un ganador' : prediccionExistente ? 'Actualizar predicción' : 'Confirmar predicción'}
+          {guardando ? 'Guardando...' : empateBloqueado ? 'Elige un ganador' : prediccionExistente ? 'Actualizar predicción' : 'Confirmar predicción'}
         </button>
         </div>
       </div>
