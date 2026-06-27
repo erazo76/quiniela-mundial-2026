@@ -6,7 +6,11 @@ function determinarAcierto(
   predLocal: number,
   predVisit: number,
   resLocal: number,
-  resVisit: number
+  resVisit: number,
+  // En eliminatorias el ganador real es quien AVANZA (incluye penales). Cuando se
+  // provee, manda sobre la comparación de goles: así un partido que terminó igualado
+  // en regulación y se definió por penales acredita "ganador" al lado correcto.
+  ganadorRealSide?: 'local' | 'visitante'
 ): { tipo: string; acertado: boolean; multiplicador: number } {
   if (predLocal === resLocal && predVisit === resVisit) {
     return { tipo: 'exacto', acertado: true, multiplicador: 3 }
@@ -14,11 +18,25 @@ function determinarAcierto(
   const ganadorPred =
     predLocal > predVisit ? 'local' : predVisit > predLocal ? 'visitante' : 'empate'
   const ganadorReal =
-    resLocal > resVisit ? 'local' : resVisit > resLocal ? 'visitante' : 'empate'
-  if (ganadorPred === ganadorReal) {
+    ganadorRealSide ??
+    (resLocal > resVisit ? 'local' : resVisit > resLocal ? 'visitante' : 'empate')
+  // Una predicción de empate nunca acierta "ganador" (en eliminatoria no se permite).
+  if (ganadorPred !== 'empate' && ganadorPred === ganadorReal) {
     return { tipo: 'ganador', acertado: true, multiplicador: 1.5 }
   }
   return { tipo: 'fallo', acertado: false, multiplicador: 0 }
+}
+
+// Deriva el lado ganador a partir del nombre del equipo que avanzó (columna `ganador`).
+function ladoGanador(
+  ganador: string | null | undefined,
+  equipoLocal: string,
+  equipoVisitante: string
+): 'local' | 'visitante' | undefined {
+  if (!ganador) return undefined
+  if (ganador === equipoLocal) return 'local'
+  if (ganador === equipoVisitante) return 'visitante'
+  return undefined
 }
 
 export async function procesarResultadoPartido(
@@ -42,12 +60,15 @@ export async function procesarResultadoPartido(
   // estaba cerrado (nunca tuvieron oportunidad de predecir).
   const { data: partidoMeta } = await supabase
     .from('partidos')
-    .select('fecha_hora')
+    .select('fecha_hora, ganador')
     .eq('id', partidoId)
     .maybeSingle()
   const limitePrediccion = partidoMeta?.fecha_hora
     ? new Date(new Date(partidoMeta.fecha_hora).getTime() - 5 * 60 * 1000)
     : null
+  // Lado ganador real (quien avanza). En eliminatoria acredita "ganador" aunque
+  // el marcador de regulación haya quedado igualado y se defina por penales.
+  const ganadorSide = ladoGanador(partidoMeta?.ganador, equipoLocal, equipoVisitante)
 
   // Fetch ALL users — needed to apply penalty to non-predictors
   const { data: todosUsuarios, error: errUsers } = await supabase
@@ -89,7 +110,8 @@ export async function procesarResultadoPartido(
       pred.goles_local,
       pred.goles_visitante,
       resultadoLocal,
-      resultadoVisitante
+      resultadoVisitante,
+      ganadorSide
     )
 
     const usuario = usuariosMap.get(pred.usuario_id)
@@ -276,11 +298,19 @@ export async function reprocesarResultadoPartido(
   const ligaTipoMap = new Map((ligas ?? []).map((l) => [l.id, l.tipo as string]))
   const userMap = new Map((usuarios ?? []).map((u) => [u.id, { ...u }]))
 
-  // Nuevo acierto/tipo por predicción — depende solo del marcador.
+  // Lado ganador real (quien avanza) para acreditar "ganador" en eliminatoria.
+  const { data: partidoMeta } = await supabase
+    .from('partidos')
+    .select('ganador')
+    .eq('id', partidoId)
+    .maybeSingle()
+  const ganadorSide = ladoGanador(partidoMeta?.ganador, equipoLocal, equipoVisitante)
+
+  // Nuevo acierto/tipo por predicción — depende del marcador y de quién avanzó.
   const calc = new Map(
     predicciones.map((p) => [
       p.id,
-      determinarAcierto(p.goles_local, p.goles_visitante, resultadoLocal, resultadoVisitante),
+      determinarAcierto(p.goles_local, p.goles_visitante, resultadoLocal, resultadoVisitante, ganadorSide),
     ])
   )
 

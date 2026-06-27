@@ -169,10 +169,16 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
   }, [])
 
   const esEmpate = golesLocal === golesVisitante
+  const esEliminatoria = partido.fase !== 'grupos'
+  const empateBloqueado = esEliminatoria && esEmpate
   const gananciaExacto = fichasApostadas * 3
   const gananciaGanador = Math.floor(fichasApostadas * 1.5)
 
   async function handleGuardar() {
+    if (empateBloqueado) {
+      setError('En fases eliminatorias debés elegir un ganador: no se permite el empate.')
+      return
+    }
     setGuardando(true)
     setError(null)
     try {
@@ -329,13 +335,23 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
               <span className="text-slate-500 font-bold text-sm">0 pts</span>
             </div>
           )}
-          {esEmpate && (
+          {esEmpate && !esEliminatoria && (
             <p className="text-[11px] text-slate-500 leading-snug mt-1 pt-2 border-t border-slate-800">
               Predijiste un empate: si terminan iguales con <strong className="text-slate-400">tu marcador exacto</strong> ganas el máximo;
               si terminan en empate pero con <strong className="text-slate-400">otro marcador</strong>, igual aciertas el empate.
             </p>
           )}
         </div>
+
+        {/* Empate no permitido en eliminatorias */}
+        {empateBloqueado && (
+          <div className="flex items-start gap-2.5 bg-red-950/50 border border-red-900/50 rounded-xl px-3 py-3">
+            <span className="text-red-400 text-base leading-none mt-px shrink-0">!</span>
+            <p className="text-sm text-red-300 leading-snug">
+              En fases eliminatorias no hay empates: elegí un <strong>ganador</strong> ajustando el marcador.
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="flex items-start gap-2.5 bg-red-950/50 border border-red-900/50 rounded-xl px-3 py-3">
@@ -347,10 +363,10 @@ export function ModalPrediccion({ partido, prediccionExistente, fichas, ligaTipo
         {/* Confirmar */}
         <button
           onClick={handleGuardar}
-          disabled={guardando}
-          className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-black uppercase tracking-wide py-4 rounded-2xl transition-colors"
+          disabled={guardando || empateBloqueado}
+          className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black uppercase tracking-wide py-4 rounded-2xl transition-colors"
         >
-          {guardando ? 'Guardando...' : prediccionExistente ? 'Actualizar predicción' : 'Confirmar predicción'}
+          {guardando ? 'Guardando...' : empateBloqueado ? 'Elegí un ganador' : prediccionExistente ? 'Actualizar predicción' : 'Confirmar predicción'}
         </button>
         </div>
       </div>

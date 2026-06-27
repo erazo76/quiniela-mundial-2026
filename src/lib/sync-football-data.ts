@@ -59,16 +59,6 @@ const TEAM_MAP: Record<string, string> = {
   'Congo DR': 'República Democrática del Congo',
 }
 
-// Mapeo de etapas de la API → fases en nuestra DB
-const FASE_MAP: Record<string, string> = {
-  LAST_32: 'dieciseisavos',
-  LAST_16: 'octavos',
-  QUARTER_FINALS: 'cuartos',
-  SEMI_FINALS: 'semis',
-  THIRD_PLACE: 'tercer_puesto',
-  FINAL: 'final',
-}
-
 // fetch a football-data.org con reintentos ante fallos de red transitorios.
 // La API gratuita se cae/limita seguido desde IPs de Vercel y lanza
 // "TypeError: fetch failed"; sin esto un blip aborta toda la sincronización.
@@ -87,99 +77,14 @@ async function fetchFootballData(
   return null
 }
 
-// Palabras que indican equipo TBD en la API
-const TBD_WORDS = ['yet', 'winner', 'loser', 'tbd', 'tba']
-function esTBD(nombre: string | null | undefined): boolean {
-  if (!nombre) return true
-  const lower = nombre.toLowerCase()
-  return TBD_WORDS.some((w) => lower.includes(w))
-}
-
-async function syncEquiposEliminatorias(
-  supabase: SupabaseClient,
-  apiKey: string
-): Promise<number> {
-  // Obtener banderas desde la DB para mapear nombre → URL
-  const { data: infoEquipos } = await supabase
-    .from('info_equipos')
-    .select('nombre_pais, bandera_url')
-
-  const banderaMap = new Map(
-    (infoEquipos ?? []).map((e: { nombre_pais: string; bandera_url: string }) => [
-      e.nombre_pais,
-      e.bandera_url,
-    ])
-  )
-
-  // Obtener partidos SCHEDULED/TIMED de eliminatorias desde la API
-  const res = await fetchFootballData(
-    'https://api.football-data.org/v4/competitions/WC/matches?status=SCHEDULED,TIMED',
-    apiKey
-  )
-  if (!res || !res.ok) return 0
-
-  const data = await res.json()
-  const partidosApi: Array<{
-    homeTeam: { name: string }
-    awayTeam: { name: string }
-    utcDate: string
-    stage: string
-  }> = (data.matches ?? []).filter(
-    (m: { stage: string }) => m.stage !== 'GROUP_STAGE' && FASE_MAP[m.stage]
-  )
-
-  if (!partidosApi.length) return 0
-
-  // Obtener nuestros partidos pendientes de fases eliminatorias
-  const fasesElim = Object.values(FASE_MAP)
-  const { data: nuestrosPartidos } = await supabase
-    .from('partidos')
-    .select('id, equipo_local, equipo_visitante, fase, fecha_hora')
-    .in('fase', fasesElim)
-    .in('estado', ['pendiente', 'en_vivo'])
-
-  if (!nuestrosPartidos?.length) return 0
-
-  let actualizados = 0
-
-  for (const partido of partidosApi) {
-    const localApi = partido.homeTeam.name
-    const visitanteApi = partido.awayTeam.name
-
-    // Saltar si alguno es TBD
-    if (esTBD(localApi) || esTBD(visitanteApi)) continue
-
-    const localEs = TEAM_MAP[localApi] ?? localApi
-    const visitanteEs = TEAM_MAP[visitanteApi] ?? visitanteApi
-    const fase = FASE_MAP[partido.stage]
-    const fechaApi = partido.utcDate.split('T')[0]
-
-    // Buscar nuestro partido por fecha y fase
-    const nuestro = nuestrosPartidos.find((p) => {
-      const fechaDB = p.fecha_hora.split('T')[0]
-      return fechaDB === fechaApi && p.fase === fase
-    })
-
-    if (!nuestro) continue
-
-    // Solo actualizar si los equipos cambiaron
-    if (nuestro.equipo_local === localEs && nuestro.equipo_visitante === visitanteEs) continue
-
-    const { error } = await supabase
-      .from('partidos')
-      .update({
-        equipo_local: localEs,
-        equipo_visitante: visitanteEs,
-        bandera_local: banderaMap.get(localEs) ?? null,
-        bandera_visitante: banderaMap.get(visitanteEs) ?? null,
-      })
-      .eq('id', nuestro.id)
-
-    if (!error) actualizados++
-  }
-
-  return actualizados
-}
+// NOTA: se eliminó `syncEquiposEliminatorias`. Llenaba los equipos de eliminatorias
+// copiándolos del API football-data, pero hacía match contra nuestras filas SOLO por
+// fecha+fase; como hay 2-3 partidos por día, el `.find()` siempre devolvía la primera
+// fila de esa fecha y varios cruces del API se escribían sobre la MISMA fila,
+// pisándose y dejando equipos duplicados/desubicados. Además el API trae los cruces
+// del Mundial real, inconsistentes con el bracket que surge de NUESTROS grupos. El
+// bracket es responsabilidad exclusiva de `resolver-fase.ts` (única fuente de verdad).
+// Aquí solo se sincronizan RESULTADOS, nunca asignaciones de equipos del bracket.
 
 // Marca como "en_vivo" los partidos pendientes cuyo kickoff ya pasó, sin
 // depender del estado IN_PLAY de la API (el plan gratuito de football-data
@@ -255,14 +160,9 @@ export async function syncResultadosFootballData(
   const apiKey = process.env.FOOTBALL_DATA_API_KEY
   if (!apiKey) return { sincronizados: 0, mensaje: 'FOOTBALL_DATA_API_KEY no configurado' }
 
-  // Actualizar equipos en rondas eliminatorias. Su fallo NO debe abortar la
-  // sincronización de resultados: lo aislamos en su propio try/catch.
-  let equiposActualizados = 0
-  try {
-    equiposActualizados = await syncEquiposEliminatorias(supabase, apiKey)
-  } catch {
-    equiposActualizados = 0
-  }
+  // El bracket de eliminatorias lo arma `resolver-fase.ts` desde nuestros resultados;
+  // este sync NO debe tocar las asignaciones de equipos (ver nota arriba).
+  const equiposActualizados = 0
 
   // Marcar partidos en vivo. Aislado: su fallo no debe abortar los resultados.
   let enVivo = 0

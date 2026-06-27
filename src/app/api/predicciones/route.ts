@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   // Verificar partido
   const { data: partido, error: errorPartido } = await supabase
     .from('partidos')
-    .select('id, estado, fecha_hora, equipo_local, equipo_visitante')
+    .select('id, estado, fecha_hora, equipo_local, equipo_visitante, fase')
     .eq('id', partido_id)
     .single()
 
@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
 
   if (partido.estado !== 'pendiente') {
     return NextResponse.json({ error: 'El partido ya no acepta predicciones' }, { status: 400 })
+  }
+
+  // En fases eliminatorias no hay empates: la predicción debe tener un ganador.
+  if (partido.fase !== 'grupos' && goles_local === goles_visitante) {
+    return NextResponse.json(
+      { error: 'En fases eliminatorias debés elegir un ganador: no se permite el empate' },
+      { status: 400 }
+    )
   }
 
   const kickoff = new Date(partido.fecha_hora)
