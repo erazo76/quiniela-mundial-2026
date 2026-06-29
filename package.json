@@ -9,7 +9,8 @@
     "lint": "eslint",
     "seed": "node --env-file=.env.local --import=tsx/esm scripts/seed.ts",
     "simular": "node --env-file=.env.local --import=tsx/esm scripts/simular-liga.ts",
-    "simular:resultados": "node --env-file=.env.local --import=tsx/esm scripts/simular-resultados.ts"
+    "simular:resultados": "node --env-file=.env.local --import=tsx/esm scripts/simular-resultados.ts",
+    "reprocesar:grupos": "node --env-file=.env.local --import=tsx scripts/reprocesar-grupos.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

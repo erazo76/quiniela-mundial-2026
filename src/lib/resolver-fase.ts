@@ -11,10 +11,19 @@
  * de la DB (equipo_local/visitante = "Ganador D32-1", etc.), así que no se hardcodea
  * nada en este archivo más allá de los prefijos de cada fase.
  *
- * Para la asignación de terceros se usa un matching bipartito simple dado que
- * FIFA publica una tabla de 495 combinaciones posibles que no tenemos disponible.
- * Si el orden difiere del oficial, el admin puede corregirlo editando equipo_local/
- * visitante directamente desde la base de datos o cuando se implemente edición manual.
+ * Asignación de terceros (IMPORTANTE):
+ * FIFA publica una tabla oficial de 495 combinaciones (qué tercero juega contra qué
+ * 1°) que NO está embebida aquí. El matching bipartito de `asignarTerceros` solo
+ * garantiza que cada tercero caiga en un slot cuyo grupo es válido, pero entre las
+ * múltiples asignaciones válidas puede elegir una que NO coincide con la tabla oficial
+ * (caso real WC2026: terceros B/D/F/I/J quedaron permutados en slots equivocados).
+ *
+ * Por eso, tras resolverse el bracket, el admin DEBE cotejar los 8 cruces de tercero
+ * contra la tabla oficial de la combinación que clasificó y corregir equipo_visitante/
+ * equipo_local + bandera si difiere. Esta función NUNCA sobrescribe un slot ya resuelto
+ * (todas las escrituras buscan el string placeholder "3°(...)" / "1A" / "Ganador ..."),
+ * así que una corrección manual es estable: no se revierte salvo un re-seed completo
+ * que vuelva a poner placeholders.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js'

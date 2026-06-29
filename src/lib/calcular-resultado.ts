@@ -10,18 +10,34 @@ function determinarAcierto(
   // En eliminatorias el ganador real es quien AVANZA (incluye penales). Cuando se
   // provee, manda sobre la comparación de goles: así un partido que terminó igualado
   // en regulación y se definió por penales acredita "ganador" al lado correcto.
-  ganadorRealSide?: 'local' | 'visitante'
+  ganadorRealSide?: 'local' | 'visitante',
+  // En eliminatorias el empate NO es un resultado posible (siempre avanza alguien) ni
+  // se permite pronosticarlo. En grupos sí: acertar el empate con marcador distinto
+  // acredita "ganador" (2 pts junior / 1.5× master).
+  esEliminatoria = false
 ): { tipo: string; acertado: boolean; multiplicador: number } {
   if (predLocal === resLocal && predVisit === resVisit) {
     return { tipo: 'exacto', acertado: true, multiplicador: 3 }
   }
   const ganadorPred =
     predLocal > predVisit ? 'local' : predVisit > predLocal ? 'visitante' : 'empate'
+  // ganadorRealSide (quien AVANZA, incluye penales) solo manda en eliminatorias.
+  // En grupos el marcador decide: un partido empatado NO tiene ganador, aunque la
+  // columna `ganador` del partido traiga un valor espurio.
   const ganadorReal =
-    ganadorRealSide ??
-    (resLocal > resVisit ? 'local' : resVisit > resLocal ? 'visitante' : 'empate')
-  // Una predicción de empate nunca acierta "ganador" (en eliminatoria no se permite).
-  if (ganadorPred !== 'empate' && ganadorPred === ganadorReal) {
+    esEliminatoria && ganadorRealSide
+      ? ganadorRealSide
+      : resLocal > resVisit
+        ? 'local'
+        : resVisit > resLocal
+          ? 'visitante'
+          : 'empate'
+  // En eliminatoria un pronóstico de empate nunca acredita (no está permitido).
+  // En grupos, acertar la tendencia —incluido el empate— acredita "ganador".
+  if (esEliminatoria && ganadorPred === 'empate') {
+    return { tipo: 'fallo', acertado: false, multiplicador: 0 }
+  }
+  if (ganadorPred === ganadorReal) {
     return { tipo: 'ganador', acertado: true, multiplicador: 1.5 }
   }
   return { tipo: 'fallo', acertado: false, multiplicador: 0 }
@@ -60,9 +76,10 @@ export async function procesarResultadoPartido(
   // estaba cerrado (nunca tuvieron oportunidad de predecir).
   const { data: partidoMeta } = await supabase
     .from('partidos')
-    .select('fecha_hora, ganador')
+    .select('fecha_hora, ganador, fase')
     .eq('id', partidoId)
     .maybeSingle()
+  const esEliminatoria = partidoMeta?.fase != null && partidoMeta.fase !== 'grupos'
   const limitePrediccion = partidoMeta?.fecha_hora
     ? new Date(new Date(partidoMeta.fecha_hora).getTime() - 5 * 60 * 1000)
     : null
@@ -111,7 +128,8 @@ export async function procesarResultadoPartido(
       pred.goles_visitante,
       resultadoLocal,
       resultadoVisitante,
-      ganadorSide
+      ganadorSide,
+      esEliminatoria
     )
 
     const usuario = usuariosMap.get(pred.usuario_id)
@@ -290,7 +308,7 @@ export async function reprocesarResultadoPartido(
 
   const { data: usuarios, error: errU } = await supabase
     .from('usuarios')
-    .select('id, fichas, racha, liga_id, created_at')
+    .select('id, nombre, fichas, racha, liga_id, created_at')
     .in('id', userIds)
   if (errU) return { procesadas: 0, corregidas: 0, error: errU.message }
 
@@ -301,16 +319,17 @@ export async function reprocesarResultadoPartido(
   // Lado ganador real (quien avanza) para acreditar "ganador" en eliminatoria.
   const { data: partidoMeta } = await supabase
     .from('partidos')
-    .select('ganador')
+    .select('ganador, fase')
     .eq('id', partidoId)
     .maybeSingle()
   const ganadorSide = ladoGanador(partidoMeta?.ganador, equipoLocal, equipoVisitante)
+  const esEliminatoria = partidoMeta?.fase != null && partidoMeta.fase !== 'grupos'
 
   // Nuevo acierto/tipo por predicción — depende del marcador y de quién avanzó.
   const calc = new Map(
     predicciones.map((p) => [
       p.id,
-      determinarAcierto(p.goles_local, p.goles_visitante, resultadoLocal, resultadoVisitante, ganadorSide),
+      determinarAcierto(p.goles_local, p.goles_visitante, resultadoLocal, resultadoVisitante, ganadorSide, esEliminatoria),
     ])
   )
 
@@ -401,8 +420,11 @@ export async function reprocesarResultadoPartido(
   }
 
   // Actualizar solo fichas/racha de los usuarios involucrados (set acotado).
+  // `nombre` se incluye porque el upsert ejecuta el INSERT de ON CONFLICT antes de
+  // detectar el conflicto, y la columna es NOT NULL (mismo patrón que el path principal).
   const userUpdates = [...userMap.values()].map((u) => ({
     id: u.id,
+    nombre: u.nombre,
     fichas: u.fichas,
     racha: u.racha,
   }))
