@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { verifyAdminToken } from '@/lib/admin-auth'
-import { procesarResultadoPartido } from '@/lib/calcular-resultado'
+import { procesarResultadoPartido, reprocesarResultadoPartido } from '@/lib/calcular-resultado'
 import { resolverTrasResultado } from '@/lib/resolver-fase'
 
 export async function POST(req: NextRequest) {
@@ -81,10 +81,36 @@ export async function POST(req: NextRequest) {
 
   if (errPartido) return NextResponse.json({ error: errPartido.message }, { status: 500 })
 
-  if (estado !== 'finalizado' || yaFinalizado) {
+  // Cambió a pendiente/en_vivo: solo se actualizó la fila (la reversión de fichas
+  // ya distribuidas no se maneja por aquí). La re-corrección de un partido se hace
+  // finalizado → finalizado, vía el reproceso idempotente de abajo.
+  if (estado !== 'finalizado') {
     return NextResponse.json({ ok: true, procesadas: 0 })
   }
 
+  // ── Re-corrección de un partido YA finalizado ────────────────────────────────
+  // Caso típico: la API guardó un cruce de eliminatoria como empate sin penales
+  // (ganador null, bracket trabado). El admin reabre, carga la tanda y re-scorea.
+  // Se usa el reproceso idempotente (ajuste por delta) para no duplicar fichas, y
+  // luego se reavanza el bracket con el nuevo total/ganador.
+  if (yaFinalizado) {
+    const { procesadas, corregidas, error } = await reprocesarResultadoPartido(
+      supabase,
+      partido_id,
+      totalLocal,
+      totalVisitante,
+      partidoActual?.equipo_local ?? 'Local',
+      partidoActual?.equipo_visitante ?? 'Visitante'
+    )
+
+    if (error) return NextResponse.json({ error }, { status: 500 })
+
+    await resolverTrasResultado(supabase, partido_id, ganador_manual ?? undefined)
+
+    return NextResponse.json({ ok: true, procesadas, corregidas, recalculado: true })
+  }
+
+  // ── Primera finalización ─────────────────────────────────────────────────────
   // Procesar fichas de los participantes usando el total
   const { procesadas, error } = await procesarResultadoPartido(
     supabase,

@@ -40,21 +40,37 @@ const FASES_ELIMINACION = ['dieciseisavos', 'octavos', 'cuartos', 'semis', 'terc
 function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
   const [resLocal, setResLocal] = useState(partido.resultado_local ?? 0)
   const [resVisit, setResVisit] = useState(partido.resultado_visitante ?? 0)
-  const [penalesLocal, setPenalesLocal] = useState(0)
-  const [penalesVisitante, setPenalesVisitante] = useState(0)
+  const [penalesLocal, setPenalesLocal] = useState(partido.penales_local ?? 0)
+  const [penalesVisitante, setPenalesVisitante] = useState(partido.penales_visitante ?? 0)
   const [estado, setEstado] = useState(partido.estado)
+  const [editando, setEditando] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [msg, setMsg] = useState<{ texto: string; ok: boolean } | null>(null)
   const [verPreds, setVerPreds] = useState(false)
   const [preds, setPreds] = useState<PredAdmin[] | null>(null)
   const [cargandoPreds, setCargandoPreds] = useState(false)
 
-  // Sincronizar estado local cuando las props cambian (ej: tras reset masivo)
+  // Sincronizar estado local cuando las props cambian (ej: tras reset masivo o
+  // tras un guardado que refresca la fila). Colapsa el modo edición.
   useEffect(() => {
     setResLocal(partido.resultado_local ?? 0)
     setResVisit(partido.resultado_visitante ?? 0)
     setEstado(partido.estado)
+    setEditando(false)
   }, [partido.resultado_local, partido.resultado_visitante, partido.estado])
+
+  // Reabrir un partido finalizado para corregirlo. El marcador guardado es el
+  // TOTAL (regulación + penales), así que se descompone para mostrar la regulación
+  // en los inputs de goles y los penales en sus propios campos.
+  function abrirEdicion() {
+    setResLocal((partido.resultado_local ?? 0) - (partido.penales_local ?? 0))
+    setResVisit((partido.resultado_visitante ?? 0) - (partido.penales_visitante ?? 0))
+    setPenalesLocal(partido.penales_local ?? 0)
+    setPenalesVisitante(partido.penales_visitante ?? 0)
+    setEstado('finalizado')
+    setMsg(null)
+    setEditando(true)
+  }
 
   const esEliminatoria = FASES_ELIMINACION.includes(partido.fase)
   const esEmpate = resLocal === resVisit
@@ -101,16 +117,20 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
         setMsg({ texto: data.error ?? 'Error', ok: false })
         return
       }
-      const texto =
-        estado === 'finalizado' && data.procesadas > 0
+      const texto = data.recalculado
+        ? `Recalculado · ${data.corregidas ?? 0} predicciones corregidas`
+        : estado === 'finalizado' && data.procesadas > 0
           ? `Guardado · ${data.procesadas} predicciones calculadas`
           : 'Guardado'
       setMsg({ texto, ok: true })
-      const totalLocal = resLocal + (necesitaPenales && penalesValidos ? penalesLocal : 0)
-      const totalVisitante = resVisit + (necesitaPenales && penalesValidos ? penalesVisitante : 0)
+      const usaPenales = necesitaPenales && penalesValidos
+      const totalLocal = resLocal + (usaPenales ? penalesLocal : 0)
+      const totalVisitante = resVisit + (usaPenales ? penalesVisitante : 0)
       onActualizado(partido.id, {
         resultado_local: totalLocal,
         resultado_visitante: totalVisitante,
+        penales_local: usaPenales ? penalesLocal : null,
+        penales_visitante: usaPenales ? penalesVisitante : null,
         estado,
       })
     } catch {
@@ -145,7 +165,7 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
       </div>
 
       {/* Controles */}
-      {!finalizado && (
+      {(!finalizado || editando) && (
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 flex-wrap">
             {/* Score */}
@@ -186,8 +206,19 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
               disabled={guardando || (necesitaPenales && !penalesValidos)}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-40 text-black text-sm font-bold rounded-lg transition-colors"
             >
-              {guardando ? '...' : 'Guardar'}
+              {guardando ? '...' : editando ? 'Recalcular' : 'Guardar'}
             </button>
+
+            {/* Cancelar — solo al reabrir un partido ya finalizado */}
+            {editando && (
+              <button
+                onClick={() => setEditando(false)}
+                disabled={guardando}
+                className="px-3 py-2 text-slate-400 hover:text-slate-200 text-sm font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
 
           {/* Goles en penales (eliminatoria + empate en regulación + finalizado) */}
@@ -225,14 +256,24 @@ function FilaPartido({ partido, token, onActualizado }: FilaPartidoProps) {
       )}
 
       {/* Resultado final (solo lectura) */}
-      {finalizado && (
-        <p className="text-slate-400 text-sm font-bold">
-          Resultado: {partido.resultado_local} - {partido.resultado_visitante}
-          {partido.penales_local != null && (
-            <span className="ml-1.5 text-amber-400 text-xs font-semibold">(p)</span>
-          )}
-          <span className="ml-2 text-slate-600 font-normal text-xs">calculado</span>
-        </p>
+      {finalizado && !editando && (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-slate-400 text-sm font-bold">
+            Resultado: {partido.resultado_local} - {partido.resultado_visitante}
+            {partido.penales_local != null && (
+              <span className="ml-1.5 text-amber-400 text-xs font-semibold">
+                (p {partido.penales_local}-{partido.penales_visitante})
+              </span>
+            )}
+            <span className="ml-2 text-slate-600 font-normal text-xs">calculado</span>
+          </p>
+          <button
+            onClick={abrirEdicion}
+            className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors shrink-0"
+          >
+            Reabrir para corregir
+          </button>
+        </div>
       )}
 
       {/* Mensaje */}

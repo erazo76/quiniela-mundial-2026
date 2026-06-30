@@ -77,6 +77,117 @@ async function fetchFootballData(
   return null
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ESPN — fuente autoritativa para eliminatorias (regulación + tanda de penales)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// El plan gratuito de football-data carga la tanda de penales de forma tardía e
+// inconsistente (llega a devolver penalties empatados 3-3 y winner null), así que
+// un cruce definido por penales puede quedar guardado como empate sin ganador y
+// trabar el bracket. ESPN expone un endpoint JSON público (sin API key) que trae
+// la regulación (`score`) y la tanda (`shootoutScore`) por equipo, más un estado
+// `status.type.completed`. Para fases de eliminación ESPN manda sobre football-data.
+interface EspnCompetitor {
+  homeAway: string
+  score: string
+  shootoutScore: number | null
+  team: { displayName?: string; name?: string }
+}
+interface EspnEvent {
+  status?: { type?: { completed?: boolean } }
+  competitions?: Array<{ competitors?: EspnCompetitor[] }>
+}
+
+function fechaYmd(d: Date): string {
+  return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`
+}
+
+// Eventos ESPN de una fecha (YYYYMMDD), memoizados por corrida.
+async function fetchEspnEventos(fecha: string, cache: Map<string, EspnEvent[]>): Promise<EspnEvent[]> {
+  if (cache.has(fecha)) return cache.get(fecha)!
+  let eventos: EspnEvent[] = []
+  try {
+    const res = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${fecha}`,
+      { cache: 'no-store' }
+    )
+    if (res.ok) {
+      const data = (await res.json()) as { events?: EspnEvent[] }
+      eventos = data.events ?? []
+    }
+  } catch {
+    eventos = []
+  }
+  cache.set(fecha, eventos)
+  return eventos
+}
+
+interface EspnResuelto {
+  regLocal: number
+  regVisit: number
+  penLocal: number | null
+  penVisit: number | null
+  ganadorSide: 'local' | 'visitante'
+}
+
+// Resuelve un cruce de eliminatoria desde ESPN, mapeado a NUESTRA orientación
+// local/visitante. Devuelve null si ESPN no tiene el partido cerrado o no lo halla.
+async function resolverConEspn(
+  localEs: string,
+  visitanteEs: string,
+  fechaHora: string,
+  cache: Map<string, EspnEvent[]>
+): Promise<EspnResuelto | null> {
+  const base = new Date(fechaHora)
+  // ESPN agrupa por fecha local (US), que puede ir un día detrás del kickoff UTC.
+  const fechas = [fechaYmd(base), fechaYmd(new Date(base.getTime() - 24 * 60 * 60 * 1000))]
+
+  for (const fecha of fechas) {
+    const eventos = await fetchEspnEventos(fecha, cache)
+    for (const ev of eventos) {
+      const comps = ev.competitions?.[0]?.competitors
+      if (!comps?.length) continue
+      const home = comps.find((c) => c.homeAway === 'home')
+      const away = comps.find((c) => c.homeAway === 'away')
+      if (!home || !away) continue
+
+      const homeName = home.team?.displayName ?? home.team?.name ?? ''
+      const awayName = away.team?.displayName ?? away.team?.name ?? ''
+      const homeEs = TEAM_MAP[homeName] ?? homeName
+      const awayEs = TEAM_MAP[awayName] ?? awayName
+
+      const directo = homeEs === localEs && awayEs === visitanteEs
+      const inverso = homeEs === visitanteEs && awayEs === localEs
+      if (!directo && !inverso) continue
+
+      if (!ev.status?.type?.completed) return null // ESPN aún no lo cerró
+
+      const homeReg = Number(home.score)
+      const awayReg = Number(away.score)
+      if (!Number.isFinite(homeReg) || !Number.isFinite(awayReg)) return null
+      const homePen = home.shootoutScore != null ? Number(home.shootoutScore) : null
+      const awayPen = away.shootoutScore != null ? Number(away.shootoutScore) : null
+
+      const regLocal = directo ? homeReg : awayReg
+      const regVisit = directo ? awayReg : homeReg
+      const penLocal = directo ? homePen : awayPen
+      const penVisit = directo ? awayPen : homePen
+
+      let ganadorSide: 'local' | 'visitante'
+      if (penLocal != null && penVisit != null && penLocal !== penVisit) {
+        ganadorSide = penLocal > penVisit ? 'local' : 'visitante'
+      } else if (regLocal !== regVisit) {
+        ganadorSide = regLocal > regVisit ? 'local' : 'visitante'
+      } else {
+        return null // empate sin tanda resuelta
+      }
+
+      return { regLocal, regVisit, penLocal, penVisit, ganadorSide }
+    }
+  }
+  return null
+}
+
 // NOTA: se eliminó `syncEquiposEliminatorias`. Llenaba los equipos de eliminatorias
 // copiándolos del API football-data, pero hacía match contra nuestras filas SOLO por
 // fecha+fase; como hay 2-3 partidos por día, el `.find()` siempre devolvía la primera
@@ -220,14 +331,14 @@ export async function syncResultadosFootballData(
 
   const { data: pendientes, error: errDB } = await supabase
     .from('partidos')
-    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante')
+    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante, fase, fecha_hora')
     .in('estado', ['pendiente', 'en_vivo'])
 
   if (errDB) throw new Error(errDB.message)
 
   const { data: finalizadosRecientes } = await supabase
     .from('partidos')
-    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante')
+    .select('id, equipo_local, equipo_visitante, estado, resultado_local, resultado_visitante, fase, fecha_hora')
     .eq('estado', 'finalizado')
     .eq('fase', 'grupos')
     .gte('fecha_hora', desdeRevalidacion)
@@ -246,6 +357,7 @@ export async function syncResultadosFootballData(
   let sincronizados = 0
   let corregidos = 0
   const errores: string[] = []
+  const espnCache = new Map<string, EspnEvent[]>()
 
   for (const partido of partidosApi) {
     const localMapeado = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
@@ -314,14 +426,42 @@ export async function syncResultadosFootballData(
     }
 
     // ── Finalización normal (pendiente/en_vivo → finalizado) ───────────────────
+    // Valores a guardar (por defecto, los de football-data).
+    let finLocal = totalLocal
+    let finVisit = totalVisitante
+    let finPenLocal = penLocal
+    let finPenVisit = penVisitante
+
+    // Eliminatorias: ESPN es autoritativa. Si resuelve el cruce (regulación + tanda),
+    // manda sobre football-data. Si NO resuelve y football-data tampoco da un ganador
+    // claro (empate sin penales), NO se finaliza: se reintenta en la próxima corrida.
+    const esEliminatoria = nuestroPartido.fase != null && nuestroPartido.fase !== 'grupos'
+    if (esEliminatoria) {
+      const espn = await resolverConEspn(
+        localMapeado,
+        visitanteMapeado,
+        nuestroPartido.fecha_hora,
+        espnCache
+      )
+      if (espn) {
+        finPenLocal = espn.penLocal
+        finPenVisit = espn.penVisit
+        finLocal = espn.regLocal + (espn.penLocal ?? 0)
+        finVisit = espn.regVisit + (espn.penVisit ?? 0)
+      } else if (totalLocal === totalVisitante) {
+        // Sin ganador en ninguna fuente → dejar pendiente para reintentar.
+        continue
+      }
+    }
+
     const updatePartido: Record<string, unknown> = {
-      resultado_local: totalLocal,
-      resultado_visitante: totalVisitante,
+      resultado_local: finLocal,
+      resultado_visitante: finVisit,
       estado: 'finalizado',
     }
-    if (penLocal != null) {
-      updatePartido.penales_local = penLocal
-      updatePartido.penales_visitante = penVisitante
+    if (finPenLocal != null) {
+      updatePartido.penales_local = finPenLocal
+      updatePartido.penales_visitante = finPenVisit
     }
 
     const { error: errUpdate } = await supabase
@@ -337,8 +477,8 @@ export async function syncResultadosFootballData(
     const { error: errCalculo } = await procesarResultadoPartido(
       supabase,
       nuestroPartido.id,
-      totalLocal,
-      totalVisitante,
+      finLocal,
+      finVisit,
       localMapeado,
       visitanteMapeado
     )
