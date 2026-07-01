@@ -12,6 +12,13 @@ interface Props {
   onClick: () => void
 }
 
+// Avisos puntuales por partido (p.ej. retraso por clima). Vaciar cuando ya no aplique.
+const AVISOS: Record<string, string> = {
+  // México vs Ecuador (dieciseisavos) — retraso por tormenta en el Estadio Azteca
+  'e81f9108-3b47-401c-8bc6-b58e1448ee5e':
+    'Retraso por lluvia — nuevo horario tentativo 10:00 p.m. ET',
+}
+
 interface PrediccionParticipante {
   usuario_id: string
   nombre: string
@@ -275,6 +282,16 @@ export function TarjetaPartido({ partido, ligaTipo, ligaId, usuarioId, onClick }
             )
           })()}
         </div>
+
+        {/* Aviso destacado (p.ej. retraso por lluvia) */}
+        {(AVISOS[partido.id] ?? partido.aviso) && (
+          <div className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
+            <span className="text-base leading-none">🌧️</span>
+            <span className="text-[11px] font-semibold leading-snug text-amber-300">
+              {AVISOS[partido.id] ?? partido.aviso}
+            </span>
+          </div>
+        )}
 
         {/* Equipos */}
         <div className="flex items-center justify-between gap-2">
