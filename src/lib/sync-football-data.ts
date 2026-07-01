@@ -221,6 +221,10 @@ async function marcarPartidosEnVivo(
 
   // 2) Complemento por API IN_PLAY/PAUSED: cubre partidos cuyo fecha_hora en
   //    la DB no coincida con el kickoff real reportado por la API.
+  //    IMPORTANTE: solo se consideran partidos cuyo fecha_hora (nuestro, que es
+  //    el autoritativo) ya pasó. Así un retraso cargado a mano (p.ej. por clima)
+  //    NO se pisa con el IN_PLAY viejo/erróneo de la API, que suele reflejar el
+  //    kickoff programado original y no la suspensión real.
   const res = await fetchFootballData(
     'https://api.football-data.org/v4/competitions/WC/matches?status=IN_PLAY,PAUSED',
     apiKey
@@ -234,6 +238,7 @@ async function marcarPartidosEnVivo(
         .from('partidos')
         .select('id, equipo_local, equipo_visitante')
         .eq('estado', 'pendiente')
+        .lte('fecha_hora', ahora)
 
       for (const partido of partidosApi) {
         const localEs = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
