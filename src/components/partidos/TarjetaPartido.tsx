@@ -14,10 +14,7 @@ interface Props {
 
 // Avisos puntuales por partido (p.ej. retraso por clima). Solo el motivo; la hora
 // se muestra aparte, en la zona horaria de cada participante. Vaciar cuando ya no aplique.
-const AVISOS: Record<string, string> = {
-  // México vs Ecuador (dieciseisavos) — retraso por tormenta en el Estadio Azteca
-  'e81f9108-3b47-401c-8bc6-b58e1448ee5e': 'Retraso por lluvia',
-}
+const AVISOS: Record<string, string> = {}
 
 interface PrediccionParticipante {
   usuario_id: string
