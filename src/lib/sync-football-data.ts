@@ -365,22 +365,43 @@ export async function syncResultadosFootballData(
   const espnCache = new Map<string, EspnEvent[]>()
 
   for (const partido of partidosApi) {
-    const localMapeado = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
-    const visitanteMapeado = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
-    const ftLocal = partido.score.fullTime.home
-    const ftVisitante = partido.score.fullTime.away
+    const homeMapeado = TEAM_MAP[partido.homeTeam.name] ?? partido.homeTeam.name
+    const awayMapeado = TEAM_MAP[partido.awayTeam.name] ?? partido.awayTeam.name
+    const ftHome = partido.score.fullTime.home
+    const ftAway = partido.score.fullTime.away
 
-    if (ftLocal == null || ftVisitante == null) continue
+    if (ftHome == null || ftAway == null) continue
 
+    // Nuestro bracket (resolver-fase) asigna local/visitante por TOPOLOGÍA, que no
+    // siempre coincide con el home/away de football-data. Matchear en AMBAS
+    // orientaciones: de lo contrario un cruce con los equipos invertidos jamás se
+    // encuentra y el partido queda atascado en 'en_vivo' para siempre (caso real
+    // Portugal/España en octavos: API home=Portugal, nuestra fila local=España).
     const nuestroPartido = nuestrosPartidos.find(
-      (p) => p.equipo_local === localMapeado && p.equipo_visitante === visitanteMapeado
+      (p) =>
+        (p.equipo_local === homeMapeado && p.equipo_visitante === awayMapeado) ||
+        (p.equipo_local === awayMapeado && p.equipo_visitante === homeMapeado)
     )
     if (!nuestroPartido) continue
 
+    // Orientar TODO (regulación y penales) a NUESTRA fila (equipo_local/visitante),
+    // no al home/away de la API. localMapeado/visitanteMapeado quedan igual a
+    // nuestra orientación para que ESPN y el scoring río abajo sean consistentes.
+    const inverso = nuestroPartido.equipo_local === awayMapeado
+    const localMapeado = nuestroPartido.equipo_local
+    const visitanteMapeado = nuestroPartido.equipo_visitante
+    const ftLocal = inverso ? ftAway : ftHome
+    const ftVisitante = inverso ? ftHome : ftAway
+
     // Penales: solo aplican si la regulación terminó empatada
     const pen = partido.score.penalties
-    const penLocal = ftLocal === ftVisitante && pen?.home != null ? pen.home : null
-    const penVisitante = ftLocal === ftVisitante && pen?.away != null ? pen.away : null
+    const penHome = pen?.home ?? null
+    const penAway = pen?.away ?? null
+    const penLocalRaw = inverso ? penAway : penHome
+    const penVisitanteRaw = inverso ? penHome : penAway
+    const empateReg = ftLocal === ftVisitante
+    const penLocal = empateReg && penLocalRaw != null ? penLocalRaw : null
+    const penVisitante = empateReg && penVisitanteRaw != null ? penVisitanteRaw : null
     const totalLocal = ftLocal + (penLocal ?? 0)
     const totalVisitante = ftVisitante + (penVisitante ?? 0)
 
