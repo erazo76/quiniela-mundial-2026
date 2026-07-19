@@ -3,6 +3,13 @@ import { useState, useEffect, useRef, useMemo, Fragment, type CSSProperties } fr
 import { Partido } from '@/types'
 import { calcularGrupo, DesempatesGrupo } from '@/lib/grupos'
 import { createClient } from '@/lib/supabase/client'
+import { playSound } from '@/lib/audio'
+
+// Póster del campeón por selección (imagen de celebración a la derecha de la Final)
+const CHAMPION_IMG: Record<string, string> = {
+  'España': '/ui/campeon-espana.png',
+  'Argentina': '/ui/campeon-argentina.png',
+}
 
 function shortName(name: string) {
   const abbr: Record<string, string> = {
@@ -441,6 +448,86 @@ function buildBracketOrder(sortedCols: Partido[][], faseKeys: string[]): Partido
   return ordered
 }
 
+// ─── ConfettiBurst ─────────────────────────────────────────────────────────
+// Lluvia de confeti a pantalla completa (mismo espíritu que un acierto exacto)
+
+function ConfettiBurst() {
+  const pieces = useMemo(() => {
+    const colors = ['#39ff14', '#ffd700', '#ff3b3b', '#3b9bff', '#ffffff', '#ff8c00']
+    return Array.from({ length: 110 }, (_, i) => ({
+      left: Math.random() * 100,
+      delay: Math.random() * 0.7,
+      dur: 2.4 + Math.random() * 2,
+      size: 6 + Math.random() * 9,
+      color: colors[i % colors.length],
+      rot: Math.random() * 360,
+      drift: (Math.random() - 0.5) * 160,
+    }))
+  }, [])
+  return (
+    <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 60 }} aria-hidden>
+      <style>{`
+        @keyframes confFall {
+          0%   { transform: translateY(-12vh) translateX(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(112vh) translateX(var(--drift)) rotate(720deg); opacity: 0.85; }
+        }
+        @media (prefers-reduced-motion: reduce) { .conf-piece { display: none; } }
+      `}</style>
+      {pieces.map((p, i) => (
+        <span
+          key={i}
+          className="conf-piece"
+          style={{
+            position: 'absolute', top: 0, left: `${p.left}%`,
+            width: p.size, height: p.size * 0.42,
+            background: p.color, borderRadius: 1,
+            ['--drift' as string]: `${p.drift}px`,
+            animation: `confFall ${p.dur}s linear ${p.delay}s forwards`,
+          } as CSSProperties}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ─── ChampionPoster ────────────────────────────────────────────────────────
+// Póster del campeón en el espacio a la derecha de la Final
+
+function ChampionPoster({ src, nombre }: { src: string; nombre: string }) {
+  return (
+    <div className="champ-pop" style={{ position: 'relative', width: 240, marginLeft: 24 }}>
+      <style>{`
+        @keyframes champPop { 0% { opacity: 0; transform: scale(0.92) translateY(14px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes champGlow { 0%,100% { box-shadow: 0 0 22px rgba(57,255,20,0.32); } 50% { box-shadow: 0 0 42px rgba(57,255,20,0.62); } }
+        .champ-pop { animation: champPop 0.7s cubic-bezier(.2,.8,.2,1) both; }
+        .champ-frame { animation: champGlow 2.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .champ-pop, .champ-frame { animation: none; } }
+      `}</style>
+      <div className="champ-frame" style={{ borderRadius: 16, overflow: 'hidden', border: '2px solid #39ff14', background: '#0b1220' }}>
+        <img
+          src={src}
+          alt={`Campeón ${nombre}`}
+          style={{ display: 'block', width: '100%', height: 360, objectFit: 'cover' }}
+        />
+      </div>
+      {/* Cinta CAMPEÓN */}
+      <div
+        style={{
+          position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: '#39ff14', color: '#052e00',
+          fontSize: 11, fontWeight: 900, letterSpacing: '0.16em',
+          padding: '4px 14px', borderRadius: 999, whiteSpace: 'nowrap',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.5)',
+        }}
+      >
+        <img src="/ui/copa.png" alt="" style={{ width: 14, height: 14 }} />
+        CAMPEÓN
+      </div>
+    </div>
+  )
+}
+
 // ─── LlaveView ─────────────────────────────────────────────────────────────
 
 function LlaveView({ partidos }: { partidos: Partido[] }) {
@@ -498,6 +585,23 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
     return () => cancelAnimationFrame(raf)
   }, [targetLayout])
 
+  // Campeón: dispara confeti + sonido de acierto cuando el ganador de la Final
+  // se actualiza (o al entrar a la Llave con la Final ya cerrada). getTeam está
+  // declarada más abajo (function declaration → hoisted), por eso se puede usar acá.
+  const campeonName = getTeam(byFase['final']?.[0], 'winner')?.nombre ?? null
+  const [showConfetti, setShowConfetti] = useState(false)
+  const celebratedRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!campeonName) return
+    if (celebratedRef.current === campeonName) return
+    celebratedRef.current = campeonName
+    setShowConfetti(true)
+    playSound('reveal.ogg', 0.4)
+    const t1 = setTimeout(() => playSound('winner.ogg', 0.6), 500)
+    const t2 = setTimeout(() => setShowConfetti(false), 4500)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [campeonName])
+
   const canLeft  = focusedCol > 0
   const canRight = focusedCol < colCounts.length - 1
   const focusOn = (ci: number) => {
@@ -543,9 +647,11 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
   const campeon     = getTeam(finalMatch,  'winner')
   const subcampeon  = getTeam(finalMatch,  'loser')
   const tercerLugar = getTeam(tercerMatch, 'winner')
+  const campeonImg  = campeon ? CHAMPION_IMG[campeon.nombre] ?? null : null
 
   return (
     <div className="flex-1 min-h-0 relative">
+      {showConfetti && <ConfettiBurst />}
       <div ref={scrollRef} className="absolute inset-0 overflow-auto">
       {/* Bracket reveal animation — cards cascade in, connectors draw their stroke */}
       <style>{`
@@ -629,6 +735,13 @@ function LlaveView({ partidos }: { partidos: Partido[] }) {
                   </Fragment>
                 )
               })}
+
+              {/* Póster del campeón en el espacio a la derecha de la Final */}
+              {campeonImg && campeon && (
+                <div style={{ height: bracketH, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                  <ChampionPoster src={campeonImg} nombre={campeon.nombre} />
+                </div>
+              )}
             </div>
           </div>
         )}
