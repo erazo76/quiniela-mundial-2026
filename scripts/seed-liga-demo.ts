@@ -25,8 +25,26 @@ const PIN_DEMO = '0000'
 const CODIGO_ORIGEN = 'CL4ISI'
 
 const LOTE = 500
+// PostgREST corta cualquier select en 1000 filas sin avisar, así que las
+// lecturas grandes (predicciones, historial) van paginadas con .range().
+const PAGINA = 1000
 
 type Supabase = ReturnType<typeof createAdminClient>
+
+async function leerTodo<T>(
+  consulta: (desde: number, hasta: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+  etiqueta: string
+): Promise<T[]> {
+  const filas: T[] = []
+  for (let desde = 0; ; desde += PAGINA) {
+    const { data, error } = await consulta(desde, desde + PAGINA - 1)
+    if (error) throw new Error(`Leyendo ${etiqueta}: ${error.message}`)
+    if (!data?.length) break
+    filas.push(...data)
+    if (data.length < PAGINA) break
+  }
+  return filas
+}
 
 async function insertarEnLotes<T>(supabase: Supabase, tabla: string, filas: T[]) {
   for (let i = 0; i < filas.length; i += LOTE) {
@@ -119,30 +137,42 @@ async function main() {
 
   // ── 3. Predicciones ──
   const idsOrigen = usuariosOrigen.map((u) => u.id)
-  const { data: predicciones } = await supabase
-    .from('predicciones')
-    .select('usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas, ganancia_fichas, tipo_acierto, acertado, created_at')
-    .in('usuario_id', idsOrigen)
+  const predicciones = await leerTodo<{ usuario_id: string }>(
+    (desde, hasta) =>
+      supabase
+        .from('predicciones')
+        .select('usuario_id, partido_id, goles_local, goles_visitante, fichas_apostadas, ganancia_fichas, tipo_acierto, acertado, created_at')
+        .in('usuario_id', idsOrigen)
+        .order('created_at', { ascending: true })
+        .range(desde, hasta),
+    'predicciones'
+  )
 
   await insertarEnLotes(
     supabase,
     'predicciones',
-    (predicciones ?? []).map((p) => ({ ...p, usuario_id: mapa.get(p.usuario_id)! }))
+    predicciones.map((p) => ({ ...p, usuario_id: mapa.get(p.usuario_id)! }))
   )
-  console.log(`${predicciones?.length ?? 0} predicciones clonadas`)
+  console.log(`${predicciones.length} predicciones clonadas`)
 
   // ── 4. Historial de fichas ──
-  const { data: historial } = await supabase
-    .from('historial_fichas')
-    .select('usuario_id, tipo, cantidad, descripcion, created_at')
-    .in('usuario_id', idsOrigen)
+  const historial = await leerTodo<{ usuario_id: string }>(
+    (desde, hasta) =>
+      supabase
+        .from('historial_fichas')
+        .select('usuario_id, tipo, cantidad, descripcion, created_at')
+        .in('usuario_id', idsOrigen)
+        .order('created_at', { ascending: true })
+        .range(desde, hasta),
+    'historial_fichas'
+  )
 
   await insertarEnLotes(
     supabase,
     'historial_fichas',
-    (historial ?? []).map((h) => ({ ...h, usuario_id: mapa.get(h.usuario_id)! }))
+    historial.map((h) => ({ ...h, usuario_id: mapa.get(h.usuario_id)! }))
   )
-  console.log(`${historial?.length ?? 0} movimientos de historial clonados`)
+  console.log(`${historial.length} movimientos de historial clonados`)
 
   console.log(`\nListo. Código ${CODIGO_DEMO} · PIN ${PIN_DEMO} para todos los jugadores.`)
 }
