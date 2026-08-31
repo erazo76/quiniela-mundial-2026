@@ -101,12 +101,11 @@ export default function UnirmePage() {
 
   const pasoNumero = paso === 'codigo' ? 0 : paso === 'liga' ? 1 : 2
 
-  async function buscarLiga(e: React.FormEvent) {
-    e.preventDefault()
+  async function cargarLiga(cod: string) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/ligas/miembros?codigo=${codigo.trim().toUpperCase()}`)
+      const res = await fetch(`/api/ligas/miembros?codigo=${cod}`)
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Código no válido'); return }
       setLiga(data.liga)
@@ -118,6 +117,21 @@ export default function UnirmePage() {
       setLoading(false)
     }
   }
+
+  async function buscarLiga(e: React.FormEvent) {
+    e.preventDefault()
+    await cargarLiga(codigo.trim().toUpperCase())
+  }
+
+  // La landing enlaza la liga demo como /unirme?codigo=DEMO26 para que un
+  // visitante entre de una vez a ver la app sin teclear el código.
+  // La URL es estado externo y solo se lee al montar: la carga es justo lo que
+  // el efecto sincroniza, aunque arranque poniendo el spinner.
+  useEffect(() => {
+    const cod = new URLSearchParams(window.location.search).get('codigo')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (cod) void cargarLiga(cod.trim().toUpperCase())
+  }, [])
 
   function seleccionarMiembro(m: Miembro) {
     setSeleccionado(m)
@@ -143,9 +157,10 @@ export default function UnirmePage() {
     setLoading(true)
     setError('')
     try {
+      const codigoLiga = liga?.codigo_invitacion ?? codigo
       const body = esNuevo
-        ? { codigoInvitacion: codigo, nombreUsuario: nombreNuevo.trim(), pin }
-        : { codigoInvitacion: codigo, usuarioId: seleccionado!.id, pin }
+        ? { codigoInvitacion: codigoLiga, nombreUsuario: nombreNuevo.trim(), pin }
+        : { codigoInvitacion: codigoLiga, usuarioId: seleccionado!.id, pin }
 
       const res = await fetch('/api/unirse', {
         method: 'POST',

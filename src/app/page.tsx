@@ -180,6 +180,25 @@ export default function WelcomePage() {
             Crear una liga nueva
           </Link>
         </div>
+
+        {/* El Mundial ya terminó: la liga demo deja la app navegable para quien
+            llegue de fuera, con los nombres de los participantes anonimizados. */}
+        <Link
+          href="/unirme?codigo=DEMO26"
+          className="w-full rounded-2xl border border-dashed border-white/20 hover:border-green-400/50 bg-black/30 hover:bg-black/40 backdrop-blur-sm px-4 py-3 transition-all group"
+        >
+          <p className="text-[11px] uppercase tracking-widest text-green-400/80 font-bold">
+            ¿Solo mirando?
+          </p>
+          <p className="text-sm text-slate-300 mt-0.5 leading-snug">
+            Entra a la <span className="text-white font-semibold group-hover:underline">liga demo</span> con el
+            torneo completo
+          </p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Código <span className="font-mono text-slate-400">DEMO26</span> · PIN{' '}
+            <span className="font-mono text-slate-400">0000</span>
+          </p>
+        </Link>
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-3">

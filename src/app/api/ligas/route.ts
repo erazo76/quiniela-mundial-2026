@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { hashPin, sinPin } from '@/lib/pin'
 
 function generarCodigo(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
   const fichasIniciales = ligaTipo === 'junior' ? 0 : 1000
   const { data: usuario, error: usuarioError } = await supabase
     .from('usuarios')
-    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin), fichas: fichasIniciales })
+    .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: await hashPin(pin), fichas: fichasIniciales })
     .select()
     .single()
 
@@ -57,5 +58,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al crear el usuario' }, { status: 500 })
   }
 
-  return NextResponse.json({ usuario, liga })
+  return NextResponse.json({ usuario: sinPin(usuario), liga })
 }

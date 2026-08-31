@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { esHash, hashPin, sinPin, verificarPin } from '@/lib/pin'
 
 export async function POST(req: NextRequest) {
   const { codigoInvitacion, usuarioId, nombreUsuario, pin } = await req.json()
@@ -44,15 +45,22 @@ export async function POST(req: NextRequest) {
 
     // Sin PIN aún (migración o primera vez con flujo nuevo): asignar PIN
     if (usuario.pin === null) {
-      await supabase.from('usuarios').update({ pin: String(pin) }).eq('id', usuarioId)
-      return NextResponse.json({ usuario: { ...usuario, pin }, liga })
+      const nuevoHash = await hashPin(pin)
+      await supabase.from('usuarios').update({ pin: nuevoHash }).eq('id', usuarioId)
+      return NextResponse.json({ usuario: sinPin(usuario), liga })
     }
 
-    if (usuario.pin !== String(pin)) {
+    if (!(await verificarPin(pin, usuario.pin))) {
       return NextResponse.json({ error: 'PIN incorrecto. Intenta de nuevo.' }, { status: 401 })
     }
 
-    return NextResponse.json({ usuario, liga })
+    // PIN heredado en texto plano: se reescribe como hash ahora que sabemos que
+    // es correcto. Si la escritura falla, el login ya es válido igualmente.
+    if (!esHash(usuario.pin)) {
+      await supabase.from('usuarios').update({ pin: await hashPin(pin) }).eq('id', usuarioId)
+    }
+
+    return NextResponse.json({ usuario: sinPin(usuario), liga })
   }
 
   // Caso: usuario nuevo — la inscripción está siempre abierta.
@@ -77,7 +85,7 @@ export async function POST(req: NextRequest) {
     const fichasIniciales = liga.tipo === 'junior' ? 0 : 1000
     const { data: usuario, error } = await supabase
       .from('usuarios')
-      .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: String(pin), fichas: fichasIniciales })
+      .insert({ nombre: nombreUsuario.trim(), liga_id: liga.id, pin: await hashPin(pin), fichas: fichasIniciales })
       .select()
       .single()
 
@@ -85,7 +93,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Error al unirse a la liga' }, { status: 500 })
     }
 
-    return NextResponse.json({ usuario, liga })
+    return NextResponse.json({ usuario: sinPin(usuario), liga })
   }
 
   return NextResponse.json({ error: 'Datos incompletos' }, { status: 400 })
